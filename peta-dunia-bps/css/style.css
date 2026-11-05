@@ -1,0 +1,977 @@
+/* ==========================================================================
+   Peta Dunia BPS - Main Stylesheet
+   Pure vanilla CSS with CSS variables, responsive stage scaling & design tokens
+   ========================================================================== */
+
+:root {
+  /* Ocean & Background Colors */
+  --color-page-bg: #0B2545;
+  --color-ocean-top: #5EC3F0;
+  --color-ocean-bottom: #1A78BD;
+
+  /* Dev Bar */
+  --color-devbar-bg: #07172A;
+  --color-devbar-border: rgba(255, 255, 255, 0.1);
+  --color-devbar-text: #CBD5E1;
+
+  /* Island Geometry Colors */
+  --color-island-sand: #F2DC9B;
+  --color-island-grass: #7CCF63;
+  --color-island-shadow: rgba(0, 0, 0, 0.15);
+
+  /* HUD & Card Elements */
+  --color-card-bg: #0F3D6E;
+  --color-card-text: #FFFFFF;
+  --color-card-subtext: #CFE6FA;
+  --color-xp-track: #2C5F93;
+  --color-gold: #FFD24A;
+
+  /* Work Unit Palette */
+  --color-sestama-block: #4CB8A0;
+  --color-sestama-pill: #1F8A70;
+  --color-kepala-block: #4A90D9;
+  --color-kepala-pill: #0F3D6E;
+  --color-metodologi-block: #2E6FD6;
+  --color-metodologi-pill: #1C4FA0;
+  --color-sosial-block: #8C6FD6;
+  --color-sosial-pill: #5B3FB0;
+  --color-produksi-block: #E8963A;
+  --color-produksi-pill: #C06A10;
+  --color-distribusi-block: #D9566A;
+  --color-distribusi-pill: #A82A40;
+  --color-neraca-block: #4AA3A8;
+  --color-neraca-pill: #1F7A80;
+  --color-itama-block: #8A97A8;
+  --color-itama-pill: #5A6678;
+
+  /* Biro Default Palette */
+  --color-biro-block: #6FA8DC;
+  --color-biro-pill: #1C4FA0;
+
+  /* Typography */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Base resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-page-bg);
+  font-family: var(--font-system);
+  color: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   Dev Bar (Fixed at top, 36px)
+   ========================================================================== */
+#dev-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background-color: var(--color-devbar-bg);
+  border-bottom: 1px solid var(--color-devbar-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 1000;
+  font-size: 12px;
+  color: var(--color-devbar-text);
+  user-select: none;
+}
+
+.devbar-label {
+  font-weight: 500;
+}
+
+.devbar-select {
+  background-color: #0E243E;
+  color: #FFFFFF;
+  border: 1px solid #234E7B;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.devbar-select:focus {
+  border-color: var(--color-gold);
+}
+
+/* ==========================================================================
+   Stage Scaler & Canvas Area (960x560 Design Stage)
+   ========================================================================== */
+#stage-viewport {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--color-page-bg);
+}
+
+#stage {
+  position: absolute;
+  width: 960px;
+  height: 560px;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--color-ocean-top) 0%, var(--color-ocean-bottom) 100%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Screen base */
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================================================
+   HUD Components
+   ========================================================================== */
+.hud-card {
+  background-color: var(--color-card-bg);
+  color: var(--color-card-text);
+  border-radius: 16px;
+  padding: 10px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+
+/* Left HUD */
+.hud-left-wrapper {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  z-index: 20;
+}
+
+.hud-left-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-back-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: #FFFFFF;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
+}
+
+.hud-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.hud-back-btn:active {
+  transform: scale(0.95);
+}
+
+.hud-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hud-subtitle {
+  font-size: 11px;
+  color: var(--color-card-subtext);
+  margin-top: 2px;
+}
+
+/* Right HUD */
+.hud-right-wrapper {
+  position: absolute;
+  right: 20px;
+  top: 18px;
+  z-index: 20;
+}
+
+.hud-right-card {
+  width: 230px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-avatar-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-avatar-svg {
+  display: block;
+}
+
+.hud-player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.hud-player-level {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-xp-text {
+  font-size: 11px;
+  color: var(--color-card-subtext);
+}
+
+.hud-progress-track {
+  height: 8px;
+  background-color: var(--color-xp-track);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.hud-progress-fill {
+  height: 100%;
+  background-color: var(--color-gold);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ==========================================================================
+   Screen 1: World Map Islands
+   ========================================================================== */
+.world-islands {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.world-island {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--color-island-grass);
+  border: 6px solid var(--color-island-sand);
+  box-shadow: 0 8px 0 var(--color-island-shadow);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  user-select: none;
+}
+
+.world-island:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+}
+
+.world-island:active {
+  transform: translateY(2px);
+}
+
+/* Building block inside world island */
+.island-building {
+  width: 60px;
+  height: 66px;
+  border-radius: 6px;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  position: absolute;
+  left: 50%;
+  top: 16%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.building-roof-accent {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.building-windows {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 8px;
+  padding: 7px 10px 0;
+  justify-items: center;
+}
+
+.window-pane {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.building-door {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px 3px 0 0;
+}
+
+/* Island Label Pill */
+.island-pill {
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  transform: translateX(-50%);
+  z-index: 5;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 7px 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.island-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Screen 2: Island "Sekretariat Utama" (Biro Tiles)
+   ========================================================================== */
+.island-main-oval {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--color-island-grass);
+  border: 6px solid var(--color-island-sand);
+  box-shadow: 0 8px 0 var(--color-island-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.biro-tiles-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 34px;
+  width: 100%;
+}
+
+.biro-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  column-gap: 20px;
+  width: 100%;
+}
+
+.biro-tile {
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease;
+}
+
+.biro-tile:hover {
+  transform: translateY(-3px);
+}
+
+.biro-tile:active {
+  transform: translateY(2px);
+}
+
+.biro-building-block {
+  width: 62px;
+  height: 70px;
+  border-radius: 6px;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+  position: relative;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.biro-building-roof {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.biro-windows {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px 10px;
+  padding: 8px 10px 0;
+  justify-items: center;
+}
+
+.b-win {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.biro-door {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 15px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 3px 3px 0 0;
+}
+
+.biro-pill {
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s ease;
+}
+
+/* "Biro Anda" special highlight indicator */
+.biro-tile.is-current-unit .biro-pill {
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 0 10px rgba(255, 210, 74, 0.5);
+}
+
+/* ==========================================================================
+   Screen 3: Office Screen (#/office)
+   Floor-plan canvas, high-DPI scaling, D-pad, HUD hint, and Info Panel modal
+   ========================================================================== */
+.screen-office {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #10263F;
+  overflow: hidden;
+}
+
+#office-canvas {
+  position: absolute;
+  left: 20px;
+  top: 96px;
+  width: 920px;
+  height: 382px;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  cursor: default;
+}
+
+/* Bottom-left hint text */
+.office-hint-text {
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  font-size: 12px;
+  color: #8FA8C4;
+  font-weight: 500;
+  user-select: none;
+  z-index: 20;
+}
+
+/* On-screen D-Pad (bottom-right of stage) */
+.office-dpad {
+  position: absolute;
+  right: 24px;
+  bottom: 12px;
+  width: 108px;
+  height: 108px;
+  z-index: 30;
+  user-select: none;
+  touch-action: none;
+}
+
+.dpad-btn {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  background-color: rgba(15, 61, 110, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.1s ease, transform 0.1s ease, border-color 0.1s ease;
+  touch-action: none;
+}
+
+.dpad-btn:hover {
+  background-color: rgba(25, 80, 140, 0.95);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dpad-btn:active,
+.dpad-btn.is-active {
+  background-color: var(--color-gold);
+  color: #10263F;
+  border-color: var(--color-gold);
+  transform: scale(0.94);
+}
+
+.dpad-up    { top: 0; left: 37px; }
+.dpad-down  { bottom: 0; left: 37px; }
+.dpad-left  { top: 37px; left: 0; }
+.dpad-right { top: 37px; right: 0; }
+
+.dpad-center {
+  position: absolute;
+  top: 37px;
+  left: 37px;
+  width: 34px;
+  height: 34px;
+  background-color: rgba(15, 61, 110, 0.4);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Info Board Panel (Part 3: Interactive Modal, Sub-Views & Quest Sheet)
+   ========================================================================== */
+.info-panel-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.info-panel-card-white {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  padding: 22px;
+  width: min(430px, 92vw);
+  box-sizing: border-box;
+  color: #10263F;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  animation: cardPopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  max-height: 94%;
+  overflow-y: auto;
+}
+
+@keyframes cardPopIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Card Header */
+.info-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.info-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-unit-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #10263F;
+  line-height: 1.2;
+}
+
+.info-parent-chip {
+  align-self: flex-start;
+  background-color: #E1E8F0;
+  color: #3B516B;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.info-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-building-xp-chip {
+  background-color: #D3F3D8;
+  color: #1D6B32;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.info-card-close-btn {
+  background: none;
+  border: none;
+  color: #6B7F96;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color 0.15s ease;
+}
+
+.info-card-close-btn:hover {
+  color: #10263F;
+}
+
+/* Description */
+.info-unit-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #3B516B;
+  margin: 0 0 16px 0;
+}
+
+/* Akses Informasi Section */
+.info-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10263F;
+  margin-bottom: 4px;
+}
+
+.info-rows-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row-btn {
+  width: 100%;
+  background-color: #EAF1FB;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  text-align: left;
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  outline: none;
+}
+
+.info-row-btn:hover {
+  background-color: #DCE8F8;
+}
+
+.info-row-btn:focus-visible {
+  box-shadow: 0 0 0 2px #1C4FA0;
+}
+
+.info-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10263F;
+}
+
+.info-row-arrow {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1C4FA0;
+}
+
+/* Footer & Role-based elements */
+.info-panel-footer {
+  margin-top: 18px;
+}
+
+.btn-start-quest {
+  width: 100%;
+  background-color: #1C4FA0;
+  color: #FFFFFF;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 13px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  font-family: inherit;
+  outline: none;
+}
+
+.btn-start-quest:hover {
+  background-color: #153E80;
+}
+
+.btn-start-quest:active {
+  transform: translateY(1px);
+}
+
+.btn-start-quest:focus-visible {
+  box-shadow: 0 0 0 3px #FFD24A;
+}
+
+.info-gray-note {
+  background-color: #E8EDF3;
+  color: #3B516B;
+  text-align: center;
+  font-size: 12px;
+  border-radius: 12px;
+  padding: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Sub-Views (Row Drilldown) */
+.info-sub-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-sub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.info-sub-back-btn {
+  background-color: #E1E8F0;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #10263F;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.info-sub-back-btn:hover {
+  background-color: #D3DFEC;
+}
+
+.info-sub-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #10263F;
+}
+
+.info-sub-body {
+  background-color: #F8FAFC;
+  border-radius: 12px;
+  padding: 20px 16px;
+  border: 1px dashed #CBD5E1;
+}
+
+.info-sub-placeholder {
+  margin: 0;
+  font-size: 13px;
+  color: #6B7F96;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Quest Bottom Sheet */
+.quest-sheet-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.quest-sheet-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quest-sheet-back-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #1C4FA0;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.quest-sheet-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #10263F;
+}
+
+.quest-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.quest-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: #F1F5F9;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  gap: 12px;
+}
+
+.quest-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quest-item-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #10263F;
+}
+
+.quest-item-desc {
+  font-size: 11px;
+  color: #64748B;
+  line-height: 1.4;
+}
+
+.quest-item-xp {
+  background-color: var(--color-gold);
+  color: #5A4500;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Toast Notification Component
+   ========================================================================== */
+.bps-toast {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(7, 23, 42, 0.95);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 22px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  border: 1.5px solid var(--color-gold);
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.bps-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

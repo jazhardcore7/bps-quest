@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peta Dunia BPS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Dev Bar: Fixed at top (36px), visible on every screen -->
+  <header id="dev-bar" role="toolbar" aria-label="Bilah Simulasi Dev">
+    <span class="devbar-label">Simulasi pegawai dari:</span>
+    <select id="dev-unit-select" class="devbar-select" aria-label="Pilih unit kerja simulasi">
+      <option value="Biro SDM">Biro SDM</option>
+      <option value="Biro Umum">Biro Umum</option>
+    </select>
+  </header>
+
+  <!-- Stage Viewport: Fills viewport below dev bar -->
+  <main id="stage-viewport" role="main">
+    <!-- Design Stage: Fixed 960x560 canvas scaled via CSS transform -->
+    <div id="stage" aria-live="polite"></div>
+  </main>
+
+  <!-- Classic Scripts loaded in dependency order (No ES modules, 100% file:// compatible) -->
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/panel.js"></script>
+  <script src="js/screens/world.js"></script>
+  <script src="js/screens/island.js"></script>
+  <script src="js/screens/office.js"></script>
+  <script src="js/router.js"></script>
+
+  <!-- Application Bootstrap -->
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. Stage Scaler: Fit 960x560 canvas inside available area while preserving aspect ratio
+      var stage = document.getElementById('stage');
+      var viewport = document.getElementById('stage-viewport');
+
+      function updateStageScale() {
+        if (!stage || !viewport) return;
+        var availWidth = viewport.clientWidth;
+        var availHeight = viewport.clientHeight;
+        if (availWidth === 0 || availHeight === 0) return;
+
+        var scale = Math.min(availWidth / 960, availHeight / 560);
+        stage.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+      }
+
+      window.addEventListener('resize', updateStageScale);
+      updateStageScale();
+
+      // 2. Dev Bar Bindings
+      var unitSelect = document.getElementById('dev-unit-select');
+      if (unitSelect && window.AppState) {
+        // Set initial select value from AppState (which reads localStorage safely)
+        unitSelect.value = window.AppState.currentUnit;
+
+        // On dropdown change -> update AppState immediately
+        unitSelect.addEventListener('change', function () {
+          window.AppState.setCurrentUnit(this.value);
+        });
+
+        // Keep dropdown in sync if AppState changes externally
+        window.AppState.subscribe(function (state) {
+          if (unitSelect.value !== state.currentUnit) {
+            unitSelect.value = state.currentUnit;
+          }
+        });
+      }
+
+      // 3. Initialize Router (boots default route #/world)
+      if (window.Router) {
+        window.Router.init();
+      }
+    })();
+  </script>
+</body>
+</html>
+
