@@ -68,3 +68,4 @@ describe('Jakarta Month Key (format YYYY-MM in Asia/Jakarta UTC+7)', () => {
     assert.equal(monthKeyJakarta(yearStart), '2027-01');
   });
 });
+
