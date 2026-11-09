@@ -12,7 +12,10 @@ export const db = getFirestore(app);
 
 if (useEmulators) {
   // Connect to local Firebase Emulators (Auth: 9099, Firestore: 8080)
+  console.log('[Firebase] Connecting to local Emulators (Auth: 9099, Firestore: 8080)...');
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
+} else {
+  console.log(`[Firebase] Connecting to remote Firebase project: ${config.projectId}`);
 }
 

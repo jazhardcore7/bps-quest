@@ -36,7 +36,7 @@ export function getFirebaseConfig() {
   };
 }
 
-export const useEmulators = env.DEV && env.VITE_USE_EMULATORS === 'true';
+export const useEmulators = Boolean((env.DEV ?? (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production')) && env.VITE_USE_EMULATORS === 'true');
 
 // Unit ID mapping for MVP
 export const UNIT_IDS = {

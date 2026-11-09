@@ -398,6 +398,60 @@ describe('Firestore Security Rules', () => {
   });
 
   describe('Users Collection Allowlist & Protected Field Controls', () => {
+    it('allows client to create user document if email matches allowlist', async () => {
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id' }).firestore();
+      await assertSucceeds(setDoc(doc(db, 'users', 'uid_new_user'), {
+        displayName: 'Budi Santoso',
+        email: 'budi@bps.go.id',
+        unit: 'biro-sdm',
+        role: 'employee',
+        xp: 0,
+        level: 1,
+        avatarId: 'default',
+        weekKey: '2026-W46',
+        xpWeek: 0,
+        monthKey: '2026-11',
+        xpMonth: 0,
+        createdAt: serverTimestamp()
+      }));
+    });
+
+    it('denies client from creating user document if email is NOT in allowlist', async () => {
+      const db = testEnv.authenticatedContext('uid_stranger', { email: 'stranger@gmail.com' }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_stranger'), {
+        displayName: 'Stranger',
+        email: 'stranger@gmail.com',
+        unit: 'biro-sdm',
+        role: 'employee',
+        xp: 0,
+        level: 1,
+        avatarId: 'default',
+        weekKey: '2026-W46',
+        xpWeek: 0,
+        monthKey: '2026-11',
+        xpMonth: 0,
+        createdAt: serverTimestamp()
+      }));
+    });
+
+    it('denies client from creating user document with mismatched unit or role', async () => {
+      const db = testEnv.authenticatedContext('uid_cheat', { email: 'budi@bps.go.id' }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_cheat'), {
+        displayName: 'Budi Hacker',
+        email: 'budi@bps.go.id',
+        unit: 'biro-sdm',
+        role: 'admin', // Mismatched: allowlist has 'employee'
+        xp: 0,
+        level: 1,
+        avatarId: 'default',
+        weekKey: '2026-W46',
+        xpWeek: 0,
+        monthKey: '2026-11',
+        xpMonth: 0,
+        createdAt: serverTimestamp()
+      }));
+    });
+
     it('denies client from updating protected fields (role, unit, email)', async () => {
       const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
       await assertFails(updateDoc(doc(db, 'users', 'uid_budi'), { role: 'admin' }));
