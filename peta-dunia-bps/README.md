@@ -68,6 +68,44 @@ npm run preview
 ```
 Menjalankan web server lokal untuk menguji hasil build produksi secara langsung.
 
+### 5. Menjalankan Pengujian Unit & Security Rules
+```bash
+# Menjalankan unit test helpers (XP formula, weekKey, monthKey, dailyPeriodKey)
+npm run test:helpers
+
+# Menjalankan security rules test suites terhadap emulator Firestore
+npm run test:rules
+
+# Menjalankan seluruh test suite sekaligus
+npm test
+```
+
+### 6. Seeding Data Awal ke Emulator
+```bash
+npm run seed
+```
+
+---
+
+## Known Security Trade-offs & Limitations
+
+Dalam arsitektur MVP berbasis *client-driven Firestore* tanpa Cloud Functions atau custom auth claims, terdapat beberapa batasan keamanan dan kompromi arsitektural yang didokumentasikan secara sadar:
+
+1. **Visibilitas Kunci Jawaban Kuis (`quiz.correctIndex`)**:
+   - Karena dokumen kuis pada koleksi `quests` dibaca langsung oleh klien yang terautentikasi (`allow read: if isSignedIn()`), nilai `quiz.correctIndex` dapat dibaca melalui DevTools/skrip klien.
+   - *Mitigasi di masa depan*: Pindahkan validasi kuis ke Firebase Cloud Functions (Callable Function atau HTTP Cloud Run) yang memvalidasi jawaban di sisi server sebelum mengeksekusi penulisan dokumen `completions`.
+
+2. **Validasi Kunci Periode (`periodKey`)**:
+   - Integritas penyelesaian kuis harian vs checkpoint dijaga melalui format ID dokumen deterministik `completions/{uid}_{questId}_{periodKey}`, aturan larangan *update/delete*, dan pemastian `request.resource.data.createdAt == request.time`.
+   - *Mitigasi di masa depan*: Server Timestamp / Scheduled Function untuk menutup jendela klaim harian di zona waktu Asia/Jakarta secara independen.
+
+3. **Perhitungan Akumulasi Periode Klien (`weekKey` & `monthKey`)**:
+   - Security Rules memvalidasi bahwa klien hanya dapat memperbarui `xp`, `level`, `weekKey`, `xpWeek`, `monthKey`, `xpMonth`, dan `lastCompletionId` secara atomik bersamaan dengan pembuatan dokumen `completions` yang valid.
+   - Format `weekKey` divalidasi dengan regex `^[0-9]{4}-W[0-9]{2}$` dan `monthKey` dengan `^[0-9]{4}-[0-9]{2}$`. Jika klien memalsukan nilai kunci minggu/bulan pada saat rollover, hal tersebut hanya berdampak pada akumulasi periodik pengguna itu sendiri (`xpWeek`/`xpMonth`), dan sama sekali tidak dapat memalsukan total akumulasi XP sepanjang waktu (`xp`) maupun level pemain.
+
+4. **Kontrol Akses Peran Admin**:
+   - Pembuatan dan pengubahan unit kerja (`units`) serta daftar quest (`quests`) dibatasi secara ketat hanya untuk pengguna berstatus `role == 'admin'` dalam dokumen profil `users/{auth.uid}`. Klien non-admin tidak dapat memodifikasi koleksi ini.
+
 ---
 
 ## Struktur Berkas Proyek

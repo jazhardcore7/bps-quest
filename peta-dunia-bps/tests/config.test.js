@@ -1,6 +1,14 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { XP_PER_LEVEL, calculateLevel, weekKeyJakarta, monthKeyJakarta } from '../src/config.js';
+import {
+  XP_PER_LEVEL,
+  calculateLevel,
+  weekKeyJakarta,
+  monthKeyJakarta,
+  dailyPeriodKeyJakarta,
+  toUnitId,
+  UNIT_IDS
+} from '../src/config.js';
 
 describe('Level and XP calculation', () => {
   it('defines XP_PER_LEVEL as 500', () => {
@@ -22,6 +30,20 @@ describe('Level and XP calculation', () => {
     assert.equal(calculateLevel(null), 1);
     assert.equal(calculateLevel(undefined), 1);
     assert.equal(calculateLevel(-50), 1);
+  });
+});
+
+describe('Unit ID Mappings', () => {
+  it('maps Biro SDM and biro-sdm to biro-sdm', () => {
+    assert.equal(toUnitId('Biro SDM'), 'biro-sdm');
+    assert.equal(toUnitId('biro-sdm'), 'biro-sdm');
+    assert.equal(toUnitId('Biro Umum'), 'biro-umum');
+    assert.equal(UNIT_IDS.BIRO_SDM, 'biro-sdm');
+  });
+
+  it('handles empty or nullish unit strings', () => {
+    assert.equal(toUnitId(''), '');
+    assert.equal(toUnitId(null), '');
   });
 });
 
@@ -69,3 +91,21 @@ describe('Jakarta Month Key (format YYYY-MM in Asia/Jakarta UTC+7)', () => {
   });
 });
 
+describe('Jakarta Daily Period Key (format YYYY-MM-DD in Asia/Jakarta UTC+7)', () => {
+  it('correctly handles day before midnight in Jakarta', () => {
+    // 2026-11-08 23:59:59 UTC+7 is 2026-11-08 16:59:59 UTC
+    const beforeMidnight = new Date('2026-11-08T16:59:59.000Z');
+    assert.equal(dailyPeriodKeyJakarta(beforeMidnight), '2026-11-08');
+  });
+
+  it('rolls over to next day at 00:00:01 in Jakarta', () => {
+    // 2026-11-09 00:00:01 UTC+7 is 2026-11-08 17:00:01 UTC
+    const afterMidnight = new Date('2026-11-08T17:00:01.000Z');
+    assert.equal(dailyPeriodKeyJakarta(afterMidnight), '2026-11-09');
+  });
+
+  it('matches YYYY-MM-DD format regex', () => {
+    const todayKey = dailyPeriodKeyJakarta(new Date());
+    assert.match(todayKey, /^\d{4}-\d{2}-\d{2}$/);
+  });
+});

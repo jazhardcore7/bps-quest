@@ -914,19 +914,33 @@ body.has-devbar #stage-viewport {
 
 .quest-card-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 12px 14px;
   background-color: #F1F5F9;
   border-radius: 12px;
   border: 1px solid #E2E8F0;
+  gap: 10px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.quest-card-item.is-completed {
+  background-color: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+.quest-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
+  width: 100%;
 }
 
 .quest-item-main {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  flex: 1;
   min-width: 0;
 }
 
@@ -1221,4 +1235,119 @@ body.has-devbar #stage-viewport {
 
 .hud-logout-btn:focus-visible {
   box-shadow: 0 0 0 2px var(--color-gold);
+}
+
+
+/* ==========================================================================
+   Real Quests & Interactive Quiz Component (Part 6)
+   ========================================================================== */
+.quest-completed-badge {
+  background: #D3F3D8;
+  color: #1D6B32;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-claim-quest {
+  background: #1C4FA0;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  outline: none;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.btn-claim-quest:hover {
+  background: #2563EB;
+}
+
+.btn-claim-quest:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quest-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quiz-box {
+  width: 100%;
+  margin-top: 10px;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.quiz-question {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10263F;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.quiz-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quiz-option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.quiz-option-item:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.quiz-option-item.selected {
+  background: #EBF5FF;
+  border-color: #3B82F6;
+  color: #1D4ED8;
+  font-weight: 600;
+}
+
+.quiz-error-msg {
+  font-size: 11px;
+  color: #DC2626;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.quest-loading-text,
+.quest-empty-text {
+  text-align: center;
+  color: #64748B;
+  font-size: 12px;
+  padding: 18px 0;
 }

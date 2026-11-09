@@ -11,6 +11,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  onSnapshot,
   serverTimestamp
 } from 'firebase/firestore';
 import { auth, db } from './client.js';
@@ -18,6 +19,29 @@ import { AppState } from '../state/index.js';
 import { weekKeyJakarta, monthKeyJakarta } from '../config.js';
 
 export const NOT_ALLOWED_MESSAGE = 'Email kamu belum terdaftar. Hubungi admin Biro SDM.';
+
+let userSnapshotUnsubscribe = null;
+
+export function stopListeningToUserProfile() {
+  if (userSnapshotUnsubscribe) {
+    userSnapshotUnsubscribe();
+    userSnapshotUnsubscribe = null;
+  }
+}
+
+export function startListeningToUserProfile(uid) {
+  stopListeningToUserProfile();
+  if (!uid) return;
+
+  const userDocRef = doc(db, 'users', uid);
+  userSnapshotUnsubscribe = onSnapshot(userDocRef, (snap) => {
+    if (snap.exists()) {
+      AppState.setUserProfile(snap.data());
+    }
+  }, (err) => {
+    console.warn('User profile onSnapshot error:', err);
+  });
+}
 
 export function mapAuthError(error) {
   if (!error) return 'Terjadi kesalahan tidak dikenal.';
@@ -68,6 +92,7 @@ export async function ensureUserProfile(user) {
   if (userSnap.exists()) {
     const profile = userSnap.data();
     AppState.setUserProfile(profile);
+    startListeningToUserProfile(uid);
     return profile;
   }
 
@@ -114,6 +139,7 @@ export async function ensureUserProfile(user) {
 
   await setDoc(userDocRef, initialProfile);
   AppState.setUserProfile(initialProfile);
+  startListeningToUserProfile(uid);
   return initialProfile;
 }
 
@@ -121,7 +147,7 @@ export async function ensureUserProfile(user) {
  * Signs in using email and password.
  */
 export async function loginWithEmail(email, password) {
-  const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+  const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
   return await ensureUserProfile(cred.user);
 }
 
@@ -129,7 +155,7 @@ export async function loginWithEmail(email, password) {
  * Registers an account via email and password if on allowlist.
  */
 export async function registerWithEmail(email, password) {
-  const trimmedEmail = email.trim();
+  const trimmedEmail = email.trim().toLowerCase();
   const cred = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
   return await ensureUserProfile(cred.user);
 }
@@ -147,6 +173,7 @@ export async function loginWithGoogle() {
  * Signs out current user and clears AppState.
  */
 export async function logout() {
+  stopListeningToUserProfile();
   await signOut(auth);
   AppState.clearUser();
 }
@@ -162,12 +189,13 @@ export function onAuthChanged(callback) {
         callback(user, AppState.user);
       } catch (err) {
         console.warn('Auth state change allowlist error:', err);
+        stopListeningToUserProfile();
         callback(null, null);
       }
     } else {
+      stopListeningToUserProfile();
       AppState.clearUser();
       callback(null, null);
     }
   });
 }
-

@@ -30,7 +30,7 @@ const ALLOWED_EMAILS = [
     email: 'pegawai2@bps.go.id',
     data: {
       displayName: 'Siti Rahma',
-      unit: 'biro-sdm',
+      unit: 'biro-umum',
       role: 'employee'
     }
   },
@@ -40,6 +40,74 @@ const ALLOWED_EMAILS = [
       displayName: 'Admin Utama',
       unit: 'biro-sdm',
       role: 'admin'
+    }
+  }
+];
+
+const UNITS = [
+  {
+    id: 'biro-sdm',
+    data: {
+      name: 'Biro Sumber Daya Manusia',
+      parentUnit: 'Sekretariat Utama',
+      description: 'Biro yang mengelola perencanaan, mutasi, pengembangan, dan kesejahteraan pegawai BPS',
+      level: 2
+    }
+  }
+];
+
+const QUESTS = [
+  {
+    id: 'quest-daily-1',
+    data: {
+      unitId: 'biro-sdm',
+      title: '[Judul quest 1] Presensi & Rencana Harian',
+      description: '[Deskripsi quest harian pengisian presensi dan log aktivitas harian pegawai]',
+      type: 'daily',
+      xp: 20,
+      active: true
+    }
+  },
+  {
+    id: 'quest-checkpoint-1',
+    data: {
+      unitId: 'biro-sdm',
+      title: '[Judul quest 2] Pemahaman Pola Karir Pegawai',
+      description: '[Pelajari panduan pola karir ASN BPS dan selesaikan kuis pemahaman]',
+      type: 'checkpoint',
+      xp: 50,
+      active: true,
+      quiz: {
+        question: 'Apa prinsip utama dalam implementasi sistem merit manajemen ASN di BPS?',
+        options: [
+          'Kualifikasi, kompetensi, dan kinerja secara adil dan wajar',
+          'Senioritas dan masa kerja tanpa evaluasi kinerja',
+          'Kedekatan personal dan rekomendasi subjektif',
+          'Tingkat pendidikan formal semata'
+        ],
+        correctIndex: 0
+      }
+    }
+  },
+  {
+    id: 'quest-checkpoint-2',
+    data: {
+      unitId: 'biro-sdm',
+      title: '[Judul quest 3] Kode Etik BerAKHLAK',
+      description: '[Pahami nilai-nilai dasar BerAKHLAK dalam pelaksanaan tugas sehari-hari]',
+      type: 'checkpoint',
+      xp: 30,
+      active: true,
+      quiz: {
+        question: 'Dalam core values BerAKHLAK, perilaku saling peduli dan menghargai perbedaan mencerminkan nilai...',
+        options: [
+          'Berorientasi Pelayanan',
+          'Harmonis',
+          'Loyal',
+          'Adaptif'
+        ],
+        correctIndex: 1
+      }
     }
   }
 ];
@@ -56,10 +124,25 @@ async function seedProject(projectId) {
   const db = getFirestore(app);
   console.log(`[Seed] Seeding project '${projectId}'...`);
 
+  // Seed allowedEmails
   for (const entry of ALLOWED_EMAILS) {
     const docRef = db.collection('allowedEmails').doc(entry.email.toLowerCase());
     await docRef.set(entry.data, { merge: true });
-    console.log(`  ✓ [${projectId}] allowedEmails/${entry.email.toLowerCase()} ->`, entry.data);
+    console.log(`  ✓ [${projectId}] allowedEmails/${entry.email.toLowerCase()} ->`, entry.data.displayName);
+  }
+
+  // Seed units
+  for (const u of UNITS) {
+    const docRef = db.collection('units').doc(u.id);
+    await docRef.set(u.data, { merge: true });
+    console.log(`  ✓ [${projectId}] units/${u.id} ->`, u.data.name);
+  }
+
+  // Seed quests
+  for (const q of QUESTS) {
+    const docRef = db.collection('quests').doc(q.id);
+    await docRef.set(q.data, { merge: true });
+    console.log(`  ✓ [${projectId}] quests/${q.id} ->`, q.data.title, `(+${q.data.xp} XP)`);
   }
 }
 
@@ -68,7 +151,7 @@ async function seedAll() {
   for (const proj of targetProjects) {
     await seedProject(proj);
   }
-  console.log(`[Seed] Successfully seeded allowlist entries for all target projects!\n`);
+  console.log(`[Seed] Successfully seeded all data (allowlist, units, quests)!\n`);
 }
 
 seedAll().catch((err) => {

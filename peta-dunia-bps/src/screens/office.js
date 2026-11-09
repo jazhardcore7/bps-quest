@@ -3,6 +3,8 @@ import { AppState } from '../state/index.js';
 import { Hud } from '../ui/hud.js';
 import { openInfoPanel, isInfoPanelOpen, setPanelCallback } from '../ui/panel.js';
 
+let unsubscribeState = null;
+
 // ---------------------------------------------------------------------------
 // Data Definitions: Floor, Rooms (Obstacles), Board, and Labels
 // ---------------------------------------------------------------------------
@@ -103,9 +105,18 @@ export const OfficeScreen = {
     this.lastTime = performance.now();
     this.gameLoop = this.gameLoop.bind(this);
     this.rafId = requestAnimationFrame(this.gameLoop);
+
+    unsubscribeState = AppState.subscribe(() => {
+      this.updateHud();
+    });
   },
 
   unmount() {
+    if (typeof unsubscribeState === 'function') {
+      unsubscribeState();
+      unsubscribeState = null;
+    }
+
     this.active = false;
 
     if (this.rafId) {
@@ -158,6 +169,14 @@ export const OfficeScreen = {
     html += '</div>';
 
     this.container.innerHTML = html;
+  },
+
+  updateHud() {
+    if (!this.container) return;
+    const rightWrapper = this.container.querySelector('.hud-right-wrapper');
+    if (rightWrapper) {
+      rightWrapper.innerHTML = Hud.renderRightCard(AppState);
+    }
   },
 
   setupCanvas() {

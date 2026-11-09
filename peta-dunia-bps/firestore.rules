@@ -12,7 +12,17 @@ service cloud.firestore {
     }
 
     function userEmail() {
-      return request.auth.token.email.lower();
+      return request.auth.token.email;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isUserAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && userDoc(request.auth.uid).role == 'admin';
     }
 
     function allowlistDoc() {
@@ -23,17 +33,42 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/allowedEmails/$(userEmail()));
     }
 
+    // Units Collection
+    match /units/{unitId} {
+      allow read: if isSignedIn();
+      allow write: if isUserAdmin();
+    }
+
+    // Quests Collection
+    match /quests/{questId} {
+      allow read: if isSignedIn();
+      allow write: if isUserAdmin();
+    }
+
+    // Completions Collection
+    match /completions/{completionId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && completionId == request.auth.uid + '_' + request.resource.data.questId + '_' + request.resource.data.periodKey
+        && !exists(/databases/$(database)/documents/completions/$(completionId))
+        && request.resource.data.createdAt == request.time
+        && exists(/databases/$(database)/documents/quests/$(request.resource.data.questId))
+        && get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.active == true
+        && request.resource.data.xp == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.xp
+        && request.resource.data.unitId == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.unitId
+        && userDoc(request.auth.uid).unit == request.resource.data.unitId;
+
+      allow update, delete: if false;
+    }
+
     // Users Collection
     match /users/{userId} {
       // Signed-in users may read any user doc
       allow read: if isSignedIn();
 
-      // Create only if:
-      // - uid == auth.uid
-      // - allowedEmails/{lowercased auth email} exists
-      // - unit and role match the allowlist document
-      // - email matches auth token email
-      // - initial stats: xp == 0, xpWeek == 0, xpMonth == 0, level == 1
+      // Create only if matching allowlist
       allow create: if isOwner(userId)
                     && isEmailAllowed()
                     && request.resource.data.email == request.auth.token.email
@@ -44,16 +79,41 @@ service cloud.firestore {
                     && request.resource.data.xpMonth == 0
                     && request.resource.data.level == 1;
 
-      // Clients may NOT update role, unit or email
+      // Update only permitted progression fields via atomic batch write linked to a completion
       allow update: if isOwner(userId)
-                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'unit', 'email']);
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                      'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId', 'avatarId'
+                    ])
+                    && (
+                      // 1. Profile visual tweak (avatarId only, without XP progression changes)
+                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                        'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId'
+                      ]))
+                      ||
+                      // 2. Tamper-resistant quest claim: verified against atomic completion creation
+                      (
+                        request.resource.data.lastCompletionId != null
+                        && existsAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId))
+                        && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.uid == userId
+                        && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.createdAt == request.time
+                        && request.resource.data.xp == resource.data.xp + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+                        && request.resource.data.level == (request.resource.data.xp / 500) + 1
+                        && request.resource.data.weekKey.matches('^[0-9]{4}-W[0-9]{2}$')
+                        && request.resource.data.monthKey.matches('^[0-9]{4}-[0-9]{2}$')
+                        && (request.resource.data.weekKey == resource.data.weekKey
+                            ? request.resource.data.xpWeek == resource.data.xpWeek + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+                            : request.resource.data.xpWeek == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
+                        && (request.resource.data.monthKey == resource.data.monthKey
+                            ? request.resource.data.xpMonth == resource.data.xpMonth + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+                            : request.resource.data.xpMonth == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
+                      )
+                    );
 
       allow delete: if false;
     }
 
     // Allowed Emails Collection
     match /allowedEmails/{emailId} {
-      // A signed-in user may only get the doc of their own lowercased email; no listing, no writes
       allow get: if isSignedIn() && userEmail() == emailId;
       allow list, write: if false;
     }

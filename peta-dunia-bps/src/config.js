@@ -36,6 +36,21 @@ export function getFirebaseConfig() {
 
 export const useEmulators = env.DEV && env.VITE_USE_EMULATORS === 'true';
 
+// Unit ID mapping for MVP
+export const UNIT_IDS = {
+  BIRO_SDM: 'biro-sdm'
+};
+
+export const UNIT_MAPPINGS = {
+  'Biro SDM': 'biro-sdm',
+  'biro-sdm': 'biro-sdm'
+};
+
+export function toUnitId(unit) {
+  if (!unit) return '';
+  return UNIT_MAPPINGS[unit] || String(unit).toLowerCase().replace(/[\s_]+/g, '-');
+}
+
 // Gamification Level Constants & Helpers
 export const XP_PER_LEVEL = 500;
 
@@ -78,4 +93,15 @@ export function monthKeyJakarta(date) {
   const year = d.getUTCFullYear();
   const month = String(d.getUTCMonth() + 1).padStart(2, '0');
   return `${year}-${month}`;
+}
+
+/**
+ * Returns the daily period key (format "YYYY-MM-DD") in Asia/Jakarta time.
+ */
+export function dailyPeriodKeyJakarta(date) {
+  const d = getJakartaDate(date);
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
