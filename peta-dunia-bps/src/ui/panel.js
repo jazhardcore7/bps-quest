@@ -343,3 +343,4 @@ export function setPanelCallback(fn) {
 export function isInfoPanelOpen() {
   return isPanelOpen;
 }
+

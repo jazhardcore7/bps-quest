@@ -28,3 +28,4 @@ updateStageScale();
 
 // 3. Initialize Router (boots default route #/world)
 Router.init();
+

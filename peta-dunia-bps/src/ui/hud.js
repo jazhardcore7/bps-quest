@@ -113,3 +113,4 @@ export const Hud = {
   bindLeftCardEvents,
   showToast
 };
+

@@ -81,3 +81,4 @@ export const BpsData = {
     { id: 'pbj', name: 'Biro Pengadaan (PBJ)' }
   ]
 };
+
