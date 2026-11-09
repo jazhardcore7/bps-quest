@@ -12,6 +12,7 @@
     ]
   },
   "emulators": {
+    "singleProjectMode": false,
     "auth": {
       "port": 9099
     },
@@ -23,4 +24,3 @@
     }
   }
 }
-

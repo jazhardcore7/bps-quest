@@ -7,6 +7,9 @@ import { mountDevBar } from './ui/devbar.js';
 // 1. Mount Dev Bar conditionally only in DEV mode
 if (import.meta.env.DEV) {
   mountDevBar();
+  import('./state/index.js').then(({ AppState }) => {
+    window.AppState = AppState;
+  });
 }
 
 // 2. Stage Scaler: Fit 960x560 canvas inside available area while preserving aspect ratio

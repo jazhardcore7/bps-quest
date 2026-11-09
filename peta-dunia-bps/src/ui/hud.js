@@ -1,4 +1,6 @@
 // Reusable HUD components, icons, and toast notifications
+import { logout } from '../firebase/auth.js';
+
 let toastTimeout = null;
 
 export const icons = {
@@ -11,15 +13,32 @@ export const icons = {
     '<circle cx="20" cy="17" r="7" fill="#F2B583"/>' +
     '<path d="M14 14 C16 12 24 12 26 14 C25 13 23 12.5 20 12.5 C17 12.5 15 13 14 14 Z" fill="#3B2A20"/>' +
     '<path d="M8 38 C8 29 14 26 20 26 C26 26 32 29 32 38 Z" fill="#2E86DE"/>' +
-    '</svg>'
+    '</svg>',
+  logout: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>'
 };
+
+// Global delegation for logout button clicks
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', async (e) => {
+    const logoutBtn = e.target.closest('#hud-logout-btn');
+    if (logoutBtn) {
+      e.preventDefault();
+      try {
+        await logout();
+        window.location.hash = '#/login';
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
+    }
+  });
+}
 
 export function renderRightCard(state) {
   const player = (state && state.player) || {
-    name: 'Pegawai Demo',
+    displayName: 'Pegawai BPS',
     level: 1,
     title: 'Explorer',
-    xp: 120,
+    xp: 0,
     xpToNext: 500
   };
   const percent = Math.min(100, Math.max(0, Math.round((player.xp / player.xpToNext) * 100)));
@@ -30,12 +49,18 @@ export function renderRightCard(state) {
         icons.avatar +
       '</div>' +
       '<div class="hud-player-info">' +
+        '<div class="hud-player-name" title="' + (player.displayName || 'Pegawai BPS') + '">' +
+          (player.displayName || 'Pegawai BPS') +
+        '</div>' +
         '<div class="hud-player-level">Level ' + player.level + ' · ' + player.title + '</div>' +
         '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +
         '<div class="hud-progress-track" role="progressbar" aria-valuenow="' + player.xp + '" aria-valuemin="0" aria-valuemax="' + player.xpToNext + '">' +
           '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
         '</div>' +
       '</div>' +
+      '<button type="button" class="hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
+        icons.logout +
+      '</button>' +
     '</div>';
 }
 
@@ -114,3 +139,4 @@ export const Hud = {
   showToast
 };
 
+export default Hud;

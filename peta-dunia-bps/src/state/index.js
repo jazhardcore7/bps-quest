@@ -1,42 +1,26 @@
 // Application state management with pub/sub observer pattern
-const STORAGE_KEY = 'bps_current_unit';
-const DEFAULT_UNIT = 'Biro SDM';
+import { calculateLevel, XP_PER_LEVEL } from '../config.js';
 
-function loadPersistedUnit() {
-  try {
-    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored === 'Biro SDM' || stored === 'Biro Umum') {
-        return stored;
-      }
-    }
-  } catch (e) {
-    console.warn('localStorage read error:', e);
-  }
-  return DEFAULT_UNIT;
-}
-
-function savePersistedUnit(unit) {
-  try {
-    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEY, unit);
-    }
-  } catch (e) {
-    console.warn('localStorage write error:', e);
-  }
+function normalizeUnit(unit) {
+  if (!unit) return '';
+  return String(unit).toLowerCase().replace(/[\s\-_]+/g, '');
 }
 
 const subscribers = [];
 
 export const AppState = {
+  user: null, // Full Firestore user document (or null if logged out)
   player: {
-    name: 'Pegawai Demo',
+    displayName: 'Pegawai BPS',
+    email: '',
+    role: 'employee',
     level: 1,
     title: 'Explorer',
-    xp: 120,
-    xpToNext: 500
+    xp: 0,
+    xpToNext: XP_PER_LEVEL,
+    avatarId: 'default'
   },
-  currentUnit: loadPersistedUnit(),
+  currentUnit: '',
 
   subscribe(fn) {
     if (typeof fn === 'function') {
@@ -50,16 +34,56 @@ export const AppState = {
     };
   },
 
+  setUserProfile(userDoc) {
+    this.user = userDoc;
+    if (userDoc) {
+      this.currentUnit = userDoc.unit || '';
+      const xp = typeof userDoc.xp === 'number' ? userDoc.xp : 0;
+      const level = calculateLevel(xp);
+      this.player = {
+        displayName: userDoc.displayName || 'Pegawai BPS',
+        email: userDoc.email || '',
+        role: userDoc.role || 'employee',
+        level,
+        title: userDoc.role === 'admin' ? 'Administrator' : 'Explorer',
+        xp,
+        xpToNext: level * XP_PER_LEVEL,
+        avatarId: userDoc.avatarId || 'default'
+      };
+    } else {
+      this.clearUser();
+      return;
+    }
+    this.notify();
+  },
+
+  clearUser() {
+    this.user = null;
+    this.currentUnit = '';
+    this.player = {
+      displayName: '',
+      email: '',
+      role: 'employee',
+      level: 1,
+      title: 'Explorer',
+      xp: 0,
+      xpToNext: XP_PER_LEVEL,
+      avatarId: 'default'
+    };
+    this.notify();
+  },
+
   setCurrentUnit(unit) {
+    // DEV-only local override, NEVER written to Firestore or localStorage
     if (this.currentUnit !== unit) {
       this.currentUnit = unit;
-      savePersistedUnit(unit);
       this.notify();
     }
   },
 
   canStartQuest(buildingUnit) {
-    return this.currentUnit === buildingUnit;
+    if (!this.currentUnit || !buildingUnit) return false;
+    return normalizeUnit(this.currentUnit) === normalizeUnit(buildingUnit);
   },
 
   notify() {
@@ -73,3 +97,4 @@ export const AppState = {
   }
 };
 
+export default AppState;
