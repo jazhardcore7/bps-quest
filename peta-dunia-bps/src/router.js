@@ -3,6 +3,7 @@ import WorldScreen from './screens/world.js';
 import IslandScreen from './screens/island.js';
 import OfficeScreen from './screens/office.js';
 import LoginScreen from './screens/login.js';
+import LeaderboardScreen from './screens/leaderboard.js';
 import { onAuthChanged } from './firebase/auth.js';
 import { AppState } from './state/index.js';
 
@@ -10,15 +11,22 @@ const routes = {
   '#/login': LoginScreen,
   '#/world': WorldScreen,
   '#/island': IslandScreen,
-  '#/office': OfficeScreen
+  '#/office': OfficeScreen,
+  '#/leaderboard': LeaderboardScreen
 };
 
 let currentScreen = null;
 let stageContainer = null;
 let isAuthInitialized = false;
 let currentUser = null;
+let previousHash = null;
+let currentHash = null;
 
 export const Router = {
+  getPreviousHash() {
+    return previousHash || '#/world';
+  },
+
   init() {
     stageContainer = document.getElementById('stage');
     if (!stageContainer) {
@@ -79,6 +87,11 @@ export const Router = {
       window.location.hash = currentUser ? '#/world' : '#/login';
       return;
     }
+
+    if (currentHash && currentHash !== hash) {
+      previousHash = currentHash;
+    }
+    currentHash = hash;
 
     const nextScreen = routes[hash];
 

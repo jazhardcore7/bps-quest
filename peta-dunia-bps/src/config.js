@@ -1,5 +1,7 @@
 // Environment configuration, game constants, and time helpers
-const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+const env = (typeof import.meta !== 'undefined' && import.meta.env && Object.keys(import.meta.env).length > 0)
+  ? import.meta.env
+  : (typeof process !== 'undefined' && process.env ? process.env : {});
 
 const REQUIRED_FIREBASE_VARS = [
   'VITE_FIREBASE_API_KEY',

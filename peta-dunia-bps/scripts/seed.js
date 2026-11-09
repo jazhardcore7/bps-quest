@@ -1,6 +1,6 @@
 // Seed script targeting Firestore emulator only
 import { initializeApp, getApps, getApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 // Guard: Target EMULATOR ONLY
 if (!process.env.FIRESTORE_EMULATOR_HOST) {
@@ -16,6 +16,32 @@ const targetProjects = Array.from(new Set([
   process.env.GCLOUD_PROJECT,
   process.env.VITE_FIREBASE_PROJECT_ID
 ].filter(Boolean)));
+
+function getJakartaDateParts(date = new Date()) {
+  const d = new Date(date.getTime() + (7 * 60 + date.getTimezoneOffset()) * 60000);
+  return d;
+}
+
+function weekKeyJakarta(date = new Date()) {
+  const jkt = getJakartaDateParts(date);
+  const d = new Date(Date.UTC(jkt.getFullYear(), jkt.getMonth(), jkt.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
+function monthKeyJakarta(date = new Date()) {
+  const jkt = getJakartaDateParts(date);
+  const year = jkt.getFullYear();
+  const month = String(jkt.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+const now = new Date();
+const currentWeek = weekKeyJakarta(now);
+const currentMonth = monthKeyJakarta(now);
 
 const ALLOWED_EMAILS = [
   {
@@ -112,6 +138,111 @@ const QUESTS = [
   }
 ];
 
+const MOCK_USERS = [
+  {
+    id: 'mock_user_1',
+    data: {
+      displayName: 'Andi Pratama',
+      email: 'andi@bps.go.id',
+      unit: 'biro-sdm',
+      role: 'employee',
+      xp: 450,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 120,
+      monthKey: currentMonth,
+      xpMonth: 250,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'mock_user_2',
+    data: {
+      displayName: 'Dewi Lestari',
+      email: 'dewi@bps.go.id',
+      unit: 'biro-sdm',
+      role: 'employee',
+      xp: 350,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 80,
+      monthKey: currentMonth,
+      xpMonth: 180,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'mock_user_3',
+    data: {
+      displayName: 'Rian Hidayat',
+      email: 'rian@bps.go.id',
+      unit: 'biro-umum',
+      role: 'employee',
+      xp: 200,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 80,
+      monthKey: currentMonth,
+      xpMonth: 150,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'mock_user_past',
+    data: {
+      displayName: 'Hendra Veteran',
+      email: 'hendra@bps.go.id',
+      unit: 'biro-sdm',
+      role: 'employee',
+      xp: 600,
+      level: 2,
+      avatarId: 'default',
+      weekKey: '2026-W01', // Past weekKey
+      xpWeek: 100,
+      monthKey: currentMonth,
+      xpMonth: 100,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'mock_user_tie_alpha',
+    data: {
+      displayName: 'Citra Ayu',
+      email: 'citra@bps.go.id',
+      unit: 'biro-sdm',
+      role: 'employee',
+      xp: 100,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 40,
+      monthKey: currentMonth,
+      xpMonth: 100,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'mock_user_tie_beta',
+    data: {
+      displayName: 'Doni Kurniawan',
+      email: 'doni@bps.go.id',
+      unit: 'biro-sdm',
+      role: 'employee',
+      xp: 100,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 40,
+      monthKey: currentMonth,
+      xpMonth: 100,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  }
+];
+
 async function seedProject(projectId) {
   const appName = `seed-${projectId}`;
   let app;
@@ -144,6 +275,13 @@ async function seedProject(projectId) {
     await docRef.set(q.data, { merge: true });
     console.log(`  ✓ [${projectId}] quests/${q.id} ->`, q.data.title, `(+${q.data.xp} XP)`);
   }
+
+  // Seed mock users for leaderboard
+  for (const m of MOCK_USERS) {
+    const docRef = db.collection('users').doc(m.id);
+    await docRef.set(m.data, { merge: true });
+    console.log(`  ✓ [${projectId}] users/${m.id} ->`, m.data.displayName, `(xp: ${m.data.xp}, xpWeek: ${m.data.xpWeek})`);
+  }
 }
 
 async function seedAll() {
@@ -151,7 +289,7 @@ async function seedAll() {
   for (const proj of targetProjects) {
     await seedProject(proj);
   }
-  console.log(`[Seed] Successfully seeded all data (allowlist, units, quests)!\n`);
+  console.log(`[Seed] Successfully seeded all data (allowlist, units, quests, leaderboard users)!\n`);
 }
 
 seedAll().catch((err) => {

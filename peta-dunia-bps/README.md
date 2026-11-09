@@ -106,6 +106,11 @@ Dalam arsitektur MVP berbasis *client-driven Firestore* tanpa Cloud Functions at
 4. **Kontrol Akses Peran Admin**:
    - Pembuatan dan pengubahan unit kerja (`units`) serta daftar quest (`quests`) dibatasi secara ketat hanya untuk pengguna berstatus `role == 'admin'` dalam dokumen profil `users/{auth.uid}`. Klien non-admin tidak dapat memodifikasi koleksi ini.
 
+5. **Arsitektur Papan Peringkat Rendah Biaya Baca (Leaderboard Low-Read Cost)**:
+   - Tiga tab papan peringkat ("Sepanjang Waktu", "Mingguan", "Bulanan") dirancang hemat kuota Firestore: masing-masing tab hanya mengeksekusi **1 query tunggal** langsung ke koleksi `users` (maksimal 60 dokumen) dengan composite index (`weekKey + xpWeek` dan `monthKey + xpMonth`), tanpa pernah membaca koleksi riwayat `completions`.
+   - Hasil query dicache di memori klien selama 60 detik (TTL). Tombol *Segarkan* memaksa refresh manual.
+   - Pemeringkatan dan tie-breaking (XP total tertinggi, kemudian alfabetik nama) serta filter unit dilakukan secara instan di sisi klien.
+
 ---
 
 ## Struktur Berkas Proyek
@@ -115,28 +120,39 @@ peta-dunia-bps/
 ├── .env.example             # Template variabel lingkungan aman
 ├── .gitignore               # Mengabaikan .env, node_modules, dist, log emulator
 ├── firebase.json            # Konfigurasi emulator (auth: 9099, firestore: 8080)
-├── firestore.rules          # Security rules default (deny all)
-├── firestore.indexes.json   # Definisi indeks firestore
+├── firestore.rules          # Security rules Firebase (completions, users, allowedEmails, quests)
+├── firestore.indexes.json   # Definisi composite index firestore (weekKey+xpWeek, monthKey+xpMonth)
 ├── package.json             # Dependensi (firebase, vite, firebase-tools)
 ├── index.html               # Entry HTML Vite dengan <script type="module">
 ├── public/                  # Aset publik statis
+├── tests/
+│   ├── config.test.js       # Unit test rumus level & date helpers (Asia/Jakarta)
+│   ├── leaderboard.test.js  # Unit test sorting, tie-breaking, filtering leaderboard
+│   └── rules.test.js        # Security rules integration tests
+├── scripts/
+│   └── seed.js              # Script seeding emulator data (users, quests, allowlist, units)
 └── src/
     ├── main.js              # Entrypoint utama: CSS, devbar, stage scaler, router
-    ├── config.js            # Validasi variabel lingkungan Firebase
-    ├── router.js            # Hash router (#/world, #/island, #/office)
+    ├── config.js            # Validasi variabel lingkungan Firebase & kalkulasi XP/Level
+    ├── router.js            # Hash router (#/login, #/world, #/island, #/office, #/leaderboard)
     ├── firebase/
-    │   └── client.js        # Inisialisasi Firebase v9 & koneksi emulator lokal
+    │   ├── client.js        # Inisialisasi Firebase v9 & koneksi emulator lokal
+    │   ├── auth.js          # Layanan autentikasi, Google Popup, allowlist checking
+    │   ├── quests.js        # Layanan Firestore quests & atomic completions batching
+    │   └── leaderboard.js   # Layanan query leaderboard (users collection, 60s cache)
     ├── state/
-    │   └── index.js         # AppState global, observer, localStorage & canStartQuest()
+    │   └── index.js         # AppState global, observer & canStartQuest()
     ├── data/
     │   └── index.js         # Data 8 pulau & 7 biro unit kerja
     ├── screens/
+    │   ├── login.js         # Screen 0: Autentikasi email/password & Google
     │   ├── world.js         # Screen 1: Peta Dunia BPS (8 pulau)
     │   ├── island.js        # Screen 2: Pulau Sekretariat Utama (7 biro)
-    │   └── office.js        # Screen 3: Denah Lantai Kantor Biro SDM (Canvas 2D)
+    │   ├── office.js        # Screen 3: Denah Lantai Kantor Biro SDM (Canvas 2D)
+    │   └── leaderboard.js   # Screen 4: Papan Peringkat (All-Time, Mingguan, Bulanan)
     ├── ui/
-    │   ├── hud.js           # Kartu HUD pemain, XP progress bar, toast notification
-    │   ├── panel.js         # Modal Papan Informasi, sub-view, quest sheet, focus trap
+    │   ├── hud.js           # Kartu HUD pemain, tombol piala leaderboard, progress bar XP
+    │   ├── panel.js         # Modal Papan Informasi, sub-view, quest sheet, quiz, focus trap
     │   └── devbar.js        # Bilah simulasi pegawai (hanya tampil pada mode DEV)
     └── styles/
         └── style.css        # Stylesheet terpadu & responsif
@@ -150,5 +166,10 @@ peta-dunia-bps/
 2. **Pulau Sestama (`#/island`)**: Perhatikan ubin **"Biro SDM · Biro Anda"** berbingkai emas saat bilah simulasi dev memilih *Biro SDM*. Klik *Biro SDM* untuk masuk ke denah kantor.
 3. **Fisika & Denah Kantor (`#/office`)**: Gerakkan avatar menggunakan `WASD` / tombol panah / D-Pad sentuh. Avatar meluncur mulus sepanjang dinding tanpa tembus.
 4. **Papan Informasi & Balon Interaksi**: Dekati papan kuning hingga balon *"Tekan E"* muncul di atas avatar.
-5. **Role Match ("Biro SDM")**: Buka panel (tekan `E` atau klik papan di kanvas). Akses 4 baris informasi, lalu klik tombol biru **"Mulai Quest"** untuk membuka lembar 3 quest aktif.
-6. **Role Restriction ("Biro Umum")**: Ubah dropdown di atas menjadi *Biro Umum*, lalu buka panel kembali. Tombol *"Mulai Quest"* tidak ada di dalam DOM, dan digantikan oleh catatan abu-abu *"Quest hanya tersedia untuk pegawai Biro SDM"*.
+5. **Role Match ("Biro SDM")**: Buka panel (tekan `E` atau klik papan di kanvas). Akses 4 baris informasi, lalu klik tombol biru **"Mulai Quest"** untuk membuka lembar quest aktif.
+6. **Klaim Quest & XP**: Selesaikan kuis checkpoint atau klaim quest harian. Muncul animasi toast `+N XP`, progress bar dan level di HUD terupdate seketika secara atomik.
+7. **Papan Peringkat (`#/leaderboard`)**: Klik ikon piala emas pada kartu HUD untuk membuka papan peringkat.
+   - Tab **"Sepanjang Waktu"**, **"Mingguan"**, dan **"Bulanan"** menampilkan peringkat 1-3 dengan badge piala emas/perak/perunggu.
+   - Pengguna aktif ditandai dengan aksen emas `(Kamu)`. Jika pengguna berada di luar daftar 60 besar, baris pengguna dipin di bagian bawah layar.
+   - Filter unit chip ("Semua", "Biro SDM") menyaring tampilan secara instan tanpa re-query.
+   - Tombol kembali (Back) di kartu kiri mengembalikan pemain ke layar sebelumnya.
