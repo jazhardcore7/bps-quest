@@ -1,76 +1,116 @@
-# Peta Dunia BPS — Clickable Prototype
+# Peta Dunia BPS — Vite & Firebase Architecture
 
-Prototipe interaktif lokal (tanpa backend/server) untuk konsep gamifikasi internal BPS: pegawai menjelajahi pulau-pulau unit kerja, memasuki kantor biro, dan mengakses papan informasi serta quest peran pegawai.
-
----
-
-## Cara Menjalankan
-
-1. Buka folder `./peta-dunia-bps/`.
-2. Klik ganda (**double-click**) file `index.html`.
-3. Aplikasi akan langsung berjalan di browser favorit Anda (Google Chrome, Microsoft Edge, Mozilla Firefox, Apple Safari) melalui protokol `file://`.
-4. **Tidak memerlukan** instalasi `npm`, `node`, `build tools`, server web lokal, maupun koneksi internet (100% offline & self-contained).
+Aplikasi gamifikasi internal BPS yang dimigrasikan ke arsitektur modern berbasis **Vite (Vanilla JS, ES Modules)** dan terintegrasi dengan konfigurasi **Firebase (Modular SDK v9+)** serta emulator lokal.
 
 ---
 
-## Arsitektur Singkat
+## Prasyarat Lingkungan (Prerequisites)
 
-- **Teknologi**: Vanilla HTML5, CSS3, dan JavaScript (ES5/standard classic script tags tanpa modul `import`/`export`).
-- **Desain & Responsivitas**: Kanvas tetap `960px × 560px` di dalam `#stage` yang otomatis di-scaling menggunakan CSS transform preserving aspect ratio pada resolusi layar apa pun (termasuk 1440×900 hingga 900×560).
-- **Perutean (Routing)**: Hash router berbasis `#` (`#/world`, `#/island`, `#/office`) yang mendukung tombol navigasi in-app dan browser Back/Forward.
-- **State & Reaktivitas**: `AppState` global dengan pola Observer (Pub/Sub) serta penyimpanan aman `localStorage` di dalam blok `try/catch`.
-- **Kanvas Lantai Kantor**: Render grafis resolusi tajam via `devicePixelRatio`, avatar interaktif dengan fisika delta-time (`220 px/s`), deteksi tabrakan independen sumbu X/Y (sliding collision), kontrol D-pad layar sentuh, dan focus trap aksesibilitas dialog.
+1. **Node.js**: Versi LTS (v18+ atau v20+ / v22+).
+2. **Java Runtime (JRE / JDK 11+)**: **Wajib diinstal** untuk menjalankan Firebase Firestore Emulator (`npm run emulators`). Periksa ketersediaan Java dengan menjalankan:
+   ```bash
+   java -version
+   ```
 
 ---
 
-## Skenario Demo 6 Langkah (6-Step Demo Script)
+## Konfigurasi Lingkungan (.env)
 
-Ikuti panduan 6 langkah berikut untuk menguji seluruh fitur dari Part 1 hingga Part 3:
+Salin berkas contoh `.env.example` menjadi `.env`:
+```bash
+cp .env.example .env
+```
 
-### Langkah 1: Eksplorasi Peta Dunia (Screen 1 — `#/world`)
-1. Buka `index.html`.
-2. Anda berada di **Peta Dunia BPS** yang menampilkan 8 pulau unit kerja:
-   - Perhatikan pulau **Sekretariat Utama** berstatus terbuka dengan ikon bintang emas.
-   - Klik salah satu pulau lain yang terkunci (misalnya *"Kepala & Wakil Kepala BPS"*).
-   - Muncul notifikasi toast di bagian atas: **"Pulau ini segera hadir"** (hilang otomatis setelah 2 detik).
+Isi variabel lingkungan berikut sesuai konfigurasi proyek Firebase Anda:
 
-### Langkah 2: Masuk ke Pulau Sekretariat Utama (Screen 2 — `#/island`)
-1. Klik pulau **Sekretariat Utama**.
-2. Rute berpindah ke `#/island`.
-3. Terlihat pulau besar dengan 7 biro:
-   - Secara default bilah simulasi dev di atas memilih **Biro SDM**.
-   - Perhatikan ubin **Biro SDM** memiliki border emas dengan label **"Biro SDM · Biro Anda"**.
+| Variabel | Deskripsi |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | API Key web Firebase |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Domain autentikasi Firebase (`<project-id>.firebaseapp.com`) |
+| `VITE_FIREBASE_PROJECT_ID` | Project ID Firebase |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Bucket Cloud Storage |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID Cloud Messaging |
+| `VITE_FIREBASE_APP_ID` | App ID web Firebase |
+| `VITE_USE_EMULATORS` | Set `"true"` untuk menghubungkan Auth & Firestore ke emulator lokal saat `npm run dev` |
 
-### Langkah 3: Interaksi Ubin Biro & Masuk Kantor
-1. Klik ubin biro lain (misalnya *"Biro Keuangan"*).
-2. Muncul toast: **"Peta kantor belum tersedia di prototype"**.
-3. Klik ubin **Biro SDM**.
-4. Rute berpindah ke `#/office` (Denah lantai kantor Biro SDM).
+> [!IMPORTANT]
+> Berkas `.env` dan `.env.local` telah dimasukkan ke dalam `.gitignore` dan **tidak boleh dicatat atau diunggah ke repository git**.
 
-### Langkah 4: Navigasi Avatar & Papan Informasi (Screen 3 — `#/office`)
-1. Avatar spawn pada posisi tengah ruangan `(700, 290)`.
-2. Gerakkan avatar menggunakan tombol **W / A / S / D**, **Tombol Panah**, atau tombol **D-Pad** di pojok kanan bawah.
-3. Dekati dinding atau ruangan (misalnya *R. Kolaborasi*); avatar meluncur mulus sepanjang dinding tanpa tembus (wall sliding collision).
-4. Dekati **Papan Informasi** (balok kuning di dekat pintu keluar).
-5. Saat berada dalam jarak dekat (radius 80 unit), muncul balon interaksi **"Tekan E"** di atas kepala avatar.
+---
 
-### Langkah 5: Kasus 1 — Pegawai Biro SDM (Eligibel Mulai Quest)
-1. Tekan tombol **E** pada keyboard atau klik langsung pada objek **Papan Informasi** di kanvas.
-2. Modal putih **Papan Informasi** terbuka dan avatar berhenti bergerak:
-   - Di bagian atas tampak judul *"Biro SDM"*, chip induk *"Sekretariat Utama"*, dan chip gedung *"Level 2 · 350/600 XP"*.
-   - Uji 4 baris **Akses Informasi** (*Profil & Tugas Fungsi*, *Struktur Organisasi*, dll.): klik salah satu baris untuk masuk ke sub-view penjelasan, lalu klik tombol **"← Kembali"** untuk kembali ke menu utama.
-   - Karena bilah simulasi dev disetel ke **Biro SDM**, tombol biru **"Mulai Quest"** tampil penuh di bagian bawah.
-3. Klik tombol **"Mulai Quest"**:
-   - Lembar daftar **"Quest tersedia"** terbuka, menampilkan 3 quest dengan badge XP (`+50 XP`, `+30 XP`, `+20 XP`).
-4. Tekan tombol **Escape**, klik tombol **×**, atau klik area gelap latar belakang:
-   - Modal tertutup dan avatar dapat digerakkan kembali dengan normal.
+## Perintah Pengembangan (Scripts)
 
-### Langkah 6: Kasus 2 — Pegawai Non-SDM (Biro Umum / Pembatasan Peran)
-1. Pada bilah dev gelap di bagian paling atas layar, ubah dropdown **"Simulasi pegawai dari:"** menjadi **"Biro Umum"**.
-2. Dekati kembali Papan Informasi dan tekan **E** (atau klik papan di kanvas).
-3. Perhatikan bagian bawah modal:
-   - Tombol **"Mulai Quest" sama sekali tidak ada di dalam DOM**.
-   - Tampil kotak catatan abu-abu berbunyi: **"Quest hanya tersedia untuk pegawai Biro SDM"**.
-4. Tutup modal, lalu klik tombol panah kembali di HUD kiri untuk kembali ke Pulau (`#/island`) dan Peta Dunia (`#/world`).
-5. Perhatikan bahwa pilihan unit *"Biro Umum"* tetap tersimpan di `localStorage` bahkan setelah me-refresh halaman browser.
+### 1. Menjalankan Firebase Emulators
+Jalankan emulator lokal (Auth pada port `9099`, Firestore pada port `8080`):
+```bash
+npm run emulators
+```
+> [!NOTE]
+> Emulator Firestore memerlukan runtime **Java**. Jika Java belum terpasang, perintah ini akan meminta instalasi JRE/JDK.
 
+### 2. Menjalankan Server Pengembangan (Dev Server)
+Jalankan server Vite lokal:
+```bash
+npm run dev
+```
+Buka URL lokal yang muncul (default: `http://localhost:5173/`).
+Pada mode pengembangan (`DEV`), bilah dev bar di bagian atas layar (**"Simulasi pegawai dari:"**) akan otomatis aktif untuk mempermudah pengujian peran.
+
+### 3. Membangun Bundle Produksi (Build)
+```bash
+npm run build
+```
+Menghasilkan bundle statis teroptimasi di dalam folder `./dist/` (tanpa bilah dev bar).
+
+### 4. Pratinjau Hasil Build (Preview)
+```bash
+npm run preview
+```
+Menjalankan web server lokal untuk menguji hasil build produksi secara langsung.
+
+---
+
+## Struktur Berkas Proyek
+
+```
+peta-dunia-bps/
+├── .env.example             # Template variabel lingkungan aman
+├── .gitignore               # Mengabaikan .env, node_modules, dist, log emulator
+├── firebase.json            # Konfigurasi emulator (auth: 9099, firestore: 8080)
+├── firestore.rules          # Security rules default (deny all)
+├── firestore.indexes.json   # Definisi indeks firestore
+├── package.json             # Dependensi (firebase, vite, firebase-tools)
+├── index.html               # Entry HTML Vite dengan <script type="module">
+├── public/                  # Aset publik statis
+└── src/
+    ├── main.js              # Entrypoint utama: CSS, devbar, stage scaler, router
+    ├── config.js            # Validasi variabel lingkungan Firebase
+    ├── router.js            # Hash router (#/world, #/island, #/office)
+    ├── firebase/
+    │   └── client.js        # Inisialisasi Firebase v9 & koneksi emulator lokal
+    ├── state/
+    │   └── index.js         # AppState global, observer, localStorage & canStartQuest()
+    ├── data/
+    │   └── index.js         # Data 8 pulau & 7 biro unit kerja
+    ├── screens/
+    │   ├── world.js         # Screen 1: Peta Dunia BPS (8 pulau)
+    │   ├── island.js        # Screen 2: Pulau Sekretariat Utama (7 biro)
+    │   └── office.js        # Screen 3: Denah Lantai Kantor Biro SDM (Canvas 2D)
+    ├── ui/
+    │   ├── hud.js           # Kartu HUD pemain, XP progress bar, toast notification
+    │   ├── panel.js         # Modal Papan Informasi, sub-view, quest sheet, focus trap
+    │   └── devbar.js        # Bilah simulasi pegawai (hanya tampil pada mode DEV)
+    └── styles/
+        └── style.css        # Stylesheet terpadu & responsif
+```
+
+---
+
+## Skenario Pengujian Fitur (Demo Script)
+
+1. **Peta Dunia (`#/world`)**: Klik pulau **Sekretariat Utama** untuk masuk. Klik pulau terkunci untuk melihat toast *"Pulau ini segera hadir"*.
+2. **Pulau Sestama (`#/island`)**: Perhatikan ubin **"Biro SDM · Biro Anda"** berbingkai emas saat bilah simulasi dev memilih *Biro SDM*. Klik *Biro SDM* untuk masuk ke denah kantor.
+3. **Fisika & Denah Kantor (`#/office`)**: Gerakkan avatar menggunakan `WASD` / tombol panah / D-Pad sentuh. Avatar meluncur mulus sepanjang dinding tanpa tembus.
+4. **Papan Informasi & Balon Interaksi**: Dekati papan kuning hingga balon *"Tekan E"* muncul di atas avatar.
+5. **Role Match ("Biro SDM")**: Buka panel (tekan `E` atau klik papan di kanvas). Akses 4 baris informasi, lalu klik tombol biru **"Mulai Quest"** untuk membuka lembar 3 quest aktif.
+6. **Role Restriction ("Biro Umum")**: Ubah dropdown di atas menjadi *Biro Umum*, lalu buka panel kembali. Tombol *"Mulai Quest"* tidak ada di dalam DOM, dan digantikan oleh catatan abu-abu *"Quest hanya tersedia untuk pegawai Biro SDM"*.

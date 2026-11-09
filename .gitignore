@@ -11,3 +11,18 @@ desktop.ini
 
 # Temporary / Log files
 *.log
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.env
+*.env.local
+
+# Node & Build artifacts
+node_modules/
+dist/
+
+# Firebase
+.firebase/
+*-debug.log

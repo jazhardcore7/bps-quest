@@ -118,7 +118,7 @@ html, body {
    ========================================================================== */
 #stage-viewport {
   position: absolute;
-  top: 36px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
@@ -127,6 +127,10 @@ html, body {
   justify-content: center;
   overflow: hidden;
   background-color: var(--color-page-bg);
+}
+
+body.has-devbar #stage-viewport {
+  top: 36px;
 }
 
 #stage {

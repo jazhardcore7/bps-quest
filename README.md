@@ -52,3 +52,4 @@ bps-quest/
 2. Klik ganda (**double-click**) file `index.html` atau buka melalui browser apa pun.
 3. Tidak memerlukan `npm`, `node`, `build tools`, maupun web server lokal (100% offline & client-side).
 4. Untuk panduan skenario demo lengkap, silakan lihat [README peta-dunia-bps](./peta-dunia-bps/README.md).
+
