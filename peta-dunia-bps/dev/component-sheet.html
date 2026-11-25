@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Sheet · Peta Dunia BPS</title>
+  <!-- DEV ONLY: not part of the production build (Vite builds index.html only). -->
+  <style>
+    html, body { height: auto; overflow: auto; }
+    body { margin: 0; background: var(--ocean-3); color: var(--ink); font-family: var(--font-body); }
+    .sheet { max-width: 1100px; margin: 0 auto; padding: var(--space-7) var(--space-4) var(--space-8); display: grid; gap: var(--space-8); }
+    .sheet h1 { margin: 0; color: var(--white); font-family: var(--font-display); font-weight: 600; font-size: var(--fs-6); }
+    .sheet > section { margin-top: var(--space-4); }
+    .row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+    .row + .row { margin-top: var(--space-4); }
+    .caption { margin: var(--space-4) 0 0; font-size: var(--fs-1); color: var(--ink-soft); }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-3); }
+    .swatch { border: var(--border-w) solid var(--ink); border-radius: var(--radius-m); overflow: hidden; background: var(--paper); font-size: var(--fs-1); }
+    .swatch__chip { height: 52px; border-bottom: var(--border-w) solid var(--ink); }
+    .swatch__meta { padding: var(--space-2); line-height: 1.35; }
+    .swatch__meta b { display: block; font-size: var(--fs-2); }
+    .type-sample { display: grid; gap: var(--space-2); }
+    .toast-stage { position: relative; height: 92px; background: linear-gradient(180deg, var(--ocean-1), var(--ocean-3)); border: var(--border-w) solid var(--ink); border-radius: var(--radius-m); overflow: hidden; }
+    .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--space-3); }
+    .icons figure { margin: 0; display: grid; justify-items: center; gap: var(--space-1); padding: var(--space-3) var(--space-1); background: var(--white); border: 2px solid var(--ink); border-radius: var(--radius-s); font-size: var(--fs-1); }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <h1>Komponen Dasar · Cozy Archipelago</h1>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-colors">
+      <span class="ribbon" id="s-colors">Palet</span>
+      <div class="swatches" id="swatches"></div>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-type">
+      <span class="ribbon" id="s-type">Tipografi</span>
+      <div class="type-sample">
+        <div class="display" style="font-size: var(--fs-6)">Peta Dunia BPS</div>
+        <div class="display" style="font-size: var(--fs-5)">Level 4 · Penjelajah</div>
+        <div class="display" style="font-size: var(--fs-4)">1.250 / 2.000 XP</div>
+        <div style="font-size: var(--fs-3)">Body 16px Nunito: Selesaikan quest harian untuk mendapatkan XP dan naik level.</div>
+        <div style="font-size: var(--fs-2)">Body 14px: Informasi layanan, standar pelayanan, dan jadwal kegiatan unit kerja.</div>
+        <div style="font-size: var(--fs-1); font-weight: 700">Label 12px: TERSEDIA · CHECKPOINT</div>
+      </div>
+      <p class="caption" id="font-status"></p>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-btn">
+      <span class="ribbon" id="s-btn">Tombol</span>
+      <div class="row" id="buttons"></div>
+      <div class="row" id="buttons-2"></div>
+      <p class="caption">Hover lifts 2px, press collapses the shadow, Tab shows the gold/ink focus ring. Disabled uses native <code>disabled</code>; Locked stays operable.</p>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-pill">
+      <span class="ribbon" id="s-pill">Label &amp; Chip</span>
+      <div class="row" id="pills"></div>
+      <div class="row" id="tags"></div>
+      <div class="row" id="segmented"></div>
+      <div class="row" id="chips"></div>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-panel">
+      <span class="ribbon" id="s-panel">Panel</span>
+      <div class="row" style="align-items: stretch">
+        <div class="panel panel--has-ribbon" style="flex: 1 1 260px; margin-top: var(--space-5)">
+          <span class="ribbon">Biro SDM</span>
+          <h2 class="panel__title">Kartu dengan pita</h2>
+          <p class="panel__text">Paper fill, 3px ink outline, radius L, hard shadow. Judul memakai font display.</p>
+        </div>
+        <div class="panel panel--sand" style="flex: 1 1 260px; margin-top: var(--space-5)">
+          <h2 class="panel__title">Panel pasir</h2>
+          <p class="panel__text">Varian untuk quest sheet. Teks sekunder 4.97:1 di atas pasir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-toast">
+      <span class="ribbon" id="s-toast">Toast</span>
+      <div class="row">
+        <div class="toast-stage" id="toast-a" style="flex: 1 1 300px"></div>
+        <div class="toast-stage" id="toast-b" style="flex: 1 1 300px"></div>
+      </div>
+    </section>
+
+    <section class="panel panel--has-ribbon" aria-labelledby="s-icon">
+      <span class="ribbon" id="s-icon">Ikon</span>
+      <div class="icons" id="icons"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./component-sheet.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 // Reusable HUD components, icons, and toast notifications
 import { logout } from '../firebase/auth.js';
+import { buildToastEl, TOAST_DEFAULT_MS } from './toast.js';
 
 let toastTimeout = null;
 
@@ -110,7 +111,25 @@ export function bindLeftCardEvents(container, onBack) {
   }
 }
 
-export function showToast(message, duration = 2000) {
+// Persistent screen-reader live region outside #stage, so it survives screen
+// re-renders and announces reliably (a freshly inserted region often does not).
+function announce(message) {
+  let live = document.getElementById('bps-live-status');
+  if (!live) {
+    live = document.createElement('div');
+    live.id = 'bps-live-status';
+    live.className = 'visually-hidden';
+    live.setAttribute('role', 'status');
+    live.setAttribute('aria-live', 'polite');
+    live.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(live);
+  }
+  live.textContent = '';
+  // Next frame so repeated identical messages are still announced.
+  requestAnimationFrame(() => { live.textContent = String(message); });
+}
+
+export function showToast(message, duration = TOAST_DEFAULT_MS) {
   const stage = document.getElementById('stage');
   if (!stage) return;
 
@@ -123,11 +142,13 @@ export function showToast(message, duration = 2000) {
     toastTimeout = null;
   }
 
-  const toast = document.createElement('div');
-  toast.className = 'bps-toast';
-  toast.setAttribute('role', 'alert');
-  toast.textContent = message;
+  const toast = buildToastEl(message);
+  // The visible toast is presentation; the live region does the announcing.
+  toast.removeAttribute('role');
+  toast.removeAttribute('aria-live');
+  toast.setAttribute('aria-hidden', 'true');
   stage.appendChild(toast);
+  announce(message);
 
   void toast.offsetWidth;
   toast.classList.add('visible');

@@ -64,7 +64,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   background-color: var(--color-page-bg);
-  font-family: var(--font-system);
+  font-family: var(--font-body);
   color: #FFFFFF;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -967,33 +967,7 @@ body.has-devbar #stage-viewport {
   flex-shrink: 0;
 }
 
-/* ==========================================================================
-   Toast Notification Component
-   ========================================================================== */
-.bps-toast {
-  position: absolute;
-  top: 22px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  background: rgba(7, 23, 42, 0.95);
-  color: #FFFFFF;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 22px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
-  border: 1.5px solid var(--color-gold);
-  z-index: 100;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.bps-toast.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
+/* Toast styles moved to components.css */
 
 /* ==========================================================================
    Login Screen & Auth Styles (#/login)

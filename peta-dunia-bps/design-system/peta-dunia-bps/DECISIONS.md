@@ -159,7 +159,14 @@ A ticket-style name pill in `--unit-<id>` with white text sits under the island.
 - **Locked:** the grass and sand wash toward `--locked`, a soft cloud SVG covers half the island, and the pill gets a lock icon and "Terkunci" text. A tap still shows the "Pulau ini segera hadir" toast.
 - Reduced motion: no bob, no clouds drifting.
 
-## 5. Open questions for the owner
+## 5. Resolved (owner answers, 2026-11-25)
+
+- **Q1:** toasts stay visible for **3 seconds** (`TOAST_DEFAULT_MS` in `src/ui/toast.js`). Explicit durations passed by callers are kept.
+- **Q2:** the owner will supply the woff2 files. `src/styles/fonts.css` already points to `public/fonts/` and the fallback stacks apply until then. Expected filenames are in `public/fonts/README.md`. Preload links get added once the files exist, because preloading a missing file only causes a 404.
+- **Icon family change (Phase 1):** the icons use **Lucide** geometry (ISC), not Phosphor Bold. Phosphor Bold icons are complex filled outlines that cannot be copied accurately without its package, and guardrail 3 forbids adding the package. Lucide is simple stroke geometry, redrawn in `src/ui/icons.js` at stroke-width 2.5 to suit the chunky outline style. The PRD allows either library. The coin and filled star are custom.
+- **Toast announcements:** the visible toast is `aria-hidden`. A persistent `role="status"` region outside `#stage` does the announcing. A freshly inserted live region is often not announced, and `#stage` gets re-rendered on every route change.
+
+## 6. Original open questions
 
 - **Q1 Toast duration.** PRD 8 says auto-hide after 2s. The skill's UX rule (and WCAG 2.2.1 Timing) suggests 3–5s so people can read it. Recommendation: **3s** for all toasts. The +XP value also persists in the HUD XP bar, so nothing is lost if a toast is missed. Need a yes/no because it touches accessibility (guardrail 6).
 - **Q2 Font files.** Phase 1 needs the Pixelify Sans and Nunito woff2 files (OFL) in `public/fonts/`. Download them from the official google/fonts GitHub repo, or will you supply them? No `@fontsource/*` package either way.

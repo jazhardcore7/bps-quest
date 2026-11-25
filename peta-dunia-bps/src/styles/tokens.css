@@ -1,0 +1,128 @@
+/* ==========================================================================
+   Peta Dunia BPS - Design Tokens ("Cozy Archipelago")
+   Single source of truth for color, type, space, shape, depth, motion, layers.
+   Source: design-system/peta-dunia-bps/DECISIONS.md section 3.
+   Components must reference these tokens; raw hex values belong here only.
+   Canvas code reads them once at mount via getComputedStyle(document.documentElement).
+   ========================================================================== */
+
+:root {
+  /* ---- Color: core ---- */
+  --ink: #0F2A4A;              /* text, outlines, icons */
+  --ink-soft: #4A5D75;         /* secondary text, 6.37:1 on paper */
+  --ink-shadow: rgba(15, 42, 74, 0.25);
+  --scrim: rgba(15, 42, 74, 0.55);
+  --white: #FFFFFF;
+
+  --paper: #FFF8E7;            /* panels, cards */
+  --paper-shade: #F5EBD0;      /* pressed/inset surfaces on paper */
+
+  --ocean-1: #3BB4E6;          /* shallow; ink text OK (6.11) */
+  --ocean-2: #2A96D6;          /* mid; background only, no text */
+  --ocean-3: #1B78C4;          /* deep; white text OK (4.64) */
+
+  --sand: #F2DC9B;
+  --grass: #7CCF63;
+  --grass-shade: #4FA64A;      /* ink text only */
+
+  --gold: #FFC93C;             /* rewards, primary button */
+  --gold-shade: #E0A82A;       /* coin rim, ribbon tails (non-text) */
+  --gold-deep: #8A5A00;        /* gold-family text on paper (5.60) */
+
+  --success: #2E7D32;          /* text on paper 4.84, white-on 5.13 */
+  --danger: #E8594F;           /* coral: icons, borders, fills without text */
+  --danger-strong: #B8352C;    /* error text on paper 5.53, white-on 5.86 */
+
+  --locked: #B7C2CF;           /* locked wash; ink text 8.02 */
+
+  --medal-gold: #FFC93C;
+  --medal-silver: #C9D3DE;
+  --medal-bronze: #D9925B;
+
+  /* ---- Color: unit pills (white text, all >= 4.5:1) ---- */
+  --unit-kepala: #0F3D6E;
+  --unit-sestama: #18735D;     /* darkened from #1F8A70 (4.26 -> 5.75) */
+  --unit-metodologi: #1C4FA0;
+  --unit-sosial: #5B3FB0;
+  --unit-produksi: #9A520A;    /* darkened from #C06A10 (3.95 -> 5.86) */
+  --unit-distribusi: #A82A40;
+  --unit-neraca: #1F7A80;
+  --unit-itama: #5A6678;
+  --unit-biro: #1C4FA0;
+
+  /* ---- Color: unit illustration tints (non-text, mirror blockColor) ---- */
+  --unit-kepala-tint: #4A90D9;
+  --unit-sestama-tint: #4CB8A0;
+  --unit-metodologi-tint: #2E6FD6;
+  --unit-sosial-tint: #8C6FD6;
+  --unit-produksi-tint: #E8963A;
+  --unit-distribusi-tint: #D9566A;
+  --unit-neraca-tint: #4AA3A8;
+  --unit-itama-tint: #8A97A8;
+  --unit-biro-tint: #6FA8DC;
+
+  /* ---- Focus ---- */
+  --focus-inner: var(--gold);
+  --focus-outer: var(--ink);
+  --focus-ring: 0 0 0 3px var(--focus-inner), 0 0 0 6px var(--focus-outer);
+
+  /* ---- Type ---- */
+  --font-display: "Pixelify Sans", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --fw-regular: 400;
+  --fw-bold: 700;
+  --fw-black: 800;
+  --fw-display: 600;
+  --fs-1: 12px;   /* labels, captions (minimum) */
+  --fs-2: 14px;   /* body small (minimum body) */
+  --fs-3: 16px;   /* body */
+  --fs-4: 20px;   /* subheading, big numbers */
+  --fs-5: 26px;   /* screen title */
+  --fs-6: 34px;   /* hero, level-up */
+  --lh-tight: 1.15;
+  --lh-body: 1.5;
+
+  /* ---- Space (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+
+  /* ---- Shape ---- */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --radius-pill: 999px;
+  --border-w: 3px;
+
+  /* ---- Depth (hard shadows only) ---- */
+  --shadow-hard: 0 4px 0 var(--ink-shadow);
+  --shadow-hover: 0 6px 0 var(--ink-shadow);
+  --shadow-pressed: 0 1px 0 var(--ink-shadow);
+  --glow-board: 0 0 18px rgba(255, 201, 60, 0.65); /* the only blur allowed */
+
+  /* ---- Motion ---- */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Layers ---- */
+  --z-stage: 1;
+  --z-hud: 10;
+  --z-modal: 100;
+  --z-toast: 1000;
+
+  /* ---- Sizing ---- */
+  --icon-s: 16px;
+  --icon-m: 20px;
+  --icon-l: 24px;
+  --tap-min: 44px;
+  --dpad-min: 56px;
+  --stage-min-scale: 0.7;
+}
