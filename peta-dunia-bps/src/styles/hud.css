@@ -169,14 +169,15 @@
   border-radius: 50%;
 }
 
-/* ---- Narrow screens: stage held at min scale, so keep targets >= 44px
-   effective (64 stage px x 0.7) and drop secondary text ---- */
-#stage-viewport.is-pannable .hud-card .btn--icon,
-#stage-viewport.is-pannable .hud-emblem {
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
+/* HUD icon buttons follow the scale-aware target size from components.css */
+#stage .hud-card .btn--icon,
+#stage .hud-emblem {
+  width: var(--tap-stage);
+  height: var(--tap-stage);
+  min-width: var(--tap-stage);
 }
+
+/* ---- Narrow screens (stage held at min scale): drop secondary text ---- */
 #stage-viewport.is-pannable .hud-player-name,
 #stage-viewport.is-pannable .hud-subtitle {
   display: none;

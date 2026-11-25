@@ -93,8 +93,12 @@
   touch-action: none;
 }
 
+/* Inside the stage the D-pad follows the scale-aware target size */
+#stage .office-dpad { --dpad-btn: var(--tap-stage); }
+
 @media (pointer: coarse) {
   .office-dpad { --dpad-btn: var(--dpad-min); }
+  #stage .office-dpad { --dpad-btn: max(var(--dpad-min), calc(var(--dpad-min) / var(--stage-scale, 1))); }
 }
 
 /* Narrow screens: office.js docks the D-pad on <body> so it stays on screen

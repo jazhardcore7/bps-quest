@@ -1,56 +1,9 @@
 /* ==========================================================================
-   Peta Dunia BPS - Main Stylesheet
-   Pure vanilla CSS with CSS variables, responsive stage scaling & design tokens
+   Peta Dunia BPS - Base stylesheet
+   Base resets, the DEV-only bar and the 960x560 stage frame.
+   Tokens: tokens.css. Components: components.css. Screens: world.css,
+   office.css, hud.css, panel.css, levelup.css, leaderboard.css, login.css.
    ========================================================================== */
-
-:root {
-  /* Ocean & Background Colors */
-  --color-page-bg: var(--ink);
-  --color-ocean-top: #5EC3F0;
-  --color-ocean-bottom: #1A78BD;
-
-  /* Dev Bar */
-  --color-devbar-bg: #07172A;
-  --color-devbar-border: rgba(255, 255, 255, 0.1);
-  --color-devbar-text: #CBD5E1;
-
-  /* Island Geometry Colors */
-  --color-island-sand: #F2DC9B;
-  --color-island-grass: #7CCF63;
-  --color-island-shadow: rgba(0, 0, 0, 0.15);
-
-  /* HUD & Card Elements */
-  --color-card-bg: #0F3D6E;
-  --color-card-text: #FFFFFF;
-  --color-card-subtext: #CFE6FA;
-  --color-xp-track: #2C5F93;
-  --color-gold: #FFD24A;
-
-  /* Work Unit Palette */
-  --color-sestama-block: #4CB8A0;
-  --color-sestama-pill: #1F8A70;
-  --color-kepala-block: #4A90D9;
-  --color-kepala-pill: #0F3D6E;
-  --color-metodologi-block: #2E6FD6;
-  --color-metodologi-pill: #1C4FA0;
-  --color-sosial-block: #8C6FD6;
-  --color-sosial-pill: #5B3FB0;
-  --color-produksi-block: #E8963A;
-  --color-produksi-pill: #C06A10;
-  --color-distribusi-block: #D9566A;
-  --color-distribusi-pill: #A82A40;
-  --color-neraca-block: #4AA3A8;
-  --color-neraca-pill: #1F7A80;
-  --color-itama-block: #8A97A8;
-  --color-itama-pill: #5A6678;
-
-  /* Biro Default Palette */
-  --color-biro-block: #6FA8DC;
-  --color-biro-pill: #1C4FA0;
-
-  /* Typography */
-  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
-}
 
 /* Base resets */
 *, *::before, *::after {
@@ -63,15 +16,15 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--color-page-bg);
+  background-color: var(--ink);
   font-family: var(--font-body);
-  color: #FFFFFF;
+  color: var(--white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ==========================================================================
-   Dev Bar (Fixed at top, 36px)
+   Dev Bar (DEV only, fixed at top, 36px)
    ========================================================================== */
 #dev-bar {
   position: fixed;
@@ -79,42 +32,37 @@ html, body {
   left: 0;
   right: 0;
   height: 36px;
-  background-color: var(--color-devbar-bg);
-  border-bottom: 1px solid var(--color-devbar-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  z-index: 1000;
-  font-size: 12px;
-  color: var(--color-devbar-text);
+  gap: var(--space-3);
+  z-index: var(--z-toast);
+  background-color: var(--devbar-bg);
+  border-bottom: 1px solid var(--devbar-border);
+  color: var(--devbar-text);
+  font-size: var(--fs-1);
   user-select: none;
 }
 
 .devbar-label {
-  font-weight: 500;
+  font-weight: var(--fw-bold);
 }
 
 .devbar-select {
-  background-color: #0E243E;
-  color: #FFFFFF;
-  border: 1px solid #234E7B;
-  border-radius: 4px;
-  padding: 3px 8px;
-  font-size: 12px;
+  min-height: 26px;
+  padding: 2px var(--space-2);
+  background-color: var(--ink);
+  color: var(--white);
+  border: 1px solid var(--devbar-border-strong);
+  border-radius: var(--radius-s);
   font-family: inherit;
-  font-weight: 500;
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
   cursor: pointer;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-.devbar-select:focus {
-  border-color: var(--color-gold);
 }
 
 /* ==========================================================================
-   Stage Scaler & Canvas Area (960x560 Design Stage)
+   Stage viewport and 960x560 design stage (scaled by src/stage.js)
    ========================================================================== */
 #stage-viewport {
   position: absolute;
@@ -126,7 +74,7 @@ html, body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: var(--color-page-bg);
+  background-color: var(--ink);
 }
 
 body.has-devbar #stage-viewport {
@@ -144,17 +92,8 @@ body.has-devbar #stage-viewport {
   background: linear-gradient(180deg, var(--ocean-1) 0%, var(--ocean-3) 100%);
 }
 
-/* Screen base */
 .screen {
   position: relative;
   width: 100%;
   height: 100%;
 }
-
-/* HUD styles live in hud.css */
-
-/* Info panel and quest sheet styles live in panel.css */
-
-/* Login styles live in login.css */
-
-/* Leaderboard styles live in leaderboard.css */

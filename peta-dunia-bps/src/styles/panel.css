@@ -243,8 +243,10 @@
   box-shadow: var(--shadow-hard);
 }
 
+/* Completed: paper fill (success text is 4.84:1 here; on paper-shade only 4.32) */
 .quest-card-item.is-completed {
-  background: var(--paper-shade);
+  background: var(--paper);
+  box-shadow: var(--shadow-pressed);
 }
 
 .quest-item-badges {

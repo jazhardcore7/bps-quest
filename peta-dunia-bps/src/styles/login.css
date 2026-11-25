@@ -204,6 +204,11 @@
 
 .login-toggle-btn:hover { text-decoration-thickness: 3px; }
 
+/* Inside the scaled stage, keep on-screen sizes: inputs >= 44px, the inline
+   text link >= 24px (WCAG 2.5.8 target size). */
+#stage .login-input { min-height: var(--tap-stage); }
+#stage .login-toggle-btn { min-height: max(24px, calc(24px / var(--stage-scale, 1))); }
+
 /* Narrow screens: login.js docks the screen on <body> at real size (outside
    the 0.7-scaled stage), scrollable when the viewport is short. */
 .login-screen-wrap.is-docked {

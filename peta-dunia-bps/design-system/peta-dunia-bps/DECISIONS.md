@@ -193,3 +193,11 @@ A ticket-style name pill in `--unit-<id>` with white text sits under the island.
 - **Login docking on narrow screens:** below 768px the stage is held at 0.7 scale, which made the form 31px tall with about 11px text. `login.js` now docks its screen on `<body>` at real size: fixed, scrollable, 44px controls, 16px inputs. `unmount` removes it explicitly along with the resize listener. Queries go through `root()` so error, loading and toggle still work while docked.
 - **Narrow-screen target sizing (all stage screens):** when the stage is at minimum scale, `.btn`, `.chip`, `.segmented__btn`, `.info-row-btn` and `.quiz-option-item` inside the stage grow to 64 stage px (44.8px on screen), and the panel content scrolls inside the dialog card. Measured at 390px: 45px.
 - **Known gap for Phase 6:** at exactly 768px (not "below 768") the stage scale is 0.8, so 44px controls are about 35px on screen. The PRD's 44px rule is stated for below 768px. Revisit in QA.
+
+## 9. Phase 6 notes (QA and cleanup)
+
+- **Dead CSS:** `style.css` was reduced to resets, the dev bar and the stage. 30 of the 34 legacy `--color-*` variables had no references and were removed. The dev bar now uses `--devbar-*` tokens and the shared focus ring (its `outline: none` was dropped). The duplicate `--glow-board` token was removed; Canvas uses `--board-glow`. `--ocean-2`, `--z-stage` and `--fw-regular` stay because they are part of the PRD token table.
+- **Scale-aware targets:** `src/stage.js` sets `--stage-scale` on `#stage`. In-stage controls (`.btn`, `.chip`, `.segmented__btn`, `.info-row-btn`, `.quiz-option-item`, `.login-input`, HUD icons, D-pad) use `--tap-stage: max(44px, 44px / scale)`, so they measure at least 44px on screen at every scale. This replaces the Phase 5 rules that only applied while panning, and it closes the 768px gap. The inline text link uses at least 24px (WCAG 2.5.8).
+- **Contrast fix:** a completed quest card now uses the paper background. The "Selesai" text was 4.32:1 on paper-shade and is 4.84:1 on paper.
+- **QA tools (dev only):** `dev/qa-audit.js`, `dev/qa-states.js`, `dev/qa-reduced-motion.js` and `dev/qa-matrix.md`. Results are in `DESIGN_REVAMP_REPORT.md` §4.
+- **Screenshots:** collected in `design-system/peta-dunia-bps/screenshots/phase2..6/`.

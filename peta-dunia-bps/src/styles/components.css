@@ -444,27 +444,36 @@
 }
 
 /* ==========================================================================
-   Narrow screens: the stage is held at --stage-min-scale (0.7) and pans.
-   Interactive controls inside the stage grow to 64 stage px so they stay
-   >= 44px on screen (64 x 0.7 = 44.8).
+   Scale-aware touch targets. src/stage.js sets --stage-scale on #stage.
+   Controls inside the stage are sized so that their on-screen size stays
+   >= --tap-min at any scale: max(44px, 44px / scale). At scale >= 1 this is
+   simply 44px; at 0.8 it is 55 stage px; at 0.7 it is ~63 stage px.
    ========================================================================== */
-#stage-viewport.is-pannable #stage .btn,
-#stage-viewport.is-pannable #stage .chip,
-#stage-viewport.is-pannable #stage .segmented__btn,
-#stage-viewport.is-pannable #stage .info-row-btn,
-#stage-viewport.is-pannable #stage .quiz-option-item {
-  min-height: 64px;
+#stage {
+  --tap-stage: max(var(--tap-min), calc(var(--tap-min) / var(--stage-scale, 1)));
 }
 
-#stage-viewport.is-pannable #stage .btn--icon {
-  width: 64px;
-  min-width: 64px;
+#stage .btn,
+#stage .chip,
+#stage .segmented__btn,
+#stage .info-row-btn,
+#stage .quiz-option-item {
+  min-height: var(--tap-stage);
 }
 
-/* Taller controls: let the panel content scroll inside the dialog card */
-#stage-viewport.is-pannable .info-main-view,
-#stage-viewport.is-pannable .info-sub-view,
-#stage-viewport.is-pannable .quest-sheet-container {
+#stage .btn--lg {
+  min-height: max(52px, var(--tap-stage));
+}
+
+#stage .btn--icon {
+  width: var(--tap-stage);
+  min-width: var(--tap-stage);
+}
+
+/* Controls may get taller: panel content scrolls inside the dialog card */
+.info-main-view,
+.info-sub-view,
+.quest-sheet-container {
   overflow-y: auto;
   padding: var(--space-1);
   margin: calc(-1 * var(--space-1));

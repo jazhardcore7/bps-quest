@@ -33,6 +33,8 @@ export function updateStageScale() {
   const pannable = scaledW > availWidth + 0.5 || scaledH > availHeight + 0.5;
 
   viewport.classList.toggle('is-pannable', pannable);
+  // Lets in-stage controls keep >= 44px on screen at any scale (see components.css).
+  stage.style.setProperty('--stage-scale', String(scale));
 
   if (pannable) {
     if (!stageSpacer) {

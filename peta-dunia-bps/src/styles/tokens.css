@@ -66,6 +66,12 @@
   --board-glow: rgba(255, 201, 60, 0.9);
   --shadow-on-ink: rgba(0, 0, 0, 0.35); /* hard shadow on dark backgrounds */
 
+  /* ---- Dev bar (DEV builds only) ---- */
+  --devbar-bg: #07172A;
+  --devbar-text: #CBD5E1;          /* 13.4:1 on devbar-bg */
+  --devbar-border: rgba(255, 255, 255, 0.1);
+  --devbar-border-strong: #4C6A90; /* 3.3:1 boundary on devbar-bg */
+
   --medal-gold: #FFC93C;
   --medal-silver: #C9D3DE;
   --medal-bronze: #D9925B;
@@ -134,7 +140,6 @@
   --shadow-hard: 0 4px 0 var(--ink-shadow);
   --shadow-hover: 0 6px 0 var(--ink-shadow);
   --shadow-pressed: 0 1px 0 var(--ink-shadow);
-  --glow-board: 0 0 18px rgba(255, 201, 60, 0.65); /* the only blur allowed */
 
   /* ---- Motion ---- */
   --dur-fast: 120ms;
