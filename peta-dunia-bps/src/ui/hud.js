@@ -18,7 +18,7 @@ export const icons = {
 
 const XP_SEGMENTS = 10;
 
-function initialsOf(name) {
+export function initialsOf(name) {
   // First letter of the first and last word that contain a letter.
   const letters = String(name || '')
     .split(/\s+/)

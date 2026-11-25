@@ -444,6 +444,33 @@
 }
 
 /* ==========================================================================
+   Narrow screens: the stage is held at --stage-min-scale (0.7) and pans.
+   Interactive controls inside the stage grow to 64 stage px so they stay
+   >= 44px on screen (64 x 0.7 = 44.8).
+   ========================================================================== */
+#stage-viewport.is-pannable #stage .btn,
+#stage-viewport.is-pannable #stage .chip,
+#stage-viewport.is-pannable #stage .segmented__btn,
+#stage-viewport.is-pannable #stage .info-row-btn,
+#stage-viewport.is-pannable #stage .quiz-option-item {
+  min-height: 64px;
+}
+
+#stage-viewport.is-pannable #stage .btn--icon {
+  width: 64px;
+  min-width: 64px;
+}
+
+/* Taller controls: let the panel content scroll inside the dialog card */
+#stage-viewport.is-pannable .info-main-view,
+#stage-viewport.is-pannable .info-sub-view,
+#stage-viewport.is-pannable .quest-sheet-container {
+  overflow-y: auto;
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+}
+
+/* ==========================================================================
    Reduced motion: no ambient loops, bobbing, bursts or travel.
    State changes become instant; final states stay correct.
    ========================================================================== */

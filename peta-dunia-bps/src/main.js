@@ -8,6 +8,8 @@ import './styles/office.css';
 import './styles/hud.css';
 import './styles/panel.css';
 import './styles/levelup.css';
+import './styles/leaderboard.css';
+import './styles/login.css';
 import './firebase/client.js';
 import { Router } from './router.js';
 import { mountDevBar } from './ui/devbar.js';

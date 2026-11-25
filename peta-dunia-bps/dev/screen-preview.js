@@ -9,16 +9,23 @@ import '../src/styles/office.css';
 import '../src/styles/hud.css';
 import '../src/styles/panel.css';
 import '../src/styles/levelup.css';
+import '../src/styles/leaderboard.css';
+import '../src/styles/login.css';
 import { updateStageScale } from '../src/stage.js';
 import { mountDevBar } from '../src/ui/devbar.js';
 import { AppState } from '../src/state/index.js';
+// router.js must load before the screens: leaderboard.js <-> router.js is a circular import
+// that only resolves when the router module starts evaluating first (as in main.js).
+import '../src/router.js';
 import WorldScreen from '../src/screens/world.js';
 import IslandScreen from '../src/screens/island.js';
 import OfficeScreen from '../src/screens/office.js';
+import LeaderboardScreen from '../src/screens/leaderboard.js';
+import LoginScreen from '../src/screens/login.js';
 import { showLevelUp, initLevelUp } from '../src/ui/levelup.js';
 import { openInfoPanel, closeInfoPanel, renderQuestsList } from '../src/ui/panel.js';
 
-const SCREENS = { world: WorldScreen, island: IslandScreen, office: OfficeScreen };
+const SCREENS = { world: WorldScreen, island: IslandScreen, office: OfficeScreen, leaderboard: LeaderboardScreen, login: LoginScreen };
 window.__screens = SCREENS; // lets the loop-cleanup check remount screens
 const params = new URLSearchParams(location.search);
 const name = params.get('screen') in SCREENS ? params.get('screen') : 'world';
