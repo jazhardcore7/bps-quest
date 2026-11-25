@@ -47,6 +47,25 @@
   --locked-grass-shade: #8C9E8A;
   --locked-tree: #7F927F;
 
+  /* ---- Color: office floor plan (Canvas reads these once at mount) ---- */
+  --office-floor: #F4ECDA;
+  --office-floor-line: #E4D8BD;
+  --office-wall-top: #4C6A90;
+  --room-carpet: #CFE3F7;
+  --room-carpet-dot: #B3CFEC;
+  --room-tile: #DDE3EC;
+  --room-tile-line: #C3CCD9;
+  --room-green: #D5ECD0;
+  --room-green-line: #BCDDB4;
+  --room-wood: #F2DDB4;
+  --room-wood-line: #DFC38E;
+  --sofa: #6F8FD1;
+  --rug: #C0574B;
+  --skin: #F2B583;
+  --hair: #3B2A20;
+  --board-glow: rgba(255, 201, 60, 0.9);
+  --shadow-on-ink: rgba(0, 0, 0, 0.35); /* hard shadow on dark backgrounds */
+
   --medal-gold: #FFC93C;
   --medal-silver: #C9D3DE;
   --medal-bronze: #D9925B;

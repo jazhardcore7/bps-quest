@@ -4,6 +4,7 @@ import './styles/fonts.css';
 import './styles/style.css';
 import './styles/components.css';
 import './styles/world.css';
+import './styles/office.css';
 import './firebase/client.js';
 import { Router } from './router.js';
 import { mountDevBar } from './ui/devbar.js';

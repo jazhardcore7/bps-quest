@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Office screen (#/office) - frame, hint bar, D-pad. Canvas art lives in
+   src/ui/office-art.js. Tokens only.
+   ========================================================================== */
+
+.screen-office {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ink);
+  background-image: radial-gradient(var(--office-wall-top) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  overflow: hidden;
+}
+
+#office-canvas {
+  position: absolute;
+  left: 20px;
+  top: 96px;
+  width: 920px;
+  height: 382px;
+  display: block;
+  /* Frame via box-shadow, not border: the click mapping and backing-store
+     sizing read getBoundingClientRect(), which a border would change. */
+  border-radius: var(--radius-s);
+  box-shadow: 0 0 0 var(--border-w) var(--paper), 0 6px 0 var(--border-w) var(--shadow-on-ink);
+  cursor: default;
+}
+
+/* Hint bar with keycaps (bottom-left) */
+.office-hint-text {
+  position: absolute;
+  left: 20px;
+  bottom: 18px;
+  z-index: var(--z-hud);
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 640px;
+  padding: var(--space-1) var(--space-3);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-hard);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  user-select: none;
+}
+
+.office-hint-text kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--space-1);
+  background: var(--gold);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+  box-shadow: 0 2px 0 var(--ink);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-1);
+  line-height: 1;
+}
+
+.office-hint-sep {
+  margin: 0 var(--space-1);
+  color: var(--ink-soft);
+}
+
+/* On-screen D-pad (bottom-right). Buttons are 44px for mouse users and
+   56px on touch; at the minimum stage scale they grow so the effective
+   on-screen size stays >= 56px. */
+.office-dpad {
+  --dpad-btn: var(--tap-min);
+  --dpad-gap: 4px;
+  position: absolute;
+  right: 20px;
+  bottom: 14px;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(3, var(--dpad-btn));
+  grid-template-rows: repeat(3, var(--dpad-btn));
+  gap: var(--dpad-gap);
+  user-select: none;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .office-dpad { --dpad-btn: var(--dpad-min); }
+}
+
+/* --dpad-min / --stage-min-scale = 80px when the stage is held at 0.7 */
+#stage-viewport.is-pannable .office-dpad { --dpad-btn: 80px; }
+
+.dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dpad-btn);
+  height: var(--dpad-btn);
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-hard);
+  cursor: pointer;
+  touch-action: none;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:hover {
+  background: var(--sand);
+}
+
+.dpad-btn:active,
+.dpad-btn.is-active {
+  background: var(--gold);
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(3px);
+}
+
+.dpad-btn:focus-visible {
+  box-shadow: var(--focus-ring), var(--shadow-hard);
+}
+
+.dpad-up    { grid-column: 2; grid-row: 1; }
+.dpad-left  { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down  { grid-column: 2; grid-row: 3; }
+
+.dpad-up .icon    { transform: rotate(-90deg); }
+.dpad-left .icon  { transform: rotate(180deg); }
+.dpad-down .icon  { transform: rotate(90deg); }
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+  border-radius: 50%;
+  background: var(--paper);
+  border: var(--border-w) solid var(--ink);
+  opacity: 0.6;
+  margin: 25%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dpad-btn:active,
+  .dpad-btn.is-active {
+    transform: none;
+  }
+}

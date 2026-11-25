@@ -2,6 +2,16 @@
 import { AppState } from '../state/index.js';
 import { Hud } from '../ui/hud.js';
 import { openInfoPanel, isInfoPanelOpen, setPanelCallback } from '../ui/panel.js';
+import { icon } from '../ui/icons.js';
+import {
+  readOfficeTheme,
+  drawStaticWorld,
+  drawBoardGlow,
+  drawAvatar,
+  drawNameTag,
+  fitNameTag,
+  drawKeycapBubble
+} from '../ui/office-art.js';
 
 let unsubscribeState = null;
 
@@ -61,6 +71,15 @@ const WORLD_WIDTH = 1240; // 1300 - 60
 const CANVAS_CSS_W = 920;
 const CANVAS_CSS_H = 382;
 const WORLD_SCALE = CANVAS_CSS_W / WORLD_WIDTH; // 920 / 1240
+
+// Same obstacle list as before (rooms + board), built once instead of per move.
+const OBSTACLES = ROOMS.concat([BOARD]);
+
+// Visual-only constants
+const MAX_RENDER_SCALE = 3;      // cap on backing-store density (dpr x stage scale)
+const WALK_FRAME_MS = 140;       // two-frame walk cycle
+const NAME_TAG_MAX_W = 150;      // world units
+const WORLD_VIEW = { FLOOR, ROOMS, BOARD, BOARD_CENTER, FLOOR_LABELS };
 
 export const OfficeScreen = {
   mount(container) {
@@ -155,15 +174,20 @@ export const OfficeScreen = {
     html += '<canvas id="office-canvas" width="920" height="382" aria-label="Denah Lantai Kantor Biro SDM"></canvas>';
 
     // Bottom-left hint text
-    html += '<div class="office-hint-text">WASD / panah: bergerak · E: baca papan informasi</div>';
+    html += '<div class="office-hint-text">' +
+      '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / panah: bergerak' +
+      '<span class="office-hint-sep" aria-hidden="true">·</span>' +
+      '<kbd>E</kbd> baca papan informasi' +
+    '</div>';
 
     // On-screen D-Pad (bottom-right of the stage)
     html += '<div class="office-dpad" aria-label="Navigasi D-Pad">';
-    html += '  <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Atas">&#9650;</button>';
-    html += '  <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Kiri">&#9664;</button>';
-    html += '  <div class="dpad-center"></div>';
-    html += '  <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Kanan">&#9654;</button>';
-    html += '  <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Bawah">&#9660;</button>';
+    const chev = icon('chevronRight', { size: 'l' });
+    html += '  <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Atas">' + chev + '</button>';
+    html += '  <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Kiri">' + chev + '</button>';
+    html += '  <div class="dpad-center" aria-hidden="true"></div>';
+    html += '  <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Kanan">' + chev + '</button>';
+    html += '  <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Bawah">' + chev + '</button>';
     html += '</div>';
 
     html += '</div>';
@@ -184,12 +208,56 @@ export const OfficeScreen = {
     if (!this.canvas) return;
 
     this.ctx = this.canvas.getContext('2d');
-    this.dpr = window.devicePixelRatio || 1;
-
-    this.canvas.width = CANVAS_CSS_W * this.dpr;
-    this.canvas.height = CANVAS_CSS_H * this.dpr;
     this.canvas.style.width = CANVAS_CSS_W + 'px';
     this.canvas.style.height = CANVAS_CSS_H + 'px';
+
+    // Visual state (read once; nothing here affects movement or collision)
+    this.theme = readOfficeTheme();
+    this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.staticLayer = document.createElement('canvas');
+    this.pose = { bob: 0, step: 0, fx: 0, fy: 1, moving: false };
+    this.prevX = this.avatar.x;
+    this.prevY = this.avatar.y;
+    this.nameTagSource = null;
+    this.nameTag = { text: '', width: 0 };
+
+    this.resizeCanvas();
+
+    // Rebuild once web fonts are ready so labels use the display face.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (this.active) this.needsRebuild = true;
+      });
+    }
+  },
+
+  // Backing store follows devicePixelRatio x on-screen stage scale, so the plan
+  // stays crisp when the stage is scaled up. Rebuilds the static layer.
+  resizeCanvas() {
+    if (!this.canvas) return;
+    this.dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    const stageScale = rect.width > 0 ? rect.width / CANVAS_CSS_W : 1;
+    this.renderScale = Math.min(MAX_RENDER_SCALE, this.dpr * stageScale);
+
+    const w = Math.round(CANVAS_CSS_W * this.renderScale);
+    const h = Math.round(CANVAS_CSS_H * this.renderScale);
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.staticLayer.width = w;
+    this.staticLayer.height = h;
+
+    const sctx = this.staticLayer.getContext('2d');
+    sctx.setTransform(1, 0, 0, 1, 0, 0);
+    sctx.clearRect(0, 0, w, h);
+    const k = this.renderScale * WORLD_SCALE;
+    sctx.setTransform(k, 0, 0, k, -WORLD_OFFSET_X * k, -WORLD_OFFSET_Y * k);
+    drawStaticWorld(sctx, this.theme, WORLD_VIEW);
+    sctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    this.nameTagSource = null; // re-measure with the current font
+    this.needsRebuild = false;
+    this.staticBuilds = (this.staticBuilds || 0) + 1;
   },
 
   bindEvents() {
@@ -240,6 +308,13 @@ export const OfficeScreen = {
 
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
+
+    // Resize or zoom (devicePixelRatio change) marks the static layer for rebuild;
+    // the rebuild happens on the next frame, at most once per frame.
+    this.handleResize = () => {
+      this.needsRebuild = true;
+    };
+    window.addEventListener('resize', this.handleResize);
 
     this.handleCanvasClick = (e) => {
       if (this.isPaused) return;
@@ -304,6 +379,10 @@ export const OfficeScreen = {
       window.removeEventListener('keyup', this.handleKeyUp);
       this.handleKeyUp = null;
     }
+    if (this.handleResize) {
+      window.removeEventListener('resize', this.handleResize);
+      this.handleResize = null;
+    }
     if (this.canvas && this.handleCanvasClick) {
       this.canvas.removeEventListener('click', this.handleCanvasClick);
       this.handleCanvasClick = null;
@@ -365,7 +444,7 @@ export const OfficeScreen = {
     const maxX = (FLOOR.x + FLOOR.w) - r;
     targetX = Math.max(minX, Math.min(maxX, targetX));
 
-    const obstacles = ROOMS.concat([BOARD]);
+    const obstacles = OBSTACLES;
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
       if (this.circleIntersectsAABB(targetX, y, r, obs.x, obs.y, obs.w, obs.h)) {
@@ -384,7 +463,7 @@ export const OfficeScreen = {
     const maxY = (FLOOR.y + FLOOR.h) - r;
     targetY = Math.max(minY, Math.min(maxY, targetY));
 
-    const obstacles = ROOMS.concat([BOARD]);
+    const obstacles = OBSTACLES;
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
       if (this.circleIntersectsAABB(x, targetY, r, obs.x, obs.y, obs.w, obs.h)) {
@@ -428,195 +507,67 @@ export const OfficeScreen = {
   draw() {
     const ctx = this.ctx;
     if (!ctx) return;
+    if (this.needsRebuild) this.resizeCanvas();
 
-    ctx.save();
+    const T = this.theme;
+    const k = this.renderScale * WORLD_SCALE;
+
+    // 1. static layer (cached)
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.restore();
+    ctx.drawImage(this.staticLayer, 0, 0);
 
-    ctx.save();
-    ctx.scale(this.dpr * WORLD_SCALE, this.dpr * WORLD_SCALE);
-    ctx.translate(-WORLD_OFFSET_X, -WORLD_OFFSET_Y);
+    // 2. dynamic layer in world coordinates
+    ctx.setTransform(k, 0, 0, k, -WORLD_OFFSET_X * k, -WORLD_OFFSET_Y * k);
 
-    this.drawFloor(ctx);
-    this.drawRooms(ctx);
-    this.drawFloorLabels(ctx);
-    this.drawBoard(ctx);
-    this.drawAvatar(ctx);
-
-    if (this.getDistanceToBoard() <= INTERACTION_DISTANCE) {
-      this.drawInteractionBubble(ctx);
+    const near = this.getDistanceToBoard() <= INTERACTION_DISTANCE;
+    if (near) {
+      const pulse = this.reduceMotion ? 1 : 0.5 + 0.5 * Math.sin(this.lastTime / 380);
+      drawBoardGlow(ctx, T, BOARD, pulse, this.renderScale);
     }
 
-    ctx.restore();
-  },
+    this.updatePose();
+    const av = this.avatar;
+    drawAvatar(ctx, T, av.x, av.y, this.pose);
 
-  drawFloor(ctx) {
-    ctx.fillStyle = FLOOR.fill;
-    ctx.fillRect(FLOOR.x, FLOOR.y, FLOOR.w, FLOOR.h);
-
-    ctx.strokeStyle = FLOOR.stroke;
-    ctx.lineWidth = FLOOR.strokeWidth;
-    ctx.strokeRect(FLOOR.x, FLOOR.y, FLOOR.w, FLOOR.h);
-  },
-
-  drawRooms(ctx) {
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#1E3A5F';
-    ctx.fillStyle = '#10263F';
-
-    for (let i = 0; i < ROOMS.length; i++) {
-      const r = ROOMS[i];
-      ctx.fillStyle = r.fill;
-      ctx.fillRect(r.x, r.y, r.w, r.h);
-      ctx.strokeRect(r.x, r.y, r.w, r.h);
-
-      ctx.fillStyle = '#10263F';
-      this.drawRoomLabel(ctx, r);
+    const name = (AppState.player && AppState.player.displayName) || 'Pegawai BPS';
+    if (name !== this.nameTagSource) {
+      this.nameTag = fitNameTag(ctx, T, name, NAME_TAG_MAX_W);
+      this.nameTagSource = name;
     }
+    drawNameTag(ctx, T, av.x, av.y, this.nameTag.text, this.nameTag.width);
+
+    if (near) {
+      drawKeycapBubble(ctx, T, av.x, av.y);
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   },
 
-  drawRoomLabel(ctx, r) {
-    const name = r.name;
-    const centerX = r.x + r.w / 2;
-    const centerY = r.y + r.h / 2;
+  // Derives walk frame and facing from how far the avatar moved since the last
+  // frame. Reads position only; never writes movement state.
+  updatePose() {
+    const dx = this.avatar.x - this.prevX;
+    const dy = this.avatar.y - this.prevY;
+    this.prevX = this.avatar.x;
+    this.prevY = this.avatar.y;
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    if (name === 'Ruang Kepala Biro SDM') {
-      ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('Ruang Kepala', centerX, centerY - 14);
-      ctx.fillText('Biro SDM', centerX, centerY + 14);
-    } else if (name === 'WC Perempuan') {
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('WC', centerX, centerY - 11);
-      ctx.fillText('Perempuan', centerX, centerY + 11);
-    } else if (name === 'WC Pria') {
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('WC Pria', centerX, centerY);
-    } else if (name === 'R. Kolaborasi') {
-      ctx.font = '17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('R. Kolaborasi', centerX, centerY);
-    } else if (r.w < 110 && name.length > 8) {
-      ctx.font = '15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(name, centerX, centerY);
+    const pose = this.pose;
+    pose.moving = (dx * dx + dy * dy) > 0.0001;
+    if (pose.moving) {
+      pose.fx = dx > 0.01 ? 1 : (dx < -0.01 ? -1 : 0);
+      pose.fy = dy > 0.01 ? 1 : (dy < -0.01 ? -1 : (pose.fx !== 0 ? 0 : pose.fy));
+      if (this.reduceMotion) {
+        pose.step = 0;
+        pose.bob = 0;
+      } else {
+        pose.step = Math.floor(this.lastTime / WALK_FRAME_MS) % 2;
+        pose.bob = pose.step ? -2 : 0;
+      }
     } else {
-      ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText(name, centerX, centerY);
+      pose.step = 0;
+      pose.bob = 0;
     }
-  },
-
-  drawFloorLabels(ctx) {
-    ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#6B7F96';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-
-    for (let i = 0; i < FLOOR_LABELS.length; i++) {
-      const l = FLOOR_LABELS[i];
-      ctx.fillText(l.text, l.x, l.y);
-    }
-  },
-
-  drawBoard(ctx) {
-    const x = BOARD.x;
-    const y = BOARD.y;
-    const w = BOARD.w;
-    const h = BOARD.h;
-    const r = BOARD.radius;
-
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-
-    ctx.fillStyle = BOARD.fill;
-    ctx.fill();
-
-    ctx.strokeStyle = BOARD.stroke;
-    ctx.lineWidth = BOARD.strokeWidth;
-    ctx.stroke();
-
-    ctx.save();
-    ctx.translate(BOARD_CENTER.x, BOARD_CENTER.y);
-    ctx.rotate(-Math.PI / 2);
-    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#5A4500';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(BOARD.label, 0, 0);
-    ctx.restore();
-  },
-
-  drawAvatar(ctx) {
-    const av = this.avatar;
-
-    ctx.beginPath();
-    ctx.arc(av.x, av.y, av.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#2E86DE';
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(av.x, av.y - 6, 9, 0, Math.PI * 2);
-    ctx.fillStyle = '#F2B583';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(av.x, av.y - 8, 9, Math.PI, 0);
-    ctx.fillStyle = '#3B2A20';
-    ctx.fill();
-  },
-
-  drawInteractionBubble(ctx) {
-    const av = this.avatar;
-    const bx = av.x;
-    const by = av.y - 42;
-    const bw = 88;
-    const bh = 30;
-    const br = 8;
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
-
-    ctx.beginPath();
-    ctx.moveTo(bx - bw / 2 + br, by - bh / 2);
-    ctx.lineTo(bx + bw / 2 - br, by - bh / 2);
-    ctx.quadraticCurveTo(bx + bw / 2, by - bh / 2, bx + bw / 2, by - bh / 2 + br);
-    ctx.lineTo(bx + bw / 2, by + bh / 2 - br);
-    ctx.quadraticCurveTo(bx + bw / 2, by + bh / 2, bx + bw / 2 - br, by + bh / 2);
-
-    ctx.lineTo(bx + 6, by + bh / 2);
-    ctx.lineTo(bx, by + bh / 2 + 6);
-    ctx.lineTo(bx - 6, by + bh / 2);
-
-    ctx.lineTo(bx - bw / 2 + br, by + bh / 2);
-    ctx.quadraticCurveTo(bx - bw / 2, by + bh / 2, bx - bw / 2, by + bh / 2 - br);
-    ctx.lineTo(bx - bw / 2, by - bh / 2 + br);
-    ctx.quadraticCurveTo(bx - bw / 2, by - bh / 2, bx - bw / 2 + br, by - bh / 2);
-    ctx.closePath();
-
-    ctx.fillStyle = '#0F3D6E';
-    ctx.fill();
-    ctx.restore();
-
-    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Tekan E', bx, by);
   }
 };
 
