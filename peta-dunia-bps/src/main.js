@@ -3,9 +3,11 @@ import './styles/tokens.css';
 import './styles/fonts.css';
 import './styles/style.css';
 import './styles/components.css';
+import './styles/world.css';
 import './firebase/client.js';
 import { Router } from './router.js';
 import { mountDevBar } from './ui/devbar.js';
+import { updateStageScale } from './stage.js';
 
 // 1. Mount Dev Bar conditionally only in DEV mode
 if (import.meta.env.DEV) {
@@ -15,19 +17,8 @@ if (import.meta.env.DEV) {
   });
 }
 
-// 2. Stage Scaler: Fit 960x560 canvas inside available area while preserving aspect ratio
-const stage = document.getElementById('stage');
-const viewport = document.getElementById('stage-viewport');
-
-export function updateStageScale() {
-  if (!stage || !viewport) return;
-  const availWidth = viewport.clientWidth;
-  const availHeight = viewport.clientHeight;
-  if (availWidth === 0 || availHeight === 0) return;
-
-  const scale = Math.min(availWidth / 960, availHeight / 560);
-  stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
-}
+// 2. Stage Scaler: fit the 960x560 stage (min scale + pan on narrow screens)
+export { updateStageScale };
 
 window.addEventListener('resize', updateStageScale);
 updateStageScale();

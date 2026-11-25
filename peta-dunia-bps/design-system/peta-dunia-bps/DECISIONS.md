@@ -161,7 +161,9 @@ A ticket-style name pill in `--unit-<id>` with white text sits under the island.
 
 ## 5. Resolved (owner answers, 2026-11-25)
 
-- **Q1:** toasts stay visible for **3 seconds** (`TOAST_DEFAULT_MS` in `src/ui/toast.js`). Explicit durations passed by callers are kept.
+- **Q1:** toasts stay visible for **3 seconds** (`TOAST_DEFAULT_MS` in `src/ui/toast.js`). The explicit `2000` arguments in `world.js` and `island.js` were removed in Phase 2 so those toasts use the 3s default. The level-up toast passes its own 3200ms, which is already longer.
+- **Small screens (Phase 2):** below 768px the stage holds `--stage-min-scale` (0.7). When it overflows, `#stage-viewport` becomes a native scroller, which gives touch drag-pan and starts centered. The scaler moved to `src/stage.js`, and `main.js` still exports `updateStageScale`.
+- **Raw hex exceptions (acceptance check 3):** `src/styles/tokens.css` (the source of truth) and `src/data/index.js` (unit data, unchanged). Everything still in `style.css`, `hud.js`, `panel.js`, `office.js`, `leaderboard.js` and `login.js` belongs to screens that Phases 3–5 have not restyled yet.
 - **Q2:** the owner will supply the woff2 files. `src/styles/fonts.css` already points to `public/fonts/` and the fallback stacks apply until then. Expected filenames are in `public/fonts/README.md`. Preload links get added once the files exist, because preloading a missing file only causes a 404.
 - **Icon family change (Phase 1):** the icons use **Lucide** geometry (ISC), not Phosphor Bold. Phosphor Bold icons are complex filled outlines that cannot be copied accurately without its package, and guardrail 3 forbids adding the package. Lucide is simple stroke geometry, redrawn in `src/ui/icons.js` at stroke-width 2.5 to suit the chunky outline style. The PRD allows either library. The coin and filled star are custom.
 - **Toast announcements:** the visible toast is `aria-hidden`. A persistent `role="status"` region outside `#stage` does the announcing. A freshly inserted live region is often not announced, and `#stage` gets re-rendered on every route change.

@@ -258,6 +258,14 @@
   text-overflow: ellipsis;
 }
 
+/* Flex containers ignore text-overflow, so the label span carries the ellipsis. */
+.pill > span:not(.icon) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pill[data-unit="kepala"]     { --pill-bg: var(--unit-kepala); }
 .pill[data-unit="sestama"]    { --pill-bg: var(--unit-sestama); }
 .pill[data-unit="metodologi"] { --pill-bg: var(--unit-metodologi); }

@@ -1,0 +1,345 @@
+/* ==========================================================================
+   World map (#/world) and Island (#/island) screens - "Cozy Archipelago"
+   Art comes from src/ui/island-art.js (inline SVG). Tokens only.
+   Animate transform/opacity only; all loops off under reduced motion.
+   ========================================================================== */
+
+/* Stage viewport becomes a native scroller when the stage is held at the
+   minimum scale on narrow screens (set by updateStageScale in main.js). */
+#stage-viewport.is-pannable {
+  display: block;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#stage-spacer {
+  pointer-events: none;
+}
+
+.screen-world,
+.screen-island {
+  overflow: hidden;
+}
+
+/* ---------------- Ambient sea layer ---------------- */
+.world-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.world-sea-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.sparkle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bps-twinkle 6s ease-in-out infinite;
+}
+
+@keyframes bps-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 0.9; transform: scale(1); }
+}
+
+.wave {
+  transform-box: fill-box;
+  animation: bps-wave 7s ease-in-out infinite alternate;
+}
+
+@keyframes bps-wave {
+  from { transform: translateX(-4px); }
+  to   { transform: translateX(4px); }
+}
+
+.boat {
+  position: absolute;
+  width: 48px;
+  height: 40px;
+}
+.boat-a { left: 600px; top: 176px; animation: bps-boat-a 18s ease-in-out infinite alternate; }
+.boat-b { left: 30px;  top: 128px; animation: bps-boat-b 16s ease-in-out infinite alternate; }
+
+.boat-bob {
+  display: block;
+  transform-origin: 50% 90%;
+  animation: bps-boat-bob 3.2s ease-in-out infinite alternate;
+}
+
+.boat-svg { display: block; overflow: visible; }
+
+@keyframes bps-boat-a { from { transform: translateX(0); } to { transform: translateX(90px); } }
+@keyframes bps-boat-b { from { transform: translateX(0) scaleX(-1); } to { transform: translateX(100px) scaleX(-1); } }
+@keyframes bps-boat-bob { from { transform: rotate(-3deg) translateY(0); } to { transform: rotate(3deg) translateY(-2px); } }
+
+.sky-cloud {
+  position: absolute;
+  display: block;
+  overflow: visible;
+}
+.sky-cloud-a { left: 225px; top: 92px;  animation: bps-drift-r 20s ease-in-out infinite alternate; }
+.sky-cloud-b { left: 770px; top: 110px; animation: bps-drift-l 17s ease-in-out infinite alternate; }
+.sky-cloud-c { left: 8px;   top: 372px; animation: bps-drift-r 14s ease-in-out infinite alternate; }
+
+@keyframes bps-drift-r { from { transform: translateX(0); } to { transform: translateX(36px); } }
+@keyframes bps-drift-l { from { transform: translateX(0); } to { transform: translateX(-36px); } }
+
+/* ---------------- World islands ---------------- */
+.world-islands {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.world-island {
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  border-radius: 45%;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform var(--dur-base) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.world-island.is-unlocked:hover,
+.world-island.is-unlocked:focus-visible {
+  transform: translateY(-4px);
+}
+
+.world-island.is-locked:hover,
+.world-island.is-locked:focus-visible {
+  transform: translateY(-2px);
+}
+
+.world-island:active {
+  transform: translateY(1px);
+  transition-duration: var(--dur-fast);
+}
+
+.island-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.world-island.is-unlocked .island-art {
+  animation: bps-bob 8s ease-in-out infinite;
+}
+
+@keyframes bps-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+.island-svg {
+  display: block;
+  overflow: visible;
+}
+
+.island-cloud {
+  animation: bps-drift-r 12s ease-in-out infinite alternate;
+}
+
+.island-star {
+  position: absolute;
+  top: -8px;
+  right: 16%;
+  display: inline-flex;
+}
+.island-star .icon {
+  width: 30px;
+  height: 30px;
+}
+
+.island-pill {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  z-index: 2;
+  max-width: none;
+  transform: translateX(-50%);
+}
+
+.island-pill.is-locked {
+  border-style: dashed;
+}
+
+/* ---------------- Island screen ---------------- */
+.island-main-oval {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.big-island-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.biro-tiles-layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: var(--space-4);
+  width: 100%;
+}
+
+.biro-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  column-gap: var(--space-5);
+  width: 100%;
+}
+
+.biro-tile {
+  position: relative;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-6) 0 var(--space-1);
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  border-radius: var(--radius-l);
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform var(--dur-base) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.biro-tile:hover,
+.biro-tile:focus-visible {
+  transform: translateY(-3px);
+}
+
+.biro-tile:active {
+  transform: translateY(1px);
+  transition-duration: var(--dur-fast);
+}
+
+.biro-building {
+  position: relative;
+  display: block;
+  width: 72px;
+  height: 80px;
+}
+
+.biro-building-svg {
+  display: block;
+  overflow: visible;
+}
+
+.biro-star {
+  position: absolute;
+  top: -6px;
+  right: -14px;
+  display: inline-flex;
+}
+
+.biro-pill {
+  max-width: 150px;
+}
+
+/* "Biro Anda" ribbon, shown only for the current unit */
+.biro-ribbon {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  background: var(--gold);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-hard);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-1);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.biro-tile.is-current-unit .biro-ribbon {
+  display: inline-flex;
+}
+
+/* Tooltip with the full biro name (pill may truncate) */
+.biro-tooltip {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 50%;
+  z-index: 3;
+  padding: var(--space-1) var(--space-3);
+  background: var(--ink);
+  color: var(--white);
+  border-radius: var(--radius-s);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.biro-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: var(--ink);
+}
+
+.biro-tile:hover .biro-tooltip,
+.biro-tile:focus-visible .biro-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------------- Reduced motion: everything still ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sparkle,
+  .wave,
+  .boat,
+  .boat-bob,
+  .sky-cloud,
+  .island-cloud,
+  .world-island .island-art {
+    animation: none !important;
+  }
+  .sparkle { opacity: 0.7; transform: none; }
+  .world-island:hover,
+  .world-island:focus-visible,
+  .biro-tile:hover,
+  .biro-tile:focus-visible {
+    transform: none;
+  }
+}

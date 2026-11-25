@@ -2,6 +2,8 @@
 import { AppState } from '../state/index.js';
 import { BpsData } from '../data/index.js';
 import { Hud, showToast } from '../ui/hud.js';
+import { renderIslandSVG, renderWorldAmbient } from '../ui/island-art.js';
+import { icon } from '../ui/icons.js';
 
 let unsubscribeState = null;
 
@@ -49,6 +51,9 @@ export const WorldScreen = {
     html += Hud.renderRightCard(AppState);
     html += '</div>';
 
+    // Decorative sea layer (routes, sparkles, compass, boats, clouds)
+    html += renderWorldAmbient(BpsData.islands);
+
     // Islands Container
     html += '<div class="world-islands" role="region" aria-label="Daftar Pulau Unit Kerja">';
 
@@ -60,12 +65,9 @@ export const WorldScreen = {
       const width = island.rect[2];
       const height = island.rect[3];
 
-      let iconHtml = '';
-      if (island.locked) {
-        iconHtml = Hud.icons.lock;
-      } else if (island.star) {
-        iconHtml = Hud.icons.star;
-      }
+      const badgeHtml = (!island.locked && island.star)
+        ? '<span class="island-star">' + icon('starFilled', { size: 'l' }) + '</span>'
+        : '';
 
       html += '' +
         '<button type="button" class="world-island' + (island.locked ? ' is-locked' : ' is-unlocked') + '" ' +
@@ -73,20 +75,12 @@ export const WorldScreen = {
           'data-id="' + island.id + '" ' +
           'style="left:' + left + 'px; top:' + top + 'px; width:' + width + 'px; height:' + height + 'px;" ' +
           'aria-label="' + island.label + (island.locked ? ' (Terkunci)' : '') + '">' +
-          // Building block
-          '<div class="island-building" style="background-color: ' + island.blockColor + ';">' +
-            '<div class="building-roof-accent"></div>' +
-            '<div class="building-windows">' +
-              '<span class="window-pane"></span><span class="window-pane"></span>' +
-              '<span class="window-pane"></span><span class="window-pane"></span>' +
-            '</div>' +
-            '<div class="building-door"></div>' +
-          '</div>' +
-          // Label pill
-          '<div class="island-pill" style="background-color: ' + island.pillColor + ';">' +
+          '<span class="island-art">' + renderIslandSVG(island) + badgeHtml + '</span>' +
+          // Label pill (unit color + lock icon when locked; meaning never by color alone)
+          '<span class="pill island-pill' + (island.locked ? ' is-locked' : '') + '" data-unit="' + island.id + '">' +
+            (island.locked ? icon('lock', { size: 's' }) : '') +
             '<span class="island-pill-label">' + island.label + '</span>' +
-            (iconHtml ? '<span class="island-pill-icon">' + iconHtml + '</span>' : '') +
-          '</div>' +
+          '</span>' +
         '</button>';
     }
 
@@ -107,7 +101,7 @@ export const WorldScreen = {
         if (islandId === 'sestama') {
           window.location.hash = '#/island';
         } else {
-          showToast('Pulau ini segera hadir', 2000);
+          showToast('Pulau ini segera hadir');
         }
       });
     }

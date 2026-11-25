@@ -2,6 +2,8 @@
 import { AppState } from '../state/index.js';
 import { BpsData } from '../data/index.js';
 import { Hud, showToast } from '../ui/hud.js';
+import { renderBigIslandSVG, renderBiroBuildingSVG } from '../ui/island-art.js';
+import { icon } from '../ui/icons.js';
 
 let unsubscribeState = null;
 
@@ -41,30 +43,9 @@ export const IslandScreen = {
       const tile = tiles[i];
       const name = tile.getAttribute('data-name');
       const isCurrent = (name === currentUnit);
-      const isSdm = (name === 'Biro SDM');
 
-      const block = tile.querySelector('.biro-building-block');
-      const pillText = tile.querySelector('.biro-pill-text');
-
-      if (isCurrent || isSdm) {
-        block.style.borderColor = '#FFD24A';
-      } else {
-        block.style.borderColor = '#FFFFFF';
-      }
-
-      if (pillText) {
-        if (isCurrent) {
-          pillText.textContent = name + ' · Biro Anda';
-        } else {
-          pillText.textContent = name;
-        }
-      }
-
-      if (isCurrent) {
-        tile.classList.add('is-current-unit');
-      } else {
-        tile.classList.remove('is-current-unit');
-      }
+      tile.classList.toggle('is-current-unit', isCurrent);
+      tile.setAttribute('aria-label', isCurrent ? (name + ' · Biro Anda') : name);
     }
   },
 
@@ -87,6 +68,7 @@ export const IslandScreen = {
 
     // Large Island Oval (rect: 70, 110, 820, 420)
     html += '<div class="island-main-oval" style="left: 70px; top: 110px; width: 820px; height: 420px;" role="region" aria-label="Pulau Sekretariat Utama">';
+    html += renderBigIslandSVG(820, 420);
 
     // Biro tiles flex container
     html += '<div class="biro-tiles-layout">';
@@ -97,14 +79,14 @@ export const IslandScreen = {
     // Row 1: 4 biro tiles
     html += '<div class="biro-row biro-row-1">';
     for (let i = 0; i < 4 && i < biros.length; i++) {
-      html += this.renderBiroTileHtml(biros[i], currentUnit);
+      html += this.renderBiroTileHtml(biros[i], currentUnit, i);
     }
     html += '</div>';
 
     // Row 2: 3 biro tiles
     html += '<div class="biro-row biro-row-2">';
     for (let j = 4; j < biros.length; j++) {
-      html += this.renderBiroTileHtml(biros[j], currentUnit);
+      html += this.renderBiroTileHtml(biros[j], currentUnit, j);
     }
     html += '</div>';
 
@@ -116,34 +98,28 @@ export const IslandScreen = {
     this.bindEvents();
   },
 
-  renderBiroTileHtml(biro, currentUnit) {
+  renderBiroTileHtml(biro, currentUnit, index = 0) {
     const name = biro.name;
     const isCurrent = (name === currentUnit);
     const isSdm = (name === 'Biro SDM');
-
-    const blockColor = isSdm ? '#4CB8A0' : '#6FA8DC';
-    const borderColor = (isCurrent || isSdm) ? '#FFD24A' : '#FFFFFF';
-    const pillColor = isSdm ? '#1F8A70' : '#1C4FA0';
     const displayText = isCurrent ? (name + ' · Biro Anda') : name;
+    const tint = isSdm ? 'var(--unit-sestama-tint)' : 'var(--unit-biro-tint)';
+    const pillUnit = isSdm ? 'sestama' : 'biro';
 
     return '' +
-      '<button type="button" class="biro-tile' + (isCurrent ? ' is-current-unit' : '') + '" ' +
+      '<button type="button" class="biro-tile' + (isCurrent ? ' is-current-unit' : '') + (isSdm ? ' is-playable' : '') + '" ' +
         'data-id="' + biro.id + '" ' +
         'data-name="' + name + '" ' +
         'aria-label="' + displayText + '">' +
-        // Building block: 62x70
-        '<div class="biro-building-block" style="background-color: ' + blockColor + '; border-color: ' + borderColor + ';">' +
-          '<div class="biro-building-roof"></div>' +
-          '<div class="biro-windows">' +
-            '<span class="b-win"></span><span class="b-win"></span>' +
-            '<span class="b-win"></span><span class="b-win"></span>' +
-          '</div>' +
-          '<div class="biro-door"></div>' +
-        '</div>' +
-        // Pill below
-        '<div class="biro-pill" style="background-color: ' + pillColor + ';">' +
-          '<span class="biro-pill-text">' + displayText + '</span>' +
-        '</div>' +
+        '<span class="biro-tooltip" aria-hidden="true">' + name + '</span>' +
+        '<span class="biro-ribbon" aria-hidden="true">' + icon('starFilled', { size: 's' }) + 'Biro Anda</span>' +
+        '<span class="biro-building">' +
+          renderBiroBuildingSVG(biro, index, tint) +
+          (isSdm ? '<span class="biro-star">' + icon('starFilled', { size: 'l' }) + '</span>' : '') +
+        '</span>' +
+        '<span class="pill biro-pill" data-unit="' + pillUnit + '">' +
+          '<span class="biro-pill-text">' + name + '</span>' +
+        '</span>' +
       '</button>';
   },
 
@@ -162,7 +138,7 @@ export const IslandScreen = {
         if (name === 'Biro SDM') {
           window.location.hash = '#/office';
         } else {
-          showToast('Peta kantor belum tersedia di prototype', 2000);
+          showToast('Peta kantor belum tersedia di prototype');
         }
       });
     }

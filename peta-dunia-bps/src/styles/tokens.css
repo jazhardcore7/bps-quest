@@ -35,6 +35,18 @@
 
   --locked: #B7C2CF;           /* locked wash; ink text 8.02 */
 
+  /* ---- Color: world illustration (non-text) ---- */
+  --ocean-shallow: #9EDCF2;
+  --sea-foam: #FFFFFF;
+  --tree: #3F8F45;
+  --wood: #B5774A;
+  --footpath: #E6C97E;
+  --glass: #BFE9F7;
+  --locked-sand: #DCD6C3;
+  --locked-grass: #A9B9A6;
+  --locked-grass-shade: #8C9E8A;
+  --locked-tree: #7F927F;
+
   --medal-gold: #FFC93C;
   --medal-silver: #C9D3DE;
   --medal-bronze: #D9925B;
