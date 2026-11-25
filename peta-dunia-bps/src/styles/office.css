@@ -97,8 +97,19 @@
   .office-dpad { --dpad-btn: var(--dpad-min); }
 }
 
-/* --dpad-min / --stage-min-scale = 80px when the stage is held at 0.7 */
-#stage-viewport.is-pannable .office-dpad { --dpad-btn: 80px; }
+/* Narrow screens: office.js docks the D-pad on <body> so it stays on screen
+   while the stage pans. It is outside the scaled stage, so 56px is real size. */
+.office-dpad.is-docked {
+  --dpad-btn: var(--dpad-min);
+  position: fixed;
+  right: max(var(--space-4), env(safe-area-inset-right));
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  z-index: var(--z-hud);
+}
+
+.office-dpad.is-hidden {
+  visibility: hidden;
+}
 
 .dpad-btn {
   display: flex;

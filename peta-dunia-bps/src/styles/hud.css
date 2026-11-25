@@ -1,0 +1,186 @@
+/* ==========================================================================
+   HUD cards (all game screens) - sticker cards with ink outline.
+   Markup: renderLeftCard / renderRightCard in src/ui/hud.js. Tokens only.
+   ========================================================================== */
+
+.hud-left-wrapper,
+.hud-right-wrapper {
+  position: absolute;
+  top: 14px;
+  z-index: var(--z-hud);
+}
+.hud-left-wrapper  { left: 16px; }
+.hud-right-wrapper { right: 16px; }
+
+.hud-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-hard);
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+/* ---- Left: back button / emblem + title ---- */
+.hud-left-card {
+  max-width: 420px;
+  min-height: 62px;
+}
+
+.hud-emblem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  flex-shrink: 0;
+  background: var(--gold);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 50%;
+}
+
+.hud-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hud-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-4);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-subtitle {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--ink-soft);
+  line-height: var(--lh-tight);
+}
+
+/* ---- Right: avatar, level, segmented XP, actions ---- */
+.hud-right-card {
+  width: 360px;
+}
+
+.hud-avatar-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--unit-sestama);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px var(--gold);
+}
+
+.hud-avatar-initials {
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-3);
+  line-height: 1;
+}
+
+.hud-player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hud-player-name {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--ink-soft);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-player-level {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-3);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-xp-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Segmented bar: 10 ink-outlined cells filling gold. The numeric label carries
+   the exact value, so the bar is never the only cue. */
+.hud-progress-track {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px;
+  flex: 1;
+  min-width: 80px;
+  height: 12px;
+  padding: 2px;
+  background: var(--ink);
+  border-radius: var(--radius-s);
+}
+
+.hud-xp-cell {
+  display: block;
+  background: var(--paper-shade);
+  border-radius: 2px;
+}
+
+.hud-xp-cell.is-filled {
+  background: var(--gold);
+}
+
+.hud-xp-text {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-1);
+  color: var(--gold-deep);
+  white-space: nowrap;
+}
+
+.hud-action-btn {
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+/* ---- Narrow screens: stage held at min scale, so keep targets >= 44px
+   effective (64 stage px x 0.7) and drop secondary text ---- */
+#stage-viewport.is-pannable .hud-card .btn--icon,
+#stage-viewport.is-pannable .hud-emblem {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+}
+#stage-viewport.is-pannable .hud-player-name,
+#stage-viewport.is-pannable .hud-subtitle {
+  display: none;
+}
+#stage-viewport.is-pannable .hud-title       { font-size: var(--fs-5); }
+#stage-viewport.is-pannable .hud-player-level { font-size: var(--fs-4); }
+#stage-viewport.is-pannable .hud-right-card   { width: 400px; }

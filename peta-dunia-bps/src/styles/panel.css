@@ -1,0 +1,443 @@
+/* ==========================================================================
+   Info panel (game dialog box), sub-views and quest sheet.
+   Markup: src/ui/panel.js. Tokens only.
+   ========================================================================== */
+
+.info-panel-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--scrim);
+  animation: bps-fade-in var(--dur-base) var(--ease-out);
+}
+
+@keyframes bps-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bps-pop-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.info-panel-card-white {
+  position: relative;
+  width: 520px;
+  max-width: 100%;
+  max-height: calc(100% - var(--space-4));
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-7) var(--space-5) var(--space-5);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: 0 6px 0 var(--shadow-on-ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+  animation: bps-pop-in var(--dur-slow) var(--ease-bounce);
+}
+
+.info-main-view,
+.info-sub-view,
+.quest-sheet-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+/* ---- Header: ribbon title, chips, close ---- */
+.info-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.info-unit-title.ribbon {
+  top: calc(-1 * var(--space-5) - var(--border-w));
+  margin: 0;
+  font-size: var(--fs-4);
+}
+
+.info-header-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  min-width: 0;
+}
+
+.info-parent-chip { box-shadow: none; }
+
+.info-unit-desc {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-2);
+}
+
+.info-section-label {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-3);
+  color: var(--ink);
+}
+
+/* ---- Access rows as menu items ---- */
+.info-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.info-row-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  background: var(--white);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-pressed);
+  font-family: var(--font-body);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.info-row-btn:hover {
+  background: var(--sand);
+  transform: translateX(3px);
+}
+
+.info-row-btn:active { transform: translateX(1px); }
+
+.info-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--gold);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+}
+
+.info-row-label { flex: 1; min-width: 0; }
+.info-row-arrow { display: inline-flex; color: var(--ink-soft); }
+
+/* ---- Footer: big primary or friendly locked note (no button) ---- */
+.info-panel-footer { margin-top: var(--space-1); }
+
+.info-gray-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--paper-shade);
+  color: var(--ink);
+  border: 2px dashed var(--ink-soft);
+  border-radius: var(--radius-m);
+  font-weight: var(--fw-bold);
+}
+
+.info-gray-note-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--locked);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+/* ---- Sub-view ---- */
+.info-sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.info-sub-title,
+.quest-sheet-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-5);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+}
+
+.info-sub-body {
+  padding: var(--space-4);
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+}
+
+.info-sub-placeholder {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ==========================================================================
+   Quest sheet (quest log)
+   ========================================================================== */
+.quest-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quest-sheet-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quest-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  max-height: 340px;
+  padding: var(--space-1) var(--space-1) var(--space-2);
+  margin: 0 calc(-1 * var(--space-1));
+}
+
+.quest-loading-text,
+.quest-empty-text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--ink-soft);
+  font-weight: var(--fw-bold);
+}
+
+.quest-empty-text.is-error { color: var(--danger-strong); }
+
+.quest-card-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-hard);
+}
+
+.quest-card-item.is-completed {
+  background: var(--paper-shade);
+}
+
+.quest-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.quest-type-badge,
+.quest-state-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-black);
+  line-height: 1;
+}
+
+.quest-type-badge.is-daily      { background: var(--ocean-1); color: var(--ink); }
+.quest-type-badge.is-checkpoint { background: var(--sand);    color: var(--ink); }
+.quest-state-tag { background: var(--white); color: var(--success); }
+
+.quest-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.quest-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.quest-item-title {
+  font-weight: var(--fw-black);
+  font-size: var(--fs-3);
+  color: var(--ink);
+}
+
+.quest-item-desc {
+  color: var(--ink-soft);
+  font-size: var(--fs-2);
+}
+
+.quest-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.quest-item-actions:empty { display: none; }
+
+/* "Selesai" stamp: rotated ink-bordered seal + text (never color alone) */
+.quest-completed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  color: var(--success);
+  border: var(--border-w) solid var(--success);
+  border-radius: var(--radius-s);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+  animation: bps-stamp var(--dur-slow) var(--ease-bounce);
+}
+
+@keyframes bps-stamp {
+  from { opacity: 0; transform: rotate(-6deg) scale(1.6); }
+  to   { opacity: 1; transform: rotate(-6deg) scale(1); }
+}
+
+/* ---- Quiz: options as large buttons (native radios stay for semantics) ---- */
+.quiz-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 2px dashed var(--ink-soft);
+}
+
+.quiz-question {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3);
+  color: var(--ink);
+}
+
+.quiz-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quiz-option-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-pressed);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.quiz-option-item:hover { background: var(--sand); }
+
+.quiz-option-item input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+/* Custom radio mark: ring, filled dot when chosen (shape cue, not just color) */
+.quiz-option-mark {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.quiz-option-item:has(input:checked),
+.quiz-option-item.selected {
+  background: var(--gold);
+  font-weight: var(--fw-black);
+}
+
+.quiz-option-item:has(input:checked) .quiz-option-mark,
+.quiz-option-item.selected .quiz-option-mark {
+  background: radial-gradient(circle, var(--ink) 0 40%, var(--white) 45%);
+}
+
+.quiz-option-item:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.quiz-option-text { flex: 1; min-width: 0; }
+
+/* Incorrect / validation feedback: icon + text */
+.quiz-error-msg {
+  padding: var(--space-2) var(--space-3) var(--space-2) 36px;
+  position: relative;
+  background: var(--paper);
+  color: var(--danger-strong);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-m);
+  font-weight: var(--fw-bold);
+}
+
+.quiz-error-msg::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background: var(--danger-strong);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.quiz-submit-row { display: flex; }
+
+@media (prefers-reduced-motion: reduce) {
+  .info-panel-backdrop,
+  .info-panel-card-white,
+  .quest-completed-badge {
+    animation: none;
+  }
+  .info-row-btn:hover,
+  .info-row-btn:active {
+    transform: none;
+  }
+}

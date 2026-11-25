@@ -173,3 +173,12 @@ A ticket-style name pill in `--unit-<id>` with white text sits under the island.
 
 - **Q1 Toast duration.** PRD 8 says auto-hide after 2s. The skill's UX rule (and WCAG 2.2.1 Timing) suggests 3–5s so people can read it. Recommendation: **3s** for all toasts. The +XP value also persists in the HUD XP bar, so nothing is lost if a toast is missed. Need a yes/no because it touches accessibility (guardrail 6).
 - **Q2 Font files.** Phase 1 needs the Pixelify Sans and Nunito woff2 files (OFL) in `public/fonts/`. Download them from the official google/fonts GitHub repo, or will you supply them? No `@fontsource/*` package either way.
+
+## 7. Phase 4 notes (HUD, info panel, quest sheet, level-up)
+
+- **displayName escaping:** `src/ui/escape.js` copies the `escapeHtml` approach from `panel.js`. `hud.js` uses it for the name, title, level, XP values and initials, and also for `renderLeftCard` title and subtitle. The `leaderboard.js` row template gets the same treatment in Phase 5. Verified with a hostile name: the text shows literally and no element is created.
+- **Behavior kept:** the footer still branches only on `AppState.canStartQuest(unit)`, and with another unit there is no `<button>` in the footer. The panel keeps `role="dialog"`, `aria-modal`, `aria-labelledby`, focus trap, Escape and backdrop close, and focus return. Claim and quiz logic are unchanged; only markup and classes changed.
+- **Level-up:** the emoji toast that followed a claim was removed. `src/ui/levelup.js` now watches `AppState`: the first profile load per user sets a baseline, and a later level increase shows a non-modal overlay. It never takes focus, and Escape (handled in the capture phase) closes only the overlay. It also dismisses on click or after 4s and is announced through the shared status region. The burst is CSS-only, 1.2s, and static under reduced motion.
+- **Additive exports:** `announce` (hud.js) and `renderQuestsList` (panel.js, used by the dev preview to render sample quests). All existing exports and signatures are unchanged.
+- **D-pad docking (approved by owner):** below 768px the office D-pad moves to `<body>` as a fixed control (56px real size, safe-area aware), and it is hidden while the info panel is open. `unmount` removes it explicitly. This is the only change to office cleanup, and it was verified with three remounts.
+- **Quiz feedback icon:** the wrong-answer icon is a CSS mask on `.quiz-error-msg::before` using an inline `data:` SVG. It is not a network request, and the message text is still set by the existing logic.

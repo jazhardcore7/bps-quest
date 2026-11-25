@@ -1,23 +1,33 @@
 // Reusable HUD components, icons, and toast notifications
 import { logout } from '../firebase/auth.js';
 import { buildToastEl, TOAST_DEFAULT_MS } from './toast.js';
+import { icon } from './icons.js';
+import { escapeHtml } from './escape.js';
 
 let toastTimeout = null;
 
+// Kept for compatibility (same keys as before); now token-colored inline SVG.
 export const icons = {
-  lock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="#FFFFFF" class="icon-lock" aria-hidden="true"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
-  star: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD24A" class="icon-star" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
-  backArrow: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
-  avatar: '<svg width="40" height="40" viewBox="0 0 40 40" class="hud-avatar-svg" aria-hidden="true">' +
-    '<circle cx="20" cy="20" r="20" fill="#FFD9B0"/>' +
-    '<path d="M12 15 C12 9 28 9 28 15 C26 12 23 11 20 11 C17 11 14 12 12 15 Z" fill="#3B2A20"/>' +
-    '<circle cx="20" cy="17" r="7" fill="#F2B583"/>' +
-    '<path d="M14 14 C16 12 24 12 26 14 C25 13 23 12.5 20 12.5 C17 12.5 15 13 14 14 Z" fill="#3B2A20"/>' +
-    '<path d="M8 38 C8 29 14 26 20 26 C26 26 32 29 32 38 Z" fill="#2E86DE"/>' +
-    '</svg>',
-  logout: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
-  trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD24A" class="icon-trophy" aria-hidden="true"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
+  lock: icon('lock', { size: 's' }),
+  star: icon('starFilled', { size: 's' }),
+  backArrow: icon('arrowLeft'),
+  avatar: '',
+  logout: icon('logout'),
+  trophy: icon('trophy')
 };
+
+const XP_SEGMENTS = 10;
+
+function initialsOf(name) {
+  // First letter of the first and last word that contain a letter.
+  const letters = String(name || '')
+    .split(/\s+/)
+    .map((w) => (w.match(/\p{L}/u) || [''])[0])
+    .filter(Boolean);
+  if (letters.length === 0) return 'P';
+  const last = letters.length > 1 ? letters[letters.length - 1] : '';
+  return (letters[0] + last).toUpperCase();
+}
 
 // Global delegation for HUD button clicks (logout & leaderboard)
 if (typeof document !== 'undefined') {
@@ -51,27 +61,42 @@ export function renderRightCard(state) {
     xpToNext: 500
   };
   const percent = Math.min(100, Math.max(0, Math.round((player.xp / player.xpToNext) * 100)));
+  const filled = Math.min(XP_SEGMENTS, Math.floor(percent / (100 / XP_SEGMENTS)));
+  const rawName = player.displayName || 'Pegawai BPS';
+  const name = escapeHtml(rawName);
+  const title = escapeHtml(String(player.title || ''));
+  const level = escapeHtml(String(player.level));
+  const xp = escapeHtml(String(player.xp));
+  const xpToNext = escapeHtml(String(player.xpToNext));
+  const initials = escapeHtml(initialsOf(rawName));
+
+  let cells = '';
+  for (let i = 0; i < XP_SEGMENTS; i++) {
+    cells += '<span class="hud-xp-cell' + (i < filled ? ' is-filled' : '') + '"></span>';
+  }
 
   return '' +
-    '<div class="hud-card hud-right-card" aria-label="Informasi Pemain">' +
-      '<div class="hud-avatar-wrap">' +
-        icons.avatar +
+    '<div class="hud-card hud-right-card" role="group" aria-label="Informasi Pemain">' +
+      '<div class="hud-avatar-wrap" aria-hidden="true">' +
+        '<span class="hud-avatar-initials">' + initials + '</span>' +
       '</div>' +
       '<div class="hud-player-info">' +
-        '<div class="hud-player-name" title="' + (player.displayName || 'Pegawai BPS') + '">' +
-          (player.displayName || 'Pegawai BPS') +
-        '</div>' +
-        '<div class="hud-player-level">Level ' + player.level + ' · ' + player.title + '</div>' +
-        '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +
-        '<div class="hud-progress-track" role="progressbar" aria-valuenow="' + player.xp + '" aria-valuemin="0" aria-valuemax="' + player.xpToNext + '">' +
-          '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
+        '<div class="hud-player-name" title="' + name + '">' + name + '</div>' +
+        '<div class="hud-player-level">Level ' + level + ' · ' + title + '</div>' +
+        '<div class="hud-xp-row">' +
+          '<div class="hud-progress-track" role="progressbar" aria-label="XP menuju level berikutnya" ' +
+            'aria-valuenow="' + xp + '" aria-valuemin="0" aria-valuemax="' + xpToNext + '" ' +
+            'aria-valuetext="' + xp + ' dari ' + xpToNext + ' XP">' +
+            cells +
+          '</div>' +
+          '<span class="hud-xp-text" aria-hidden="true">' + xp + ' / ' + xpToNext + ' XP</span>' +
         '</div>' +
       '</div>' +
-      '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
-        icons.trophy +
+      '<button type="button" class="btn btn--secondary btn--icon hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
+        icon('trophy') +
       '</button>' +
-      '<button type="button" class="hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
-        icons.logout +
+      '<button type="button" class="btn btn--secondary btn--icon hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
+        icon('logout') +
       '</button>' +
     '</div>';
 }
@@ -82,17 +107,17 @@ export function renderLeftCard(options = {}) {
   const subtitle = options.subtitle || 'Jelajahi seluruh pulau unit kerja di BPS';
 
   const backBtnHtml = hasBack
-    ? '<button type="button" class="hud-back-btn" id="hud-back-button" aria-label="Kembali">' +
-        icons.backArrow +
+    ? '<button type="button" class="btn btn--secondary btn--icon hud-back-btn" id="hud-back-button" aria-label="Kembali">' +
+        icon('arrowLeft') +
       '</button>'
-    : '';
+    : '<span class="hud-emblem" aria-hidden="true">' + icon('map', { size: 'l' }) + '</span>';
 
   return '' +
     '<div class="hud-card hud-left-card' + (hasBack ? ' has-back' : '') + '">' +
       backBtnHtml +
       '<div class="hud-title-wrap">' +
-        '<h1 class="hud-title">' + title + '</h1>' +
-        '<div class="hud-subtitle">' + subtitle + '</div>' +
+        '<h1 class="hud-title">' + escapeHtml(title) + '</h1>' +
+        '<div class="hud-subtitle">' + escapeHtml(subtitle) + '</div>' +
       '</div>' +
     '</div>';
 }
@@ -113,7 +138,7 @@ export function bindLeftCardEvents(container, onBack) {
 
 // Persistent screen-reader live region outside #stage, so it survives screen
 // re-renders and announces reliably (a freshly inserted region often does not).
-function announce(message) {
+export function announce(message) {
   let live = document.getElementById('bps-live-status');
   if (!live) {
     live = document.createElement('div');

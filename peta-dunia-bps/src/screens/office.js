@@ -79,6 +79,7 @@ const OBSTACLES = ROOMS.concat([BOARD]);
 const MAX_RENDER_SCALE = 3;      // cap on backing-store density (dpr x stage scale)
 const WALK_FRAME_MS = 140;       // two-frame walk cycle
 const NAME_TAG_MAX_W = 150;      // world units
+const DPAD_DOCK_BELOW = 768;     // px viewport width; matches the stage min-scale breakpoint
 const WORLD_VIEW = { FLOOR, ROOMS, BOARD, BOARD_CENTER, FLOOR_LABELS };
 
 export const OfficeScreen = {
@@ -108,9 +109,11 @@ export const OfficeScreen = {
     this.render();
     this.setupCanvas();
     this.bindEvents();
+    this.placeDpad();
 
     this.onPanelChange = (isOpen) => {
       this.isPaused = isOpen;
+      if (this.dpadEl) this.dpadEl.classList.toggle('is-hidden', isOpen);
       if (!isOpen) {
         this.lastTime = performance.now();
       }
@@ -148,9 +151,33 @@ export const OfficeScreen = {
 
     this.unbindEvents();
 
+    // The D-pad may be docked on <body> (narrow screens); remove it explicitly.
+    if (this.dpadEl) {
+      this.dpadEl.remove();
+      this.dpadEl = null;
+    }
+
     if (this.container) {
       this.container.innerHTML = '';
     }
+  },
+
+  // Narrow screens pan the stage, so the D-pad is docked to the viewport
+  // (fixed, on <body>) to stay reachable. Wider screens keep it in the stage.
+  placeDpad() {
+    if (!this.dpadEl) this.dpadEl = this.container.querySelector('.office-dpad');
+    const dpad = this.dpadEl;
+    if (!dpad) return;
+    const dock = window.innerWidth < DPAD_DOCK_BELOW;
+    if (dock && !dpad.classList.contains('is-docked')) {
+      dpad.classList.add('is-docked');
+      document.body.appendChild(dpad);
+    } else if (!dock && dpad.classList.contains('is-docked')) {
+      dpad.classList.remove('is-docked');
+      const screen = this.container.querySelector('.screen-office');
+      if (screen) screen.appendChild(dpad);
+    }
+    dpad.classList.toggle('is-hidden', Boolean(this.isPaused));
   },
 
   render() {
@@ -313,6 +340,7 @@ export const OfficeScreen = {
     // the rebuild happens on the next frame, at most once per frame.
     this.handleResize = () => {
       this.needsRebuild = true;
+      this.placeDpad();
     };
     window.addEventListener('resize', this.handleResize);
 
