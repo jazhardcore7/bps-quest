@@ -19,8 +19,35 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(uid)).data;
     }
 
+    // Email/password accounts must verify their address before they can create
+    // a profile or act as admin (Google accounts arrive already verified).
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    // Two-digit zero padding for date parts.
+    function pad2(n) {
+      return n < 10 ? '0' + string(n) : string(n);
+    }
+
+    // Current daily period key ("YYYY-MM-DD") in Asia/Jakarta (UTC+7, no DST),
+    // derived from the server clock so clients cannot choose the period.
+    function jakartaDailyKey() {
+      return string((request.time + duration.value(7, 'h')).year()) + '-'
+        + pad2((request.time + duration.value(7, 'h')).month()) + '-'
+        + pad2((request.time + duration.value(7, 'h')).day());
+    }
+
+    // Daily quests may only be claimed for today's Jakarta date;
+    // every other quest type exactly once ("once").
+    function isValidPeriodKey(questType, periodKey) {
+      return questType == 'daily'
+        ? periodKey == jakartaDailyKey()
+        : periodKey == 'once';
+    }
+
     function isUserAdmin() {
-      return isSignedIn()
+      return isEmailVerified()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && userDoc(request.auth.uid).role == 'admin';
     }
@@ -56,6 +83,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && exists(/databases/$(database)/documents/quests/$(request.resource.data.questId))
         && get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.active == true
+        && isValidPeriodKey(
+             get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.type,
+             request.resource.data.periodKey)
         && request.resource.data.xp == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.xp
         && request.resource.data.unitId == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.unitId
         && userDoc(request.auth.uid).unit == request.resource.data.unitId;
@@ -70,6 +100,7 @@ service cloud.firestore {
 
       // Create only if matching allowlist
       allow create: if isOwner(userId)
+                    && isEmailVerified()
                     && isEmailAllowed()
                     && request.resource.data.email == request.auth.token.email
                     && request.resource.data.unit == allowlistDoc().data.unit

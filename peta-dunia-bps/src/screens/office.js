@@ -1,7 +1,7 @@
 // Screen 3: Office floor-plan screen with a walkable avatar on HTML Canvas
 import { AppState } from '../state/index.js';
 import { Hud } from '../ui/hud.js';
-import { openInfoPanel, isInfoPanelOpen, setPanelCallback } from '../ui/panel.js';
+import { openInfoPanel, closeInfoPanel, isInfoPanelOpen, setPanelCallback } from '../ui/panel.js';
 
 let unsubscribeState = null;
 
@@ -124,7 +124,12 @@ export const OfficeScreen = {
       this.rafId = null;
     }
 
+    // Leaving while the info panel is open (e.g. browser Back) must not leave
+    // the panel flagged open: that would pause the avatar on the next visit.
     setPanelCallback(null);
+    if (isInfoPanelOpen()) {
+      closeInfoPanel();
+    }
     this.onPanelChange = null;
 
     this.unbindEvents();

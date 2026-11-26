@@ -13,8 +13,11 @@ import {
   writeBatch,
   serverTimestamp
 } from 'firebase/firestore';
+import { dailyPeriodKeyJakarta } from '../src/config.js';
 
 const PROJECT_ID = 'demo-bps-rules-test';
+// Daily claims are only valid for the current Asia/Jakarta date (firestore.rules).
+const TODAY = dailyPeriodKeyJakarta(new Date());
 const RULES = fs.readFileSync('firestore.rules', 'utf8');
 
 describe('Firestore Security Rules', () => {
@@ -145,7 +148,7 @@ describe('Firestore Security Rules', () => {
 
   describe('Quests and Units Permissions', () => {
     it('allows signed-in users to read quests and units', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       const qSnap = await assertSucceeds(getDoc(doc(db, 'quests', 'quest-daily-1')));
       assert.equal(qSnap.exists(), true);
       const uSnap = await assertSucceeds(getDoc(doc(db, 'units', 'biro-sdm')));
@@ -153,7 +156,7 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies non-admin users from creating or updating quests and units', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertFails(setDoc(doc(db, 'quests', 'quest-new'), {
         unitId: 'biro-sdm',
         xp: 100
@@ -164,7 +167,7 @@ describe('Firestore Security Rules', () => {
     });
 
     it('allows admin users to write quests and units', async () => {
-      const db = testEnv.authenticatedContext('uid_admin', { email: 'admin@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_admin', { email: 'admin@bps.go.id', email_verified: true }).firestore();
       await assertSucceeds(setDoc(doc(db, 'quests', 'quest-admin-created'), {
         unitId: 'biro-sdm',
         title: 'Quest Baru Admin',
@@ -176,8 +179,8 @@ describe('Firestore Security Rules', () => {
 
   describe('Quest Claiming and Tamper Resistance', () => {
     it('allows valid atomic quest claim batch (completion + user progression update)', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
-      const completionId = 'uid_budi_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_budi_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_budi');
 
@@ -187,7 +190,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch.update(userRef, {
@@ -204,8 +207,8 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies claim batch with altered/tampered XP amount', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
-      const completionId = 'uid_budi_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_budi_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_budi');
 
@@ -216,7 +219,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 999, // Mismatched with quest.xp (20)
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch.update(userRef, {
@@ -233,8 +236,8 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies claim for another user (uid mismatch)', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
-      const completionId = 'uid_admin_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_admin_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_admin');
 
@@ -244,7 +247,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch.update(userRef, {
@@ -262,8 +265,8 @@ describe('Firestore Security Rules', () => {
 
     it('denies claim by a user from another unit (unitId mismatch)', async () => {
       // uid_umum belongs to 'biro-umum', quest belongs to 'biro-sdm'
-      const db = testEnv.authenticatedContext('uid_umum', { email: 'umum@bps.go.id' }).firestore();
-      const completionId = 'uid_umum_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_umum', { email: 'umum@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_umum_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_umum');
 
@@ -273,7 +276,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch.update(userRef, {
@@ -290,8 +293,8 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies duplicate claim for the same periodKey', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
-      const completionId = 'uid_budi_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_budi_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_budi');
 
@@ -302,7 +305,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch1.update(userRef, {
@@ -323,7 +326,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch2.update(userRef, {
@@ -338,8 +341,46 @@ describe('Firestore Security Rules', () => {
       await assertFails(batch2.commit());
     });
 
+    // Builds a claim batch (completion + user progression) for uid_budi.
+    function claimBatch(db, questId, xp, periodKey) {
+      const completionId = 'uid_budi_' + questId + '_' + periodKey;
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'completions', completionId), {
+        uid: 'uid_budi',
+        questId,
+        unitId: 'biro-sdm',
+        xp,
+        periodKey,
+        createdAt: serverTimestamp()
+      });
+      batch.update(doc(db, 'users', 'uid_budi'), {
+        xp,
+        level: 1,
+        weekKey: '2026-W46',
+        xpWeek: xp,
+        monthKey: '2026-11',
+        xpMonth: xp,
+        lastCompletionId: completionId
+      });
+      return batch;
+    }
+
+    it('denies a daily claim whose periodKey is not today (Jakarta)', async () => {
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertFails(claimBatch(db, 'quest-daily-1', 20, '2020-01-01').commit());
+      await assertFails(claimBatch(db, 'quest-daily-1', 20, 'once').commit());
+      await assertFails(claimBatch(db, 'quest-daily-1', 20, TODAY + 'x').commit());
+    });
+
+    it('allows a checkpoint claim only with periodKey "once"', async () => {
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertFails(claimBatch(db, 'quest-checkpoint-1', 50, 'once-lagi').commit());
+      await assertFails(claimBatch(db, 'quest-checkpoint-1', 50, TODAY).commit());
+      await assertSucceeds(claimBatch(db, 'quest-checkpoint-1', 50, 'once').commit());
+    });
+
     it('denies direct XP edit without completion creation', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       const userRef = doc(db, 'users', 'uid_budi');
 
       // Direct client update without creating a completion doc
@@ -369,8 +410,8 @@ describe('Firestore Security Rules', () => {
         });
       });
 
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
-      const completionId = 'uid_budi_quest-daily-1_2026-11-09';
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      const completionId = 'uid_budi_quest-daily-1_' + TODAY;
       const compRef = doc(db, 'completions', completionId);
       const userRef = doc(db, 'users', 'uid_budi');
 
@@ -380,7 +421,7 @@ describe('Firestore Security Rules', () => {
         questId: 'quest-daily-1',
         unitId: 'biro-sdm',
         xp: 20,
-        periodKey: '2026-11-09',
+        periodKey: TODAY,
         createdAt: serverTimestamp()
       });
       batch.update(userRef, {
@@ -399,7 +440,7 @@ describe('Firestore Security Rules', () => {
 
   describe('Users Collection Allowlist & Protected Field Controls', () => {
     it('allows client to create user document if email matches allowlist', async () => {
-      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertSucceeds(setDoc(doc(db, 'users', 'uid_new_user'), {
         displayName: 'Budi Santoso',
         email: 'budi@bps.go.id',
@@ -416,8 +457,33 @@ describe('Firestore Security Rules', () => {
       }));
     });
 
+    it('denies creating a user document before the email is verified', async () => {
+      const db = testEnv.authenticatedContext('uid_unverified', { email: 'budi@bps.go.id', email_verified: false }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_unverified'), {
+        displayName: 'Budi Santoso',
+        email: 'budi@bps.go.id',
+        unit: 'biro-sdm',
+        role: 'employee',
+        xp: 0,
+        level: 1,
+        avatarId: 'default',
+        weekKey: '2026-W46',
+        xpWeek: 0,
+        monthKey: '2026-11',
+        xpMonth: 0,
+        createdAt: serverTimestamp()
+      }));
+    });
+
+    it('denies admin writes from an unverified admin token', async () => {
+      const db = testEnv.authenticatedContext('uid_admin', { email: 'admin@bps.go.id', email_verified: false }).firestore();
+      await assertFails(setDoc(doc(db, 'quests', 'quest-from-unverified'), {
+        unitId: 'biro-sdm', title: 'x', type: 'daily', xp: 1000, active: true
+      }));
+    });
+
     it('denies client from creating user document if email is NOT in allowlist', async () => {
-      const db = testEnv.authenticatedContext('uid_stranger', { email: 'stranger@gmail.com' }).firestore();
+      const db = testEnv.authenticatedContext('uid_stranger', { email: 'stranger@gmail.com', email_verified: true }).firestore();
       await assertFails(setDoc(doc(db, 'users', 'uid_stranger'), {
         displayName: 'Stranger',
         email: 'stranger@gmail.com',
@@ -435,7 +501,7 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies client from creating user document with mismatched unit or role', async () => {
-      const db = testEnv.authenticatedContext('uid_cheat', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_cheat', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertFails(setDoc(doc(db, 'users', 'uid_cheat'), {
         displayName: 'Budi Hacker',
         email: 'budi@bps.go.id',
@@ -453,14 +519,14 @@ describe('Firestore Security Rules', () => {
     });
 
     it('denies client from updating protected fields (role, unit, email)', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertFails(updateDoc(doc(db, 'users', 'uid_budi'), { role: 'admin' }));
       await assertFails(updateDoc(doc(db, 'users', 'uid_budi'), { unit: 'biro-umum' }));
       await assertFails(updateDoc(doc(db, 'users', 'uid_budi'), { email: 'hacked@bps.go.id' }));
     });
 
     it('allows client to update avatarId without XP changes', async () => {
-      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id' }).firestore();
+      const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertSucceeds(updateDoc(doc(db, 'users', 'uid_budi'), { avatarId: 'avatar-blue' }));
     });
   });

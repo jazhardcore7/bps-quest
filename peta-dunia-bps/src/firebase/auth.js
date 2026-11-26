@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  sendEmailVerification,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged
@@ -19,8 +20,19 @@ import { AppState } from '../state/index.js';
 import { weekKeyJakarta, monthKeyJakarta } from '../config.js';
 
 export const NOT_ALLOWED_MESSAGE = 'Email kamu belum terdaftar. Hubungi admin Biro SDM.';
+export const VERIFY_SENT_MESSAGE = 'Akun dibuat. Buka tautan verifikasi yang dikirim ke email kamu, lalu masuk.';
+export const NOT_VERIFIED_MESSAGE = 'Email kamu belum diverifikasi. Kami kirim ulang tautan verifikasi; buka tautan itu lalu masuk lagi.';
+
+// Marker so callers can tell the "verify your email first" case apart.
+function verificationError(message) {
+  const err = new Error(message);
+  err.code = 'app/email-not-verified';
+  return err;
+}
 
 let userSnapshotUnsubscribe = null;
+// True while registerWithEmail runs, so the auth listener does not race it.
+let registrationInProgress = false;
 
 export function stopListeningToUserProfile() {
   if (userSnapshotUnsubscribe) {
@@ -96,7 +108,7 @@ export async function ensureUserProfile(user) {
     return profile;
   }
 
-  // 2. First login: Check allowlist
+  // 2. First login: check allowlist
   let allowSnap;
   try {
     const allowDocRef = doc(db, 'allowedEmails', lowerEmail);
@@ -118,9 +130,16 @@ export async function ensureUserProfile(user) {
     throw new Error(NOT_ALLOWED_MESSAGE);
   }
 
+  // 3. A verified email is required before the profile is created
+  //    (firestore.rules enforces this as well).
+  if (!user.emailVerified) {
+    await signOut(auth);
+    throw verificationError(NOT_VERIFIED_MESSAGE);
+  }
+
   const allowData = allowSnap.data();
 
-  // 3. Provision new user profile in users/{uid}
+  // 4. Provision new user profile in users/{uid}
   const now = new Date();
   const initialProfile = {
     displayName: allowData.displayName || user.displayName || 'Pegawai BPS',
@@ -148,16 +167,54 @@ export async function ensureUserProfile(user) {
  */
 export async function loginWithEmail(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-  return await ensureUserProfile(cred.user);
+  try {
+    return await ensureUserProfile(cred.user);
+  } catch (err) {
+    if (err && err.code === 'app/email-not-verified') {
+      // Re-send the link; ignore rate-limit errors so the message still shows.
+      try { await sendEmailVerification(cred.user); } catch (_) {}
+    }
+    throw err;
+  }
 }
 
 /**
- * Registers an account via email and password if on allowlist.
+ * Registers an account via email and password. The profile is created on the
+ * first login after the email address is verified.
  */
 export async function registerWithEmail(email, password) {
   const trimmedEmail = email.trim().toLowerCase();
+  registrationInProgress = true;
+  try {
+    return await registerAndSendVerification(trimmedEmail, password);
+  } finally {
+    registrationInProgress = false;
+  }
+}
+
+async function registerAndSendVerification(trimmedEmail, password) {
   const cred = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
-  return await ensureUserProfile(cred.user);
+
+  // Only allowlisted addresses get a verification email; others are removed.
+  let allowed = false;
+  try {
+    allowed = (await getDoc(doc(db, 'allowedEmails', trimmedEmail))).exists();
+  } catch (_) {
+    allowed = false;
+  }
+  if (!allowed) {
+    try { await cred.user.delete(); } catch (_) {}
+    await signOut(auth);
+    throw new Error(NOT_ALLOWED_MESSAGE);
+  }
+
+  try {
+    await sendEmailVerification(cred.user);
+  } finally {
+    stopListeningToUserProfile();
+    await signOut(auth);
+  }
+  throw verificationError(VERIFY_SENT_MESSAGE);
 }
 
 /**
@@ -183,6 +240,11 @@ export async function logout() {
  */
 export function onAuthChanged(callback) {
   return onAuthStateChanged(auth, async (user) => {
+    if (user && registrationInProgress) {
+      // registerWithEmail signs this user out itself once the email is sent;
+      // the sign-out event then reaches the callback as usual.
+      return;
+    }
     if (user) {
       try {
         await ensureUserProfile(user);
