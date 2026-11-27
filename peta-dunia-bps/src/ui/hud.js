@@ -73,8 +73,12 @@ export function renderRightCard(state) {
     ? '<button type="button" class="hud-manage-btn" id="hud-manage-btn" title="Pusat Pengelolaan" aria-label="Kelola">Kelola</button>'
     : '';
 
+  const level = escapeHtml(String(player.level));
+  const xp = escapeHtml(String(player.xp));
+  const xpToNext = escapeHtml(String(player.xpToNext));
+
   return '' +
-    '<div class="hud-card hud-right-card" aria-label="Informasi Pemain">' +
+    '<div class="hud-card hud-right-card hud-v2" aria-label="Informasi Pemain">' +
       '<div class="hud-avatar-wrap">' +
         icons.avatar +
       '</div>' +
@@ -82,19 +86,28 @@ export function renderRightCard(state) {
         '<div class="hud-player-name" title="' + name + '">' +
           name +
         '</div>' +
-        '<div class="hud-player-level">Level ' + player.level + ' · ' + title + '</div>' +
-        '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +
-        '<div class="hud-progress-track" role="progressbar" aria-valuenow="' + player.xp + '" aria-valuemin="0" aria-valuemax="' + player.xpToNext + '">' +
-          '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
+        '<div class="hud-player-level">' +
+          '<span class="hud-level-text">Level ' + level + '</span>' +
+          '<span class="hud-role-chip" title="' + title + '">' + title + '</span>' +
+        '</div>' +
+        '<div class="hud-xp-row">' +
+          '<div class="hud-progress-track" role="progressbar" aria-label="XP menuju level berikutnya" ' +
+            'aria-valuenow="' + xp + '" aria-valuemin="0" aria-valuemax="' + xpToNext + '" ' +
+            'aria-valuetext="' + xp + ' dari ' + xpToNext + ' XP">' +
+            '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
+          '</div>' +
+          '<div class="hud-xp-text">' + xp + ' / ' + xpToNext + ' XP</div>' +
         '</div>' +
       '</div>' +
-      manageBtnHtml +
-      '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
-        icons.trophy +
-      '</button>' +
-      '<button type="button" class="hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
-        icons.logout +
-      '</button>' +
+      '<div class="hud-actions">' +
+        manageBtnHtml +
+        '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
+          icons.trophy +
+        '</button>' +
+        '<button type="button" class="hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
+          icons.logout +
+        '</button>' +
+      '</div>' +
     '</div>';
 }
 
@@ -110,7 +123,7 @@ export function renderLeftCard(options = {}) {
     : '';
 
   return '' +
-    '<div class="hud-card hud-left-card' + (hasBack ? ' has-back' : '') + '">' +
+    '<div class="hud-card hud-left-card hud-v2' + (hasBack ? ' has-back' : '') + '">' +
       backBtnHtml +
       '<div class="hud-title-wrap">' +
         '<h1 class="hud-title">' + title + '</h1>' +
