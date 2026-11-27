@@ -10,6 +10,11 @@ if (import.meta.env.DEV) {
   import('./state/index.js').then(({ AppState }) => {
     window.AppState = AppState;
   });
+  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+    import('./ui/demo-login.js').then(({ mountDemoLogin }) => {
+      mountDemoLogin();
+    });
+  }
 }
 
 // 2. Stage Scaler: Fit 960x560 canvas inside available area while preserving aspect ratio
