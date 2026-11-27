@@ -199,7 +199,7 @@ export const OfficeScreen = {
 
   bindEvents() {
     Hud.bindLeftCardEvents(this.container, () => {
-      window.location.hash = '#/island';
+      window.location.hash = '#/island/sestama';
     });
 
     this.handleKeyDown = (e) => {
@@ -223,7 +223,7 @@ export const OfficeScreen = {
       } else if (code === 'KeyE' || key === 'e' || key === 'E') {
         const dist = this.getDistanceToBoard();
         if (dist <= INTERACTION_DISTANCE) {
-          openInfoPanel('Biro SDM');
+          openInfoPanel('biro-sdm');
         }
       }
     };
@@ -258,14 +258,14 @@ export const OfficeScreen = {
 
       if (worldX >= BOARD.x && worldX <= BOARD.x + BOARD.w &&
           worldY >= BOARD.y && worldY <= BOARD.y + BOARD.h) {
-        openInfoPanel('Biro SDM');
+        openInfoPanel('biro-sdm');
         return;
       }
 
       const dx = worldX - BOARD_CENTER.x;
       const dy = worldY - BOARD_CENTER.y;
       if (Math.sqrt(dx * dx + dy * dy) <= INTERACTION_DISTANCE) {
-        openInfoPanel('Biro SDM');
+        openInfoPanel('biro-sdm');
       }
     };
 

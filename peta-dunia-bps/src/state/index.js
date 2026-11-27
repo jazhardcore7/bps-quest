@@ -4,15 +4,17 @@ import {
   XP_PER_LEVEL,
   getRoleLabel,
   isHeadRole,
-  isSuperAdminRole
+  isSuperAdminRole,
+  toUnitId
 } from '../config.js';
 import bpsStructure from '../data/bps-structure.json' with { type: 'json' };
 
 const STATIC_UNITS_BY_ID = new Map(bpsStructure.units.map((u) => [u.id, u]));
 
 function normalizeUnit(unit) {
-  if (!unit) return '';
-  return String(unit).toLowerCase().replace(/[\s\-_]+/g, '');
+  const resolved = toUnitId(unit);
+  if (!resolved) return '';
+  return String(resolved).toLowerCase().replace(/[\s\-_]+/g, '');
 }
 
 const subscribers = [];
@@ -108,7 +110,7 @@ export const AppState = {
     return normalizeUnit(this.currentUnit) === normalizeUnit(buildingUnit);
   },
 
-  canManageUnit(unitId) {
+  canManageUnit(unitId, unitsList = null) {
     if (!this.user || !unitId || this.player.active === false) return false;
     const role = this.player.role;
     if (isSuperAdminRole(role)) return true;
@@ -118,7 +120,9 @@ export const AppState = {
     if (!myUnit) return false;
     if (unitId === myUnit) return true;
 
-    const target = STATIC_UNITS_BY_ID.get(unitId);
+    const target = Array.isArray(unitsList)
+      ? (unitsList.find((u) => u && u.id === unitId) || STATIC_UNITS_BY_ID.get(unitId))
+      : STATIC_UNITS_BY_ID.get(unitId);
     return Boolean(target && Array.isArray(target.ancestorIds) && target.ancestorIds.includes(myUnit));
   },
 

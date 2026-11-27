@@ -1,20 +1,22 @@
-// Interactive Info Board Panel with Role-Based Quest Button & Firestore Integration
+// Interactive Info Board Panel with Role-Based Quest Button & Unit Profile Data
 import { AppState } from '../state/index.js';
 import { auth } from '../firebase/client.js';
 import {
-  fetchUnitData,
   fetchUnitQuests,
   fetchUserCompletions,
   claimQuest
 } from '../firebase/quests.js';
+import { loadUnits, getCachedUnits, getChildUnits } from '../firebase/units.js';
 import { dailyPeriodKeyJakarta } from '../config.js';
 import { showToast } from './hud.js';
+import { escapeHtml } from './escape.js';
 
 let isPanelOpen = false;
 let panelCallback = null;
 let previousActiveElement = null;
-let currentUnitName = 'Biro SDM';
-let cachedUnitData = null;
+let currentUnitId = 'biro-sdm';
+let allUnits = [];
+let currentUnitData = null;
 let keydownHandler = null;
 let unsubscribeQuestAccess = null;
 
@@ -25,37 +27,36 @@ const INFO_ROWS = [
   'Papan Informasi Terkini'
 ];
 
-function escapeHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+function findUnit(units, unitId) {
+  return (units || []).find((u) => u.id === unitId) || null;
 }
 
-function renderMainContentHtml(buildingUnit, unitData = null) {
-  const unit = buildingUnit || 'Biro SDM';
-  const data = unitData || cachedUnitData;
+function getParentName(units, unit) {
+  if (!unit || !unit.parentId) return 'BPS Republik Indonesia';
+  const parent = findUnit(units, unit.parentId);
+  return parent ? parent.name : unit.parentId;
+}
 
-  const unitName = (data && data.name) ? data.name : unit;
-  const parentUnit = (data && data.parentUnit) ? data.parentUnit : 'Sekretariat Utama';
-  const buildingXpText = (data && data.level) ? `Level ${data.level} · 350/600 XP` : 'Level 2 · 350/600 XP';
-  const unitDesc = (data && data.description) ? data.description : ('[Deskripsi singkat tugas dan fungsi ' + unit + ', diisi pihak biro]');
+function renderMainContentHtml(unitId, unitData, unitsList) {
+  const unit = unitData || findUnit(unitsList, unitId);
+  const unitName = unit ? unit.name : unitId;
+  const parentName = unit ? getParentName(unitsList, unit) : 'BPS Republik Indonesia';
+  const summaryText = (unit && unit.summary)
+    ? unit.summary
+    : 'Profil unit kerja sedang disiapkan.';
 
   let rowsHtml = '';
   for (let i = 0; i < INFO_ROWS.length; i++) {
     const rowTitle = INFO_ROWS[i];
     rowsHtml += '' +
-      '<button type="button" class="info-row-btn" data-row-title="' + rowTitle + '">' +
-        '<span class="info-row-label">' + rowTitle + '</span>' +
+      '<button type="button" class="info-row-btn" data-row-title="' + escapeHtml(rowTitle) + '">' +
+        '<span class="info-row-label">' + escapeHtml(rowTitle) + '</span>' +
         '<span class="info-row-arrow" aria-hidden="true">&#8250;</span>' +
       '</button>';
   }
 
-  // Footer decided strictly by ONE function: AppState.canStartQuest(buildingUnit)
-  const canStart = AppState.canStartQuest(unit);
+  // Footer decided strictly by ONE function: AppState.canStartQuest(unitId)
+  const canStart = AppState.canStartQuest(unitId);
 
   let footerHtml = '';
   if (canStart) {
@@ -70,7 +71,7 @@ function renderMainContentHtml(buildingUnit, unitData = null) {
     footerHtml = '' +
       '<div class="info-panel-footer">' +
         '<div class="info-gray-note">' +
-          'Quest hanya tersedia untuk pegawai ' + unit +
+          'Quest hanya tersedia untuk pegawai ' + escapeHtml(unitName) +
         '</div>' +
       '</div>';
   }
@@ -80,14 +81,16 @@ function renderMainContentHtml(buildingUnit, unitData = null) {
       '<div class="info-card-header">' +
         '<div class="info-header-left">' +
           '<h2 class="info-unit-title" id="info-panel-title">' + escapeHtml(unitName) + '</h2>' +
-          '<span class="info-parent-chip">' + escapeHtml(parentUnit) + '</span>' +
+          '<span class="info-parent-chip">' + escapeHtml(parentName) + '</span>' +
         '</div>' +
         '<div class="info-header-right">' +
-          '<span class="info-building-xp-chip">' + escapeHtml(buildingXpText) + '</span>' +
           '<button type="button" class="info-card-close-btn" id="info-card-close" aria-label="Tutup panel">&times;</button>' +
         '</div>' +
       '</div>' +
-      '<p class="info-unit-desc">' + escapeHtml(unitDesc) + '</p>' +
+      '<p class="info-unit-desc">' + escapeHtml(summaryText) + '</p>' +
+      (unit && unit.verified === false
+        ? '<p class="info-unverified-note">Profil sedang dilengkapi bersama unit terkait.</p>'
+        : '') +
       '<div class="info-section-label">Akses Informasi</div>' +
       '<div class="info-rows-list">' +
         rowsHtml +
@@ -96,10 +99,65 @@ function renderMainContentHtml(buildingUnit, unitData = null) {
     '</div>';
 }
 
-function renderSubViewHtml(rowTitle, buildingUnit) {
-  const unit = buildingUnit || 'Biro SDM';
+function renderSubViewBodyHtml(rowTitle, unit, unitsList) {
+  if (!unit) {
+    return '<p class="info-sub-empty">Data unit tidak tersedia.</p>';
+  }
+
+  if (rowTitle === 'Profil & Tugas Fungsi') {
+    const tugas = Array.isArray(unit.tugas) ? unit.tugas : [];
+    const listHtml = tugas.length > 0
+      ? '<ul class="info-sub-list">' + tugas.map((t) => '<li>' + escapeHtml(t) + '</li>').join('') + '</ul>'
+      : '<p class="info-sub-empty">Belum ada rincian tugas tercatat.</p>';
+    const unverifiedNote = unit.verified === false
+      ? '<p class="info-unverified-note">Profil sedang dilengkapi bersama unit terkait.</p>'
+      : '';
+    return '' +
+      '<p class="info-sub-summary">' + escapeHtml(unit.summary || '') + '</p>' +
+      unverifiedNote +
+      '<div class="info-sub-label">Tugas dan Fungsi</div>' +
+      listHtml;
+  }
+
+  if (rowTitle === 'Struktur Organisasi') {
+    const children = getChildUnits(unitsList, unit.id);
+    const headLine = '<p class="info-sub-summary"><strong>Pimpinan Unit:</strong> ' +
+      escapeHtml(unit.headTitle || '-') + '</p>';
+    const childHtml = children.length > 0
+      ? '<div class="info-sub-label">Unit di Bawahnya (' + children.length + ')</div>' +
+        '<ul class="info-sub-list">' + children.map((c) => '<li>' + escapeHtml(c.name) + '</li>').join('') + '</ul>'
+      : '<p class="info-sub-empty">Tidak memiliki unit kerja bawahan langsung.</p>';
+    return headLine + childHtml;
+  }
+
+  if (rowTitle === 'Fasilitas & Layanan') {
+    const services = Array.isArray(unit.services) ? unit.services : [];
+    if (services.length === 0) {
+      return '<p class="info-sub-empty">Belum ada informasi layanan.</p>';
+    }
+    return '<ul class="info-sub-list">' + services.map((s) => '<li>' + escapeHtml(s) + '</li>').join('') + '</ul>';
+  }
+
+  if (rowTitle === 'Papan Informasi Terkini') {
+    const rawAnnouncements = Array.isArray(unit.announcements) ? [...unit.announcements] : [];
+    if (rawAnnouncements.length === 0) {
+      return '<p class="info-sub-empty">Belum ada pengumuman.</p>';
+    }
+    rawAnnouncements.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return '<ul class="info-ann-list">' + rawAnnouncements.map((ann) => '' +
+      '<li class="info-ann-item">' +
+        '<span class="info-ann-date">' + escapeHtml(String(ann.createdAt || '')) + '</span>' +
+        '<span class="info-ann-text">' + escapeHtml(String(ann.text || '')) + '</span>' +
+      '</li>'
+    ).join('') + '</ul>';
+  }
+
+  return '<p class="info-sub-empty">Informasi belum tersedia.</p>';
+}
+
+function renderSubViewHtml(rowTitle, unit, unitsList) {
   return '' +
-    '<div class="info-sub-view">' +
+    '<div class="info-sub-view" data-active-row="' + escapeHtml(rowTitle) + '">' +
       '<div class="info-sub-header">' +
         '<button type="button" class="info-sub-back-btn" id="info-sub-back" aria-label="Kembali ke menu utama">' +
           '&#8592; Kembali' +
@@ -108,7 +166,7 @@ function renderSubViewHtml(rowTitle, buildingUnit) {
       '</div>' +
       '<h3 class="info-sub-title">' + escapeHtml(rowTitle) + '</h3>' +
       '<div class="info-sub-body">' +
-        '<p class="info-sub-placeholder">[Konten diisi pihak ' + escapeHtml(unit) + ']</p>' +
+        renderSubViewBodyHtml(rowTitle, unit, unitsList) +
       '</div>' +
     '</div>';
 }
@@ -167,7 +225,7 @@ function untrapFocus() {
   }
 }
 
-function wireMainViewEvents(card, buildingUnit) {
+function wireMainViewEvents(card, unitId) {
   const closeBtn = card.querySelector('#info-card-close');
   if (closeBtn) {
     closeBtn.addEventListener('click', (e) => {
@@ -181,7 +239,7 @@ function wireMainViewEvents(card, buildingUnit) {
     rowBtns[i].addEventListener('click', function (e) {
       e.preventDefault();
       const rowTitle = this.getAttribute('data-row-title');
-      showSubView(card, rowTitle, buildingUnit);
+      showSubView(card, rowTitle, unitId);
     });
   }
 
@@ -189,20 +247,21 @@ function wireMainViewEvents(card, buildingUnit) {
   if (questBtn) {
     questBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      showQuestSheet(card, buildingUnit);
+      showQuestSheet(card, unitId);
     });
   }
 }
 
-function showSubView(card, rowTitle, buildingUnit) {
-  card.innerHTML = renderSubViewHtml(rowTitle, buildingUnit);
+function showSubView(card, rowTitle, unitId) {
+  const unit = currentUnitData || findUnit(allUnits, unitId);
+  card.innerHTML = renderSubViewHtml(rowTitle, unit, allUnits);
 
   const backBtn = card.querySelector('#info-sub-back');
   if (backBtn) {
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      card.innerHTML = renderMainContentHtml(buildingUnit);
-      wireMainViewEvents(card, buildingUnit);
+      card.innerHTML = renderMainContentHtml(unitId, currentUnitData, allUnits);
+      wireMainViewEvents(card, unitId);
       const firstRow = card.querySelector('.info-row-btn');
       if (firstRow) firstRow.focus();
     });
@@ -219,7 +278,7 @@ function showSubView(card, rowTitle, buildingUnit) {
   if (backBtn) backBtn.focus();
 }
 
-async function showQuestSheet(card, buildingUnit) {
+async function showQuestSheet(card, unitId) {
   card.innerHTML = '' +
     '<div class="quest-sheet-container">' +
       '<div class="quest-sheet-header">' +
@@ -238,8 +297,8 @@ async function showQuestSheet(card, buildingUnit) {
   if (backBtn) {
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      card.innerHTML = renderMainContentHtml(buildingUnit);
-      wireMainViewEvents(card, buildingUnit);
+      card.innerHTML = renderMainContentHtml(unitId, currentUnitData, allUnits);
+      wireMainViewEvents(card, unitId);
       const questBtn = card.querySelector('#btn-open-quests');
       if (questBtn) questBtn.focus();
     });
@@ -258,8 +317,8 @@ async function showQuestSheet(card, buildingUnit) {
 
   try {
     const [quests, completions] = await Promise.all([
-      fetchUnitQuests(buildingUnit),
-      fetchUserCompletions(uid, buildingUnit)
+      fetchUnitQuests(unitId),
+      fetchUserCompletions(uid, unitId)
     ]);
 
     if (!listEl || !isPanelOpen) return;
@@ -269,7 +328,7 @@ async function showQuestSheet(card, buildingUnit) {
       return;
     }
 
-    renderQuestsList(listEl, quests, completions, buildingUnit);
+    renderQuestsList(listEl, quests, completions);
   } catch (err) {
     console.error('Failed to load quests:', err);
     if (listEl) {
@@ -278,7 +337,7 @@ async function showQuestSheet(card, buildingUnit) {
   }
 }
 
-function renderQuestsList(listEl, quests, completions, buildingUnit) {
+function renderQuestsList(listEl, quests, completions) {
   const now = new Date();
   const todayPeriodKey = dailyPeriodKeyJakarta(now);
 
@@ -306,12 +365,11 @@ function renderQuestsList(listEl, quests, completions, buildingUnit) {
     } else if (quest.type === 'daily') {
       actionHtml = '' +
         '<div class="quest-item-actions">' +
-          '<button type="button" class="btn-claim-quest btn-claim-daily" data-quest-id="' + quest.id + '">' +
+          '<button type="button" class="btn-claim-quest btn-claim-daily" data-quest-id="' + escapeHtml(quest.id) + '">' +
             'Selesaikan (+' + quest.xp + ' XP)' +
           '</button>' +
         '</div>';
     } else {
-      // Checkpoint quest
       actionHtml = '' +
         '<div class="quest-item-actions">' +
           '<span class="quest-item-xp">+' + quest.xp + ' XP</span>' +
@@ -321,30 +379,29 @@ function renderQuestsList(listEl, quests, completions, buildingUnit) {
         const optionsHtml = quest.quiz.options
           .map((opt, idx) => `
             <label class="quiz-option-item" data-opt-idx="${idx}">
-              <input type="radio" name="quiz-radio-${quest.id}" value="${idx}" />
+              <input type="radio" name="quiz-radio-${escapeHtml(quest.id)}" value="${idx}" />
               <span>${escapeHtml(opt)}</span>
             </label>
           `)
           .join('');
 
         quizHtml = '' +
-          '<div class="quiz-box" id="quiz-box-' + quest.id + '">' +
+          '<div class="quiz-box" id="quiz-box-' + escapeHtml(quest.id) + '">' +
             '<div class="quiz-question">' + escapeHtml(quest.quiz.question) + '</div>' +
             '<div class="quiz-options-list" role="radiogroup" aria-label="Pilihan kuis">' +
               optionsHtml +
             '</div>' +
-            '<div class="quiz-error-msg" id="quiz-error-' + quest.id + '" style="display: none;"></div>' +
+            '<div class="quiz-error-msg" id="quiz-error-' + escapeHtml(quest.id) + '" style="display: none;"></div>' +
             '<div style="margin-top: 4px;">' +
-              '<button type="button" class="btn-claim-quest btn-submit-quiz" data-quest-id="' + quest.id + '">' +
+              '<button type="button" class="btn-claim-quest btn-submit-quiz" data-quest-id="' + escapeHtml(quest.id) + '">' +
                 'Kirim Jawaban' +
               '</button>' +
             '</div>' +
           '</div>';
       } else {
-        // Checkpoint without quiz
         actionHtml = '' +
           '<div class="quest-item-actions">' +
-            '<button type="button" class="btn-claim-quest btn-claim-checkpoint" data-quest-id="' + quest.id + '">' +
+            '<button type="button" class="btn-claim-quest btn-claim-checkpoint" data-quest-id="' + escapeHtml(quest.id) + '">' +
               'Selesaikan (+' + quest.xp + ' XP)' +
             '</button>' +
           '</div>';
@@ -355,21 +412,18 @@ function renderQuestsList(listEl, quests, completions, buildingUnit) {
       '<div class="quest-item-top">' +
         '<div class="quest-item-main">' +
           '<div class="quest-item-title">' + escapeHtml(quest.title) + '</div>' +
-          '<div class="quest-item-desc">' + escapeHtml(quest.description) + '</div>' +
+          '<div class="quest-item-desc">' + escapeHtml(quest.description || '') + '</div>' +
         '</div>' +
         actionHtml +
       '</div>' +
       quizHtml;
 
     listEl.appendChild(itemEl);
-
-    // Wire events for this quest card
     wireQuestCardEvents(itemEl, quest);
   });
 }
 
 function wireQuestCardEvents(itemEl, quest) {
-  // Option selection interaction
   const optionLabels = itemEl.querySelectorAll('.quiz-option-item');
   optionLabels.forEach((label) => {
     label.addEventListener('click', () => {
@@ -383,7 +437,6 @@ function wireQuestCardEvents(itemEl, quest) {
     });
   });
 
-  // Daily claim button
   const dailyBtn = itemEl.querySelector('.btn-claim-daily');
   if (dailyBtn) {
     dailyBtn.addEventListener('click', (e) => {
@@ -392,7 +445,6 @@ function wireQuestCardEvents(itemEl, quest) {
     });
   }
 
-  // Checkpoint without quiz claim button
   const checkpointBtn = itemEl.querySelector('.btn-claim-checkpoint');
   if (checkpointBtn) {
     checkpointBtn.addEventListener('click', (e) => {
@@ -401,7 +453,6 @@ function wireQuestCardEvents(itemEl, quest) {
     });
   }
 
-  // Checkpoint quiz submit button
   const quizSubmitBtn = itemEl.querySelector('.btn-submit-quiz');
   if (quizSubmitBtn) {
     quizSubmitBtn.addEventListener('click', (e) => {
@@ -454,17 +505,14 @@ async function executeClaim(quest, buttonEl, itemEl) {
   try {
     const result = await claimQuest(quest);
 
-    // Show toast for XP gained
     showToast(`+${result.xp} XP`);
 
-    // Level-up announcement if player level increased
     if (result.levelUp) {
       setTimeout(() => {
-        showToast(`Selamat! Kamu naik ke Level ${result.newLevel}! 🎉`, 3200);
+        showToast(`Selamat! Kamu naik ke Level ${result.newLevel}!`, 3200);
       }, 1200);
     }
 
-    // Update quest item UI
     itemEl.classList.add('is-completed');
     const quizBox = itemEl.querySelector('.quiz-box');
     if (quizBox) {
@@ -485,10 +533,12 @@ async function executeClaim(quest, buttonEl, itemEl) {
   }
 }
 
-export function openInfoPanel(buildingUnit) {
+export function openInfoPanel(unitId) {
   if (isPanelOpen) return;
   isPanelOpen = true;
-  currentUnitName = buildingUnit || 'Biro SDM';
+  currentUnitId = unitId || 'biro-sdm';
+  allUnits = getCachedUnits();
+  currentUnitData = findUnit(allUnits, currentUnitId);
   previousActiveElement = document.activeElement;
 
   const stage = document.getElementById('stage') || document.body;
@@ -505,45 +555,46 @@ export function openInfoPanel(buildingUnit) {
   const card = document.createElement('div');
   card.className = 'info-panel-card-white';
   card.id = 'info-panel-card';
-  card.innerHTML = renderMainContentHtml(currentUnitName, cachedUnitData);
+  card.innerHTML = renderMainContentHtml(currentUnitId, currentUnitData, allUnits);
   modal.appendChild(card);
   stage.appendChild(modal);
 
-  wireMainViewEvents(card, currentUnitName);
+  wireMainViewEvents(card, currentUnitId);
 
-  // The unit can change while the panel is open (DEV unit selector). Redraw the
-  // main view when quest access changes so the footer matches canStartQuest.
-  let canStart = AppState.canStartQuest(currentUnitName);
+  let canStart = AppState.canStartQuest(currentUnitId);
   unsubscribeQuestAccess = AppState.subscribe(() => {
-    const now = AppState.canStartQuest(currentUnitName);
+    const now = AppState.canStartQuest(currentUnitId);
     if (now === canStart) return;
     canStart = now;
     if (card.querySelector('.info-main-view')) {
       const hadFocus = card.contains(document.activeElement);
-      card.innerHTML = renderMainContentHtml(currentUnitName);
-      wireMainViewEvents(card, currentUnitName);
+      card.innerHTML = renderMainContentHtml(currentUnitId, currentUnitData, allUnits);
+      wireMainViewEvents(card, currentUnitId);
       const closeBtn = card.querySelector('#info-card-close');
       if (hadFocus && closeBtn) closeBtn.focus();
     }
   });
 
-  // Asynchronously populate real unit details from Firestore if available
-  fetchUnitData(currentUnitName).then((unitData) => {
-    if (unitData) {
-      cachedUnitData = unitData;
-      if (isPanelOpen && document.getElementById('info-panel-modal')) {
-        const titleEl = card.querySelector('#info-panel-title');
-        const parentChip = card.querySelector('.info-parent-chip');
-        const xpChip = card.querySelector('.info-building-xp-chip');
-        const descEl = card.querySelector('.info-unit-desc');
-        if (titleEl && unitData.name) titleEl.textContent = unitData.name;
-        if (parentChip && unitData.parentUnit) parentChip.textContent = unitData.parentUnit;
-        if (xpChip && unitData.level) xpChip.textContent = `Level ${unitData.level} · 350/600 XP`;
-        if (descEl && unitData.description) descEl.textContent = unitData.description;
+  // Load fresh cached/Firestore units and refresh open view if unit data arrived
+  loadUnits().then((units) => {
+    if (!isPanelOpen || !document.getElementById('info-panel-modal')) return;
+    allUnits = units;
+    currentUnitData = findUnit(allUnits, currentUnitId);
+    if (card.querySelector('.info-main-view')) {
+      const hadFocus = card.contains(document.activeElement);
+      card.innerHTML = renderMainContentHtml(currentUnitId, currentUnitData, allUnits);
+      wireMainViewEvents(card, currentUnitId);
+      const closeBtn = card.querySelector('#info-card-close');
+      if (hadFocus && closeBtn) closeBtn.focus();
+    } else {
+      const subView = card.querySelector('.info-sub-view');
+      if (subView) {
+        const activeRow = subView.getAttribute('data-active-row');
+        if (activeRow) showSubView(card, activeRow, currentUnitId);
       }
     }
   }).catch((err) => {
-    console.warn('Could not fetch unit details:', err);
+    console.warn('Could not load unit details:', err);
   });
 
   modal.addEventListener('click', (e) => {
@@ -562,7 +613,7 @@ export function openInfoPanel(buildingUnit) {
     }
   }
 
-  window.dispatchEvent(new CustomEvent('bps-panel-change', { detail: { open: true, unit: currentUnitName } }));
+  window.dispatchEvent(new CustomEvent('bps-panel-change', { detail: { open: true, unit: currentUnitId } }));
 }
 
 export function closeInfoPanel() {
@@ -599,4 +650,3 @@ export function setPanelCallback(fn) {
 export function isInfoPanelOpen() {
   return isPanelOpen;
 }
-

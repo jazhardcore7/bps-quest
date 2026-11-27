@@ -1,7 +1,8 @@
 // Screen 1: World Map (#/world)
 import { AppState } from '../state/index.js';
 import { BpsData } from '../data/index.js';
-import { Hud, showToast } from '../ui/hud.js';
+import { Hud } from '../ui/hud.js';
+import { escapeHtml } from '../ui/escape.js';
 
 let unsubscribeState = null;
 
@@ -26,6 +27,7 @@ export const WorldScreen = {
   },
 
   updateHud() {
+    if (!this.container) return;
     const hudRightContainer = this.container.querySelector('.hud-right-wrapper');
     if (hudRightContainer) {
       hudRightContainer.innerHTML = Hud.renderRightCard(AppState);
@@ -49,7 +51,7 @@ export const WorldScreen = {
     html += Hud.renderRightCard(AppState);
     html += '</div>';
 
-    // Islands Container
+    // Islands Container (all 8 islands unlocked)
     html += '<div class="world-islands" role="region" aria-label="Daftar Pulau Unit Kerja">';
 
     const islands = BpsData.islands;
@@ -59,22 +61,15 @@ export const WorldScreen = {
       const top = island.rect[1];
       const width = island.rect[2];
       const height = island.rect[3];
-
-      let iconHtml = '';
-      if (island.locked) {
-        iconHtml = Hud.icons.lock;
-      } else if (island.star) {
-        iconHtml = Hud.icons.star;
-      }
+      const safeLabel = escapeHtml(island.label);
 
       html += '' +
-        '<button type="button" class="world-island' + (island.locked ? ' is-locked' : ' is-unlocked') + '" ' +
-          'id="island-' + island.id + '" ' +
-          'data-id="' + island.id + '" ' +
+        '<button type="button" class="world-island is-unlocked" ' +
+          'id="island-' + escapeHtml(island.id) + '" ' +
+          'data-id="' + escapeHtml(island.id) + '" ' +
           'style="left:' + left + 'px; top:' + top + 'px; width:' + width + 'px; height:' + height + 'px;" ' +
-          'aria-label="' + island.label + (island.locked ? ' (Terkunci)' : '') + '">' +
-          // Building block
-          '<div class="island-building" style="background-color: ' + island.blockColor + ';">' +
+          'aria-label="' + safeLabel + '">' +
+          '<div class="island-building" style="background-color: ' + escapeHtml(island.blockColor) + ';">' +
             '<div class="building-roof-accent"></div>' +
             '<div class="building-windows">' +
               '<span class="window-pane"></span><span class="window-pane"></span>' +
@@ -82,16 +77,14 @@ export const WorldScreen = {
             '</div>' +
             '<div class="building-door"></div>' +
           '</div>' +
-          // Label pill
-          '<div class="island-pill" style="background-color: ' + island.pillColor + ';">' +
-            '<span class="island-pill-label">' + island.label + '</span>' +
-            (iconHtml ? '<span class="island-pill-icon">' + iconHtml + '</span>' : '') +
+          '<div class="island-pill" style="background-color: ' + escapeHtml(island.pillColor) + ';">' +
+            '<span class="island-pill-label">' + safeLabel + '</span>' +
           '</div>' +
         '</button>';
     }
 
-    html += '</div>'; // .world-islands
-    html += '</div>'; // .screen-world
+    html += '</div>';
+    html += '</div>';
 
     this.container.innerHTML = html;
     this.bindEvents();
@@ -103,11 +96,8 @@ export const WorldScreen = {
       islandButtons[i].addEventListener('click', function (e) {
         e.preventDefault();
         const islandId = this.getAttribute('data-id');
-
-        if (islandId === 'sestama') {
-          window.location.hash = '#/island';
-        } else {
-          showToast('Pulau ini segera hadir', 2000);
+        if (islandId) {
+          window.location.hash = '#/island/' + islandId;
         }
       });
     }
@@ -115,4 +105,3 @@ export const WorldScreen = {
 };
 
 export default WorldScreen;
-
