@@ -1,0 +1,41 @@
+/* ==========================================================================
+   Self-hosted fonts (OFL). Files live in public/fonts/ (see README there).
+   Until the woff2 files are present, the fallback stacks in tokens.css apply.
+   Budget: 2 families, 4 weights total.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Pixelify Sans";
+  src: local("Pixelify Sans SemiBold"), local("PixelifySans-SemiBold"),
+       url("/fonts/pixelify-sans-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: local("Nunito Regular"), local("Nunito-Regular"),
+       url("/fonts/nunito-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: local("Nunito Bold"), local("Nunito-Bold"),
+       url("/fonts/nunito-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: local("Nunito ExtraBold"), local("Nunito-ExtraBold"),
+       url("/fonts/nunito-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}

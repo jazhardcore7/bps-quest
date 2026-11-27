@@ -1,0 +1,121 @@
+/* ==========================================================================
+   Level-up moment (src/ui/levelup.js). CSS-only burst, <= 1.5s; static under
+   reduced motion. Animates transform/opacity only.
+   ========================================================================== */
+
+.levelup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+  cursor: pointer;
+  animation: bps-fade-in var(--dur-base) var(--ease-out);
+}
+
+.levelup-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.levelup-ray {
+  position: absolute;
+  left: -7px;
+  top: -190px;
+  width: 14px;
+  height: 120px;
+  background: var(--gold);
+  border: 2px solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  transform-origin: 7px 190px;
+  transform: rotate(calc(var(--i) * 30deg)) scaleY(1);
+  opacity: 0.9;
+  animation: bps-ray 1.2s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 20ms);
+}
+
+.levelup-ray:nth-child(even) {
+  background: var(--paper);
+  height: 90px;
+  top: -170px;
+  transform-origin: 7px 170px;
+}
+
+@keyframes bps-ray {
+  0%   { opacity: 0; transform: rotate(calc(var(--i) * 30deg)) translateY(60px) scaleY(0.2); }
+  40%  { opacity: 1; }
+  100% { opacity: 0.9; transform: rotate(calc(var(--i) * 30deg)) translateY(0) scaleY(1); }
+}
+
+.levelup-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 260px;
+  padding: var(--space-6) var(--space-7) var(--space-5);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: 0 6px 0 var(--shadow-on-ink);
+  text-align: center;
+  animation: bps-level-pop 600ms var(--ease-bounce) both;
+}
+
+@keyframes bps-level-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.levelup-star {
+  position: absolute;
+  top: -26px;
+  display: inline-flex;
+  padding: var(--space-2);
+  background: var(--gold);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 50%;
+}
+.levelup-star .icon { width: 32px; height: 32px; }
+
+.levelup-kicker {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-4);
+  color: var(--gold-deep);
+}
+
+.levelup-level {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-6);
+  line-height: var(--lh-tight);
+}
+
+.levelup-title {
+  font-weight: var(--fw-black);
+  font-size: var(--fs-3);
+}
+
+.levelup-hint {
+  margin-top: var(--space-2);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .levelup-overlay,
+  .levelup-card,
+  .levelup-ray {
+    animation: none !important;
+  }
+}

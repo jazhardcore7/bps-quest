@@ -3,6 +3,7 @@ import './styles/style.css';
 import './firebase/client.js';
 import { Router } from './router.js';
 import { mountDevBar } from './ui/devbar.js';
+import { initLevelUp } from './ui/levelup.js';
 
 // 1. Mount Dev Bar conditionally only in DEV mode
 if (import.meta.env.DEV) {
@@ -29,11 +30,16 @@ export function updateStageScale() {
 
   const scale = Math.min(availWidth / 960, availHeight / 560);
   stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  // Read by the panel/leaderboard/office controls to stay >= 44px on screen (components.css).
+  stage.style.setProperty('--stage-scale', String(scale));
 }
 
 window.addEventListener('resize', updateStageScale);
 updateStageScale();
 
-// 3. Initialize Router (boots default route #/world)
+// 3. Level-up moment (watches the level in AppState)
+initLevelUp();
+
+// 4. Initialize Router (boots default route #/world)
 Router.init();
 

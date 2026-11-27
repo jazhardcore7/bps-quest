@@ -10,6 +10,7 @@ import { loadUnits, getCachedUnits, getChildUnits } from '../firebase/units.js';
 import { dailyPeriodKeyJakarta } from '../config.js';
 import { showToast } from './hud.js';
 import { escapeHtml } from './escape.js';
+import { icon } from './icons.js';
 
 let isPanelOpen = false;
 let panelCallback = null;
@@ -26,6 +27,9 @@ const INFO_ROWS = [
   'Fasilitas & Layanan',
   'Papan Informasi Terkini'
 ];
+
+// Presentation only: icon per access row (same order as INFO_ROWS).
+const INFO_ROW_ICONS = ['fileText', 'users', 'house', 'calendar'];
 
 function findUnit(units, unitId) {
   return (units || []).find((u) => u.id === unitId) || null;
@@ -50,8 +54,9 @@ function renderMainContentHtml(unitId, unitData, unitsList) {
     const rowTitle = INFO_ROWS[i];
     rowsHtml += '' +
       '<button type="button" class="info-row-btn" data-row-title="' + escapeHtml(rowTitle) + '">' +
+        '<span class="info-row-icon" aria-hidden="true">' + icon(INFO_ROW_ICONS[i] || 'info') + '</span>' +
         '<span class="info-row-label">' + escapeHtml(rowTitle) + '</span>' +
-        '<span class="info-row-arrow" aria-hidden="true">&#8250;</span>' +
+        '<span class="info-row-arrow" aria-hidden="true">' + icon('chevronRight') + '</span>' +
       '</button>';
   }
 
@@ -62,8 +67,8 @@ function renderMainContentHtml(unitId, unitData, unitsList) {
   if (canStart) {
     footerHtml = '' +
       '<div class="info-panel-footer">' +
-        '<button type="button" class="btn-start-quest" id="btn-open-quests">' +
-          'Mulai Quest' +
+        '<button type="button" class="btn btn--primary btn--lg btn--block btn-start-quest" id="btn-open-quests">' +
+          icon('flag') + 'Mulai Quest' +
         '</button>' +
       '</div>';
   } else {
@@ -71,7 +76,8 @@ function renderMainContentHtml(unitId, unitData, unitsList) {
     footerHtml = '' +
       '<div class="info-panel-footer">' +
         '<div class="info-gray-note">' +
-          'Quest hanya tersedia untuk pegawai ' + escapeHtml(unitName) +
+          '<span class="info-gray-note-icon" aria-hidden="true">' + icon('lock') + '</span>' +
+          '<span>Quest hanya tersedia untuk pegawai ' + escapeHtml(unitName) + '</span>' +
         '</div>' +
       '</div>';
   }
@@ -79,13 +85,11 @@ function renderMainContentHtml(unitId, unitData, unitsList) {
   return '' +
     '<div class="info-main-view">' +
       '<div class="info-card-header">' +
+        '<h2 class="ribbon info-unit-title" id="info-panel-title">' + escapeHtml(unitName) + '</h2>' +
         '<div class="info-header-left">' +
-          '<h2 class="info-unit-title" id="info-panel-title">' + escapeHtml(unitName) + '</h2>' +
-          '<span class="info-parent-chip">' + escapeHtml(parentName) + '</span>' +
+          '<span class="pill info-parent-chip">' + escapeHtml(parentName) + '</span>' +
         '</div>' +
-        '<div class="info-header-right">' +
-          '<button type="button" class="info-card-close-btn" id="info-card-close" aria-label="Tutup panel">&times;</button>' +
-        '</div>' +
+        '<button type="button" class="btn btn--secondary btn--icon info-card-close-btn" id="info-card-close" aria-label="Tutup panel">' + icon('close') + '</button>' +
       '</div>' +
       '<p class="info-unit-desc">' + escapeHtml(summaryText) + '</p>' +
       (unit && unit.verified === false
@@ -159,10 +163,10 @@ function renderSubViewHtml(rowTitle, unit, unitsList) {
   return '' +
     '<div class="info-sub-view" data-active-row="' + escapeHtml(rowTitle) + '">' +
       '<div class="info-sub-header">' +
-        '<button type="button" class="info-sub-back-btn" id="info-sub-back" aria-label="Kembali ke menu utama">' +
-          '&#8592; Kembali' +
+        '<button type="button" class="btn btn--secondary info-sub-back-btn" id="info-sub-back" aria-label="Kembali ke menu utama">' +
+          icon('arrowLeft') + 'Kembali' +
         '</button>' +
-        '<button type="button" class="info-card-close-btn" id="info-sub-close" aria-label="Tutup panel">&times;</button>' +
+        '<button type="button" class="btn btn--secondary btn--icon info-card-close-btn" id="info-sub-close" aria-label="Tutup panel">' + icon('close') + '</button>' +
       '</div>' +
       '<h3 class="info-sub-title">' + escapeHtml(rowTitle) + '</h3>' +
       '<div class="info-sub-body">' +
@@ -283,13 +287,13 @@ async function showQuestSheet(card, unitId) {
     '<div class="quest-sheet-container">' +
       '<div class="quest-sheet-header">' +
         '<div class="quest-sheet-title-wrap">' +
-          '<button type="button" class="quest-sheet-back-btn" id="quest-sheet-back" aria-label="Kembali ke panel">&#8592;</button>' +
+          '<button type="button" class="btn btn--secondary btn--icon quest-sheet-back-btn" id="quest-sheet-back" aria-label="Kembali ke panel">' + icon('arrowLeft') + '</button>' +
           '<h3 class="quest-sheet-title">Quest tersedia</h3>' +
         '</div>' +
-        '<button type="button" class="info-card-close-btn" id="quest-sheet-close" aria-label="Tutup panel">&times;</button>' +
+        '<button type="button" class="btn btn--secondary btn--icon info-card-close-btn" id="quest-sheet-close" aria-label="Tutup panel">' + icon('close') + '</button>' +
       '</div>' +
-      '<div class="quest-sheet-list" id="quest-sheet-list">' +
-        '<div class="quest-loading-text">Memuat quest...</div>' +
+      '<div class="quest-sheet-list" id="quest-sheet-list" aria-live="polite">' +
+        '<div class="quest-loading-text">' + icon('spinner', { className: 'spin' }) + 'Memuat quest...</div>' +
       '</div>' +
     '</div>';
 
@@ -324,7 +328,7 @@ async function showQuestSheet(card, unitId) {
     if (!listEl || !isPanelOpen) return;
 
     if (!quests || quests.length === 0) {
-      listEl.innerHTML = '<div class="quest-empty-text">Belum ada quest aktif untuk unit ini.</div>';
+      listEl.innerHTML = '<div class="quest-empty-text">' + icon('flag', { size: 'l' }) + 'Belum ada quest aktif untuk unit ini.</div>';
       return;
     }
 
@@ -332,7 +336,7 @@ async function showQuestSheet(card, unitId) {
   } catch (err) {
     console.error('Failed to load quests:', err);
     if (listEl) {
-      listEl.innerHTML = '<div class="quest-empty-text" style="color: #DC2626;">Gagal memuat quest. Silakan coba lagi.</div>';
+      listEl.innerHTML = '<div class="quest-empty-text is-error">' + icon('alert', { size: 'l' }) + 'Gagal memuat quest. Silakan coba lagi.</div>';
     }
   }
 }
@@ -359,28 +363,26 @@ function renderQuestsList(listEl, quests, completions) {
     if (isCompleted) {
       actionHtml = '' +
         '<div class="quest-item-actions">' +
-          '<span class="quest-completed-badge">&#10003; Selesai</span>' +
-          '<span class="quest-item-xp">+' + quest.xp + ' XP</span>' +
+          '<span class="quest-completed-badge">' + icon('checkCircle', { size: 's' }) + 'Selesai</span>' +
         '</div>';
     } else if (quest.type === 'daily') {
       actionHtml = '' +
         '<div class="quest-item-actions">' +
-          '<button type="button" class="btn-claim-quest btn-claim-daily" data-quest-id="' + escapeHtml(quest.id) + '">' +
+          '<button type="button" class="btn btn--primary btn-claim-quest btn-claim-daily" data-quest-id="' + escapeHtml(quest.id) + '">' +
             'Selesaikan (+' + quest.xp + ' XP)' +
           '</button>' +
         '</div>';
     } else {
       actionHtml = '' +
-        '<div class="quest-item-actions">' +
-          '<span class="quest-item-xp">+' + quest.xp + ' XP</span>' +
-        '</div>';
+        '<div class="quest-item-actions"></div>';
 
       if (quest.quiz && Array.isArray(quest.quiz.options)) {
         const optionsHtml = quest.quiz.options
           .map((opt, idx) => `
             <label class="quiz-option-item" data-opt-idx="${idx}">
               <input type="radio" name="quiz-radio-${escapeHtml(quest.id)}" value="${idx}" />
-              <span>${escapeHtml(opt)}</span>
+              <span class="quiz-option-mark" aria-hidden="true"></span>
+              <span class="quiz-option-text">${escapeHtml(opt)}</span>
             </label>
           `)
           .join('');
@@ -391,9 +393,9 @@ function renderQuestsList(listEl, quests, completions) {
             '<div class="quiz-options-list" role="radiogroup" aria-label="Pilihan kuis">' +
               optionsHtml +
             '</div>' +
-            '<div class="quiz-error-msg" id="quiz-error-' + escapeHtml(quest.id) + '" style="display: none;"></div>' +
-            '<div style="margin-top: 4px;">' +
-              '<button type="button" class="btn-claim-quest btn-submit-quiz" data-quest-id="' + escapeHtml(quest.id) + '">' +
+            '<div class="quiz-error-msg" id="quiz-error-' + escapeHtml(quest.id) + '" role="alert" style="display: none;"></div>' +
+            '<div class="quiz-submit-row">' +
+              '<button type="button" class="btn btn--primary btn-claim-quest btn-submit-quiz" data-quest-id="' + escapeHtml(quest.id) + '">' +
                 'Kirim Jawaban' +
               '</button>' +
             '</div>' +
@@ -401,14 +403,27 @@ function renderQuestsList(listEl, quests, completions) {
       } else {
         actionHtml = '' +
           '<div class="quest-item-actions">' +
-            '<button type="button" class="btn-claim-quest btn-claim-checkpoint" data-quest-id="' + escapeHtml(quest.id) + '">' +
+            '<button type="button" class="btn btn--primary btn-claim-quest btn-claim-checkpoint" data-quest-id="' + escapeHtml(quest.id) + '">' +
               'Selesaikan (+' + quest.xp + ' XP)' +
             '</button>' +
           '</div>';
       }
     }
 
+    const typeLabel = quest.type === 'daily' ? 'Harian' : 'Checkpoint';
+    const stateHtml = isCompleted
+      ? ''
+      : '<span class="quest-state-tag">' + icon('star', { size: 's' }) + 'Tersedia</span>';
+    const xpValue = escapeHtml(String(quest.xp));
+
     itemEl.innerHTML = '' +
+      '<div class="quest-item-badges">' +
+        '<span class="quest-type-badge is-' + (quest.type === 'daily' ? 'daily' : 'checkpoint') + '">' +
+          icon(quest.type === 'daily' ? 'calendar' : 'flag', { size: 's' }) + typeLabel +
+        '</span>' +
+        '<span class="xp-badge quest-item-xp">' + icon('coin') + '+' + xpValue + ' XP</span>' +
+        stateHtml +
+      '</div>' +
       '<div class="quest-item-top">' +
         '<div class="quest-item-main">' +
           '<div class="quest-item-title">' + escapeHtml(quest.title) + '</div>' +
@@ -507,11 +522,8 @@ async function executeClaim(quest, buttonEl, itemEl) {
 
     showToast(`+${result.xp} XP`);
 
-    if (result.levelUp) {
-      setTimeout(() => {
-        showToast(`Selamat! Kamu naik ke Level ${result.newLevel}!`, 3200);
-      }, 1200);
-    }
+    // Level-up is celebrated by src/ui/levelup.js, which watches the level in
+    // AppState (updated by the user-profile snapshot after this claim).
 
     itemEl.classList.add('is-completed');
     const quizBox = itemEl.querySelector('.quiz-box');
@@ -522,8 +534,9 @@ async function executeClaim(quest, buttonEl, itemEl) {
     const actionArea = itemEl.querySelector('.quest-item-actions');
     if (actionArea) {
       actionArea.innerHTML = '' +
-        '<span class="quest-completed-badge">&#10003; Selesai</span>' +
-        '<span class="quest-item-xp">+' + quest.xp + ' XP</span>';
+        '<span class="quest-completed-badge">' + icon('checkCircle', { size: 's' }) + 'Selesai</span>';
+      const stateTag = itemEl.querySelector('.quest-state-tag');
+      if (stateTag) stateTag.remove();
     }
   } catch (err) {
     console.error('Claim error:', err);
