@@ -1,5 +1,6 @@
 // Reusable HUD components, icons, and toast notifications
 import { logout } from '../firebase/auth.js';
+import { escapeHtml } from './escape.js';
 
 let toastTimeout = null;
 
@@ -50,6 +51,7 @@ export function renderRightCard(state) {
     xpToNext: 500
   };
   const percent = Math.min(100, Math.max(0, Math.round((player.xp / player.xpToNext) * 100)));
+  const name = escapeHtml(player.displayName || 'Pegawai BPS');
 
   return '' +
     '<div class="hud-card hud-right-card" aria-label="Informasi Pemain">' +
@@ -57,8 +59,8 @@ export function renderRightCard(state) {
         icons.avatar +
       '</div>' +
       '<div class="hud-player-info">' +
-        '<div class="hud-player-name" title="' + (player.displayName || 'Pegawai BPS') + '">' +
-          (player.displayName || 'Pegawai BPS') +
+        '<div class="hud-player-name" title="' + name + '">' +
+          name +
         '</div>' +
         '<div class="hud-player-level">Level ' + player.level + ' · ' + player.title + '</div>' +
         '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +

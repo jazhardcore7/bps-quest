@@ -228,8 +228,11 @@ body.has-devbar #stage-viewport {
   z-index: 20;
 }
 
+/* Width follows the content: the avatar and the two action buttons take ~190px,
+   so a fixed 230px left only 38px for the name and level. */
 .hud-right-card {
-  width: 230px;
+  min-width: 230px;
+  max-width: 340px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1160,6 +1163,7 @@ body.has-devbar #stage-viewport {
 
 .login-divider span {
   padding: 0 10px;
+  color: #A0B2C6;
 }
 
 .login-google-btn {
@@ -1703,3 +1707,28 @@ body.has-devbar #stage-viewport {
   max-width: 380px;
 }
 
+/* ==========================================================================
+   Keyboard focus rings
+   These controls set outline: none above and had no other focus style.
+   Islands and Biro tiles sit on the light ocean or island grass (dark ring),
+   the D-pad and leaderboard controls on dark cards (gold ring), and the claim
+   buttons in the white quest sheet (blue ring).
+   ========================================================================== */
+.world-island:focus-visible,
+.biro-tile:focus-visible {
+  outline: 3px solid var(--color-page-bg);
+  outline-offset: 3px;
+}
+
+.dpad-btn:focus-visible,
+.lb-tab-btn:focus-visible,
+.lb-refresh-btn:focus-visible,
+.lb-chip-btn:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+.btn-claim-quest:focus-visible {
+  outline: 3px solid var(--color-biro-pill);
+  outline-offset: 2px;
+}

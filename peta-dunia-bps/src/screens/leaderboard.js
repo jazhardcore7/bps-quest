@@ -3,6 +3,8 @@ import { AppState } from '../state/index.js';
 import { Hud, icons } from '../ui/hud.js';
 import { auth } from '../firebase/client.js';
 import { Router } from '../router.js';
+import { escapeHtml } from '../ui/escape.js';
+import { weekKeyJakarta, monthKeyJakarta } from '../config.js';
 import {
   fetchLeaderboard,
   sortLeaderboardUsers,
@@ -14,6 +16,18 @@ let unsubscribeState = null;
 // Unit label shared by the ranked rows and the pinned "Kamu" row.
 function unitLabel(unit) {
   return unit === 'biro-sdm' ? 'Biro SDM' : (unit === 'biro-umum' ? 'Biro Umum' : (unit || 'BPS'));
+}
+
+// XP fields for the pinned row, read from the user's own profile. Weekly and
+// monthly XP from an earlier week or month count as 0, as in the queries.
+function ownPeriodStats(userDoc) {
+  const u = userDoc || {};
+  const now = new Date();
+  return {
+    xp: u.xp,
+    xpWeek: u.weekKey === weekKeyJakarta(now) ? u.xpWeek : 0,
+    xpMonth: u.monthKey === monthKeyJakarta(now) ? u.xpMonth : 0
+  };
 }
 
 export const LeaderboardScreen = {
@@ -264,8 +278,8 @@ export const LeaderboardScreen = {
           '<div class="lb-col-rank">' + rankBadgeHtml + '</div>' +
           '<div class="lb-col-avatar">' + icons.avatar + '</div>' +
           '<div class="lb-col-user">' +
-            '<div class="lb-user-name">' + (u.displayName || 'Pegawai BPS') + (isCurrentUser ? ' <span class="lb-you-tag">(Kamu)</span>' : '') + '</div>' +
-            '<div class="lb-user-unit">' + unitLabel(u.unit) + '</div>' +
+            '<div class="lb-user-name">' + escapeHtml(u.displayName || 'Pegawai BPS') + (isCurrentUser ? ' <span class="lb-you-tag">(Kamu)</span>' : '') + '</div>' +
+            '<div class="lb-user-unit">' + escapeHtml(unitLabel(u.unit)) + '</div>' +
           '</div>' +
           '<div class="lb-col-level">' +
             '<span class="lb-level-chip">Level ' + level + '</span>' +
@@ -283,7 +297,7 @@ export const LeaderboardScreen = {
     if (pinnedWrap) {
       if (currentUid && !currentUserInList && AppState.player) {
         const player = AppState.player;
-        const myPeriodXp = this.getPeriodXp(player);
+        const myPeriodXp = this.getPeriodXp(ownPeriodStats(AppState.user));
         const myLevel = player.level || 1;
         const myUnit = unitLabel(player.unit);
 
@@ -300,8 +314,8 @@ export const LeaderboardScreen = {
             '<div class="lb-col-rank"><span class="rank-badge rank-num">' + myOverallRank + '</span></div>' +
             '<div class="lb-col-avatar">' + icons.avatar + '</div>' +
             '<div class="lb-col-user">' +
-              '<div class="lb-user-name">' + (player.displayName || 'Pegawai BPS') + ' <span class="lb-you-tag">(Kamu)</span></div>' +
-              '<div class="lb-user-unit">' + myUnit + ' · Di luar daftar terlihat</div>' +
+              '<div class="lb-user-name">' + escapeHtml(player.displayName || 'Pegawai BPS') + ' <span class="lb-you-tag">(Kamu)</span></div>' +
+              '<div class="lb-user-unit">' + escapeHtml(myUnit) + ' · Di luar daftar terlihat</div>' +
             '</div>' +
             '<div class="lb-col-level"><span class="lb-level-chip">Level ' + myLevel + '</span></div>' +
             '<div class="lb-col-xp"><span class="lb-xp-badge">+' + myPeriodXp + ' XP</span></div>' +

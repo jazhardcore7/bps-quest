@@ -83,13 +83,27 @@ export function mapAuthError(error) {
   }
 }
 
+// On sign-in, both the login call and the auth listener ensure the profile.
+// They share one run per uid; otherwise on first login both try to create
+// users/{uid} and the loser's write is denied by the rules.
+const profileRuns = new Map();
+
 /**
  * Ensures a user profile exists in Firestore.
  * If user exists in users/{uid}, loads it into AppState.
  * If first login: checks allowedEmails/{lowercasedEmail}. If allowed, provisions users/{uid}.
  * If not allowed: signs out immediately and throws NOT_ALLOWED_MESSAGE.
  */
-export async function ensureUserProfile(user) {
+export function ensureUserProfile(user) {
+  const uid = user && user.uid;
+  if (!uid) return provisionUserProfile(user);
+  if (!profileRuns.has(uid)) {
+    profileRuns.set(uid, provisionUserProfile(user).finally(() => profileRuns.delete(uid)));
+  }
+  return profileRuns.get(uid);
+}
+
+async function provisionUserProfile(user) {
   if (!user || !user.email) {
     throw new Error('Pengguna tidak valid atau tidak memiliki email.');
   }

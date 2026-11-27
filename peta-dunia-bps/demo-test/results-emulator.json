@@ -1,0 +1,443 @@
+[
+  {
+    "id": "AUTH-01",
+    "group": "Auth",
+    "name": "Daftar pegawai allowlist (Biro SDM), verifikasi, login pertama",
+    "expected": "Profil users/{uid} dibuat setelah verifikasi, unit biro-sdm, role employee",
+    "actual": "profil dibuat: unit=biro-sdm, role=employee, xp=0",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "AUTH-02",
+    "group": "Auth",
+    "name": "Daftar dengan email allowlist TANPA verifikasi email",
+    "expected": "Email verifikasi terkirim, tidak login, profil tidak dibuat (klien maupun tulis langsung)",
+    "actual": "daftar: \"Akun dibuat. Buka tautan verifikasi yang dikirim ke email kamu, lalu masuk.\"; email verifikasi=1; currentUser=null; login: \"Email kamu belum diverifikasi. Kami kirim ulang tautan verifikasi; buka tautan itu lalu masuk lagi.\" (email dikirim ulang, total 2); profil ada=false; tulis langsung: permission-denied",
+    "status": "PASS",
+    "evidence": "src/firebase/auth.js (registerWithEmail, ensureUserProfile), firestore.rules (isEmailVerified)"
+  },
+  {
+    "id": "AUTH-03",
+    "group": "Auth",
+    "name": "Login dengan huruf besar/kecil campur dan spasi",
+    "expected": "Login berhasil (email dinormalisasi ke huruf kecil)",
+    "actual": "berhasil, email profil=pegawai1@bps.go.id",
+    "status": "PASS",
+    "evidence": "src/firebase/auth.js:183"
+  },
+  {
+    "id": "AUTH-04",
+    "group": "Auth",
+    "name": "Kata sandi salah",
+    "expected": "Ditolak, pesan \"Email atau kata sandi salah.\"",
+    "actual": "auth/wrong-password -> \"Email atau kata sandi salah.\"",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "AUTH-05",
+    "group": "Auth",
+    "name": "Daftar dengan email di luar allowlist",
+    "expected": "Ditolak dengan NOT_ALLOWED_MESSAGE, tidak login, akun Auth dihapus",
+    "actual": "\"Email kamu belum terdaftar. Hubungi admin Biro SDM.\"; currentUser=null; login ulang: auth/user-not-found",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "AUTH-06",
+    "group": "Auth",
+    "name": "Admin allowlist daftar tanpa verifikasi lalu menulis quest",
+    "expected": "Pendaftaran butuh verifikasi; token admin belum terverifikasi tidak bisa menulis quest",
+    "actual": "daftar: \"Akun dibuat. Buka tautan verifikasi yang dikirim ke email kamu, lalu masuk.\"; tulis quests (xp 1000) dengan token belum terverifikasi: permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules (isUserAdmin memakai isEmailVerified)"
+  },
+  {
+    "id": "AUTH-06b",
+    "group": "Auth",
+    "name": "Admin terverifikasi menulis quest",
+    "expected": "Diizinkan",
+    "actual": "login role=admin; tulis quests: diizinkan",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "AUTH-07",
+    "group": "Auth",
+    "name": "Daftar pegawai allowlist unit lain (Biro Umum)",
+    "expected": "Profil unit biro-umum",
+    "actual": "unit=biro-umum",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "AUTH-08",
+    "group": "Auth",
+    "name": "Buat profil sendiri dengan role admin / xp 5000 / unit lain",
+    "expected": "Ketiganya ditolak rules",
+    "actual": "role admin: permission-denied; xp 5000: permission-denied; unit lain: permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:104-117"
+  },
+  {
+    "id": "DN-01",
+    "group": "Auth",
+    "name": "Daftar dengan nama allowlist berisi HTML dan spasi ganda",
+    "expected": "Profil dibuat; displayName dinormalisasi menjadi \"bNama/b Kotor\"",
+    "actual": "profil dibuat, displayName=\"bNama/b Kotor\"",
+    "status": "PASS",
+    "evidence": "src/config.js (normalizeDisplayName), src/firebase/auth.js:159, firestore.rules:108-111"
+  },
+  {
+    "id": "DN-02",
+    "group": "Auth",
+    "name": "Daftar dengan nama allowlist kosong",
+    "expected": "Profil dibuat; displayName = \"tanpa.nama\"",
+    "actual": "profil dibuat, displayName=\"tanpa.nama\"",
+    "status": "PASS",
+    "evidence": "src/config.js (normalizeDisplayName)"
+  },
+  {
+    "id": "AUTH-14",
+    "group": "Auth",
+    "name": "Login pertama: dua panggilan ensureUserProfile bersamaan (login + listener auth)",
+    "expected": "Keduanya berhasil dengan profil yang sama; tidak ada permission-denied",
+    "actual": "daftar: verifikasi dikirim; hasil: fulfilled, fulfilled; profil ada=true",
+    "status": "PASS",
+    "evidence": "src/firebase/auth.js (ensureUserProfile), src/router.js:42-64"
+  },
+  {
+    "id": "AUTH-13s",
+    "group": "Auth",
+    "name": "Login Google (kredensial uji emulator): email allowlist dan email luar",
+    "expected": "Allowlist: profil dibuat dari allowlist; luar: pesan allowlist, akun Auth dihapus, tidak login",
+    "actual": "allowlist: profil displayName=\"Penguji Google\", unit=biro-sdm; luar: \"Email kamu belum terdaftar. Hubungi admin Biro SDM.\", akun tersisa=false, currentUser=null",
+    "status": "PASS",
+    "evidence": "src/firebase/auth.js (ensureUserProfile); popup UI tetap MANUAL"
+  },
+  {
+    "id": "QX-00",
+    "group": "Quests",
+    "name": "Pegawai membaca quest unit",
+    "expected": "3 quest aktif terbaca",
+    "actual": "3 quest: quest-checkpoint-1, quest-checkpoint-2, quest-daily-1",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-01",
+    "group": "Quests",
+    "name": "Jawaban kuis tidak boleh terbaca klien",
+    "expected": "quiz.correctIndex tidak ada di data yang dibaca klien",
+    "actual": "terbaca: quest-checkpoint-1.correctIndex=0; quest-checkpoint-2.correctIndex=1",
+    "status": "FAIL",
+    "evidence": "firestore.rules:70-71, src/ui/panel.js:421"
+  },
+  {
+    "id": "QX-02",
+    "group": "Quests",
+    "name": "Klaim quest harian (claimQuest)",
+    "expected": "+20 XP, completion {uid}_quest-daily-1_2026-11-27 dibuat",
+    "actual": "xp=20, xpWeek=20, xpMonth=20, completion ada=true",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-03",
+    "group": "Quests",
+    "name": "Klaim harian kedua di hari yang sama (claimQuest)",
+    "expected": "Ditolak: \"Quest sudah diselesaikan pada periode ini.\"",
+    "actual": "Quest sudah diselesaikan pada periode ini.",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-04",
+    "group": "Quests",
+    "name": "Klaim harian kedua lewat batch langsung (lewati cek klien)",
+    "expected": "Ditolak rules (completion sudah ada)",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:82"
+  },
+  {
+    "id": "QX-05",
+    "group": "Quests",
+    "name": "Klaim harian dengan periodKey palsu (3x)",
+    "expected": "Semua ditolak rules",
+    "actual": "2020-01-01: permission-denied; 2020-01-02: permission-denied; 1999-12-31: permission-denied; xp 20 -> 20",
+    "status": "PASS",
+    "evidence": "firestore.rules:43-47, :86-88 (isValidPeriodKey)"
+  },
+  {
+    "id": "QX-06",
+    "group": "Quests",
+    "name": "Klaim checkpoint (setelah jawaban benar di UI)",
+    "expected": "+50 XP sekali",
+    "actual": "+50, xp baru 70",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-07",
+    "group": "Quests",
+    "name": "Klaim checkpoint kedua (claimQuest)",
+    "expected": "Ditolak",
+    "actual": "Quest sudah diselesaikan pada periode ini.",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-08",
+    "group": "Quests",
+    "name": "Klaim checkpoint ulang dengan periodKey palsu \"once-lagi\"",
+    "expected": "Ditolak rules",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:43-47"
+  },
+  {
+    "id": "QX-09",
+    "group": "Quests",
+    "name": "Edit xp langsung (updateDoc xp=99999)",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-10",
+    "group": "Quests",
+    "name": "Naikkan xp dengan lastCompletionId lama (pakai ulang)",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:135"
+  },
+  {
+    "id": "QX-11",
+    "group": "Quests",
+    "name": "Batch dengan completion 20 XP tapi user +500 XP",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:136"
+  },
+  {
+    "id": "QX-12",
+    "group": "Quests",
+    "name": "Completion dengan xp 999 (beda dari quest)",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:89"
+  },
+  {
+    "id": "QX-13",
+    "group": "Quests",
+    "name": "Ubah displayName sendiri setelah profil dibuat",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:121-123"
+  },
+  {
+    "id": "QX-14",
+    "group": "Quests",
+    "name": "Ubah avatarId saja",
+    "expected": "Diizinkan",
+    "actual": "diizinkan",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-15",
+    "group": "Quests",
+    "name": "Pegawai non-admin menulis quests (buat baru / ubah xp) dan units",
+    "expected": "Semua ditolak",
+    "actual": "buat: permission-denied; ubah xp: permission-denied; units: permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:66, :72"
+  },
+  {
+    "id": "QX-16",
+    "group": "Quests",
+    "name": "Baca allowlist: list / email orang lain / email sendiri",
+    "expected": "list ditolak, orang lain ditolak, sendiri boleh",
+    "actual": "list: permission-denied; admin: permission-denied; sendiri: boleh",
+    "status": "PASS",
+    "evidence": "firestore.rules:153-156"
+  },
+  {
+    "id": "QX-17",
+    "group": "Quests",
+    "name": "Pegawai Biro Umum klaim quest Biro SDM",
+    "expected": "Ditolak rules",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:91"
+  },
+  {
+    "id": "QX-18",
+    "group": "Quests",
+    "name": "Pegawai Biro Umum memalsukan unitId completion",
+    "expected": "Ditolak rules",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:90"
+  },
+  {
+    "id": "QX-19",
+    "group": "Quests",
+    "name": "Naik level saat melewati 500 XP (490 -> 510)",
+    "expected": "Klaim diterima rules, level=2, levelUp=true",
+    "actual": "levelUp=true, oldLevel=1, newLevel=2, tersimpan xp=510 level=2",
+    "status": "PASS",
+    "evidence": "firestore.rules:137, src/firebase/quests.js:117-120"
+  },
+  {
+    "id": "QX-20",
+    "group": "Quests",
+    "name": "Tepat 500 XP (450 + 50)",
+    "expected": "Level 2",
+    "actual": "xp=500, level=2",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-21",
+    "group": "Quests",
+    "name": "Rollover minggu & bulan (weekKey/monthKey lama)",
+    "expected": "xpWeek=20, xpMonth=20, weekKey=2026-W48, monthKey=2026-11, xp=320",
+    "actual": "xp=320, weekKey=2026-W48, xpWeek=20, monthKey=2026-11, xpMonth=20",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-22",
+    "group": "Quests",
+    "name": "Increment dalam periode yang sama (+30)",
+    "expected": "xpWeek=50, xpMonth=50",
+    "actual": "xpWeek=50, xpMonth=50",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "QX-23",
+    "group": "Quests",
+    "name": "Baca users tanpa login",
+    "expected": "Ditolak",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-09a",
+    "group": "Leaderboard",
+    "name": "Rules: buat profil dengan displayName berisi HTML",
+    "expected": "Ditolak (displayName 1-60 karakter, tanpa < atau >)",
+    "actual": "permission-denied",
+    "status": "PASS",
+    "evidence": "firestore.rules:108-111"
+  },
+  {
+    "id": "LB-09c",
+    "group": "Leaderboard",
+    "name": "Rules: nama dengan tanda kutip (tanpa < >) diterima dan tersimpan apa adanya",
+    "expected": "Diizinkan (sesuai aturan); aman hanya jika tampilan meng-escape nama (LBU-07b)",
+    "actual": "diizinkan; klaim harian berhasil",
+    "status": "PASS",
+    "evidence": "firestore.rules:108-111"
+  },
+  {
+    "id": "LB-01",
+    "group": "Leaderboard",
+    "name": "Tab Sepanjang Waktu: urutan xp desc",
+    "expected": "Terurut xp desc, tie -> xp total -> nama",
+    "actual": "Hendra Veteran(600) > Penguji Level(500) > Andi Pratama(450) > Dewi Lestari(350) > Penguji Rollover(350) > Rian Hidayat(200) > Citra Ayu(100) > Doni Kurniawan(100) > Budi Santoso(70) > Uji\" onmouseover=\"alert(1)(20)",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-02",
+    "group": "Leaderboard",
+    "name": "Tab Mingguan: urutan xpWeek desc",
+    "expected": "Terurut",
+    "actual": "Andi Pratama(120) > Dewi Lestari(80) > Rian Hidayat(80) > Penguji Level(70) > Budi Santoso(70) > Penguji Rollover(50) > Citra Ayu(40) > Doni Kurniawan(40) > Uji\" onmouseover=\"alert(1)(20)",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-03",
+    "group": "Leaderboard",
+    "name": "Tab Bulanan: urutan xpMonth desc",
+    "expected": "Terurut",
+    "actual": "Andi Pratama(250) > Dewi Lestari(180) > Rian Hidayat(150) > Hendra Veteran(100) > Citra Ayu(100) > Doni Kurniawan(100) > Penguji Level(70) > Budi Santoso(70) > Penguji Rollover(50) > Uji\" onmouseover=\"alert(1)(20)",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-04",
+    "group": "Leaderboard",
+    "name": "User dengan weekKey lama (Hendra, 2026-W01) tidak muncul di Mingguan",
+    "expected": "Tidak ada di Mingguan, ada di Sepanjang Waktu",
+    "actual": "Mingguan: tidak ada; Sepanjang Waktu: ada",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-05",
+    "group": "Leaderboard",
+    "name": "Tie-break (Citra vs Doni, xpWeek 40, xp 100)",
+    "expected": "Citra Ayu sebelum Doni Kurniawan (alfabet)",
+    "actual": "Citra Ayu, Doni Kurniawan",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-06",
+    "group": "Leaderboard",
+    "name": "Filter unit Biro SDM",
+    "expected": "Hanya unit biro-sdm",
+    "actual": "14/16 user, unit: biro-sdm",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-07",
+    "group": "Leaderboard",
+    "name": "Cache 60 detik dan Segarkan",
+    "expected": "Panggilan ke-2 dari cache; setelah 61 detik dan forceReload ambil ulang",
+    "actual": "ke-2 sama (cache)=true; setelah 61 dtk baru=true; forceReload baru=true",
+    "status": "PASS",
+    "evidence": "src/firebase/leaderboard.js:37-43"
+  },
+  {
+    "id": "LB-08",
+    "group": "Leaderboard",
+    "name": "Jumlah dokumen dibaca per tab (data seed)",
+    "expected": "<= 60 per tab",
+    "actual": "all-time=16, weekly=15, monthly=16",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-09b",
+    "group": "Leaderboard",
+    "name": "Nama HTML tidak sampai ke data leaderboard",
+    "expected": "Tidak ada (profil ditolak di LB-09a)",
+    "actual": "tidak ada",
+    "status": "PASS",
+    "evidence": ""
+  },
+  {
+    "id": "LB-10",
+    "group": "Leaderboard",
+    "name": "Batas 60 dokumen per tab dengan 80+ user",
+    "expected": "<= 60 dokumen per tab",
+    "actual": "all-time=60, weekly=60, monthly=60",
+    "status": "PASS",
+    "evidence": "src/firebase/leaderboard.js:55, :63, :70 (limit 60)"
+  }
+]

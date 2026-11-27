@@ -16,6 +16,7 @@ let previousActiveElement = null;
 let currentUnitName = 'Biro SDM';
 let cachedUnitData = null;
 let keydownHandler = null;
+let unsubscribeQuestAccess = null;
 
 const INFO_ROWS = [
   'Profil & Tugas Fungsi',
@@ -510,6 +511,22 @@ export function openInfoPanel(buildingUnit) {
 
   wireMainViewEvents(card, currentUnitName);
 
+  // The unit can change while the panel is open (DEV unit selector). Redraw the
+  // main view when quest access changes so the footer matches canStartQuest.
+  let canStart = AppState.canStartQuest(currentUnitName);
+  unsubscribeQuestAccess = AppState.subscribe(() => {
+    const now = AppState.canStartQuest(currentUnitName);
+    if (now === canStart) return;
+    canStart = now;
+    if (card.querySelector('.info-main-view')) {
+      const hadFocus = card.contains(document.activeElement);
+      card.innerHTML = renderMainContentHtml(currentUnitName);
+      wireMainViewEvents(card, currentUnitName);
+      const closeBtn = card.querySelector('#info-card-close');
+      if (hadFocus && closeBtn) closeBtn.focus();
+    }
+  });
+
   // Asynchronously populate real unit details from Firestore if available
   fetchUnitData(currentUnitName).then((unitData) => {
     if (unitData) {
@@ -551,6 +568,11 @@ export function openInfoPanel(buildingUnit) {
 export function closeInfoPanel() {
   if (!isPanelOpen) return;
   isPanelOpen = false;
+
+  if (unsubscribeQuestAccess) {
+    unsubscribeQuestAccess();
+    unsubscribeQuestAccess = null;
+  }
 
   untrapFocus();
 
