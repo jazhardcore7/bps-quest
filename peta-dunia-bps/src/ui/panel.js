@@ -431,6 +431,19 @@ function wireQuestCardEvents(itemEl, quest) {
   }
 }
 
+// Friendly claim error text; raw Firestore messages are never shown.
+function claimErrorMessage(err) {
+  const code = (err && err.code) || '';
+  if (code === 'permission-denied') {
+    return 'Klaim ditolak. Quest ini mungkin sudah kamu selesaikan atau belum tersedia untuk unitmu.';
+  }
+  const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+  if (code === 'unavailable' || code === 'deadline-exceeded' || code === 'auth/network-request-failed' || offline) {
+    return 'Koneksi bermasalah. Coba lagi sebentar lagi.';
+  }
+  return 'Klaim gagal. Coba lagi nanti.';
+}
+
 async function executeClaim(quest, buttonEl, itemEl) {
   if (buttonEl.disabled) return;
   buttonEl.disabled = true;
@@ -465,7 +478,7 @@ async function executeClaim(quest, buttonEl, itemEl) {
     }
   } catch (err) {
     console.error('Claim error:', err);
-    showToast('Gagal klaim quest: ' + (err.message || 'Terjadi kesalahan'));
+    showToast(claimErrorMessage(err));
     buttonEl.disabled = false;
     buttonEl.textContent = originalText;
   }
@@ -563,10 +576,5 @@ export function setPanelCallback(fn) {
 
 export function isInfoPanelOpen() {
   return isPanelOpen;
-}
-
-if (typeof window !== 'undefined') {
-  window.openInfoPanel = openInfoPanel;
-  window.closeInfoPanel = closeInfoPanel;
 }
 

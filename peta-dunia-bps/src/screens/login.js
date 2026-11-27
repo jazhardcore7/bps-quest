@@ -1,5 +1,5 @@
 // Login and Registration Screen (#/login)
-import { loginWithEmail, registerWithEmail, loginWithGoogle, mapAuthError } from '../firebase/auth.js';
+import { loginWithEmail, registerWithEmail, loginWithGoogle, mapAuthError, VERIFY_SENT_MESSAGE } from '../firebase/auth.js';
 
 export const LoginScreen = {
   container: null,
@@ -41,6 +41,7 @@ export const LoginScreen = {
           </div>
 
           <div id="login-error" class="login-error-alert" role="alert" style="display: none;"></div>
+          <div id="login-info" class="login-info-alert" role="status" style="display: none;"></div>
 
           <form id="login-form" class="login-form" novalidate>
             <div class="login-field">
@@ -98,20 +99,39 @@ export const LoginScreen = {
     this.bindEvents();
   },
 
+  setMessage(selector, message) {
+    const el = this.container ? this.container.querySelector(selector) : null;
+    if (el) {
+      el.textContent = message;
+      el.style.display = message ? 'block' : 'none';
+    }
+  },
+
   showError(message) {
-    const errorEl = this.container ? this.container.querySelector('#login-error') : null;
-    if (errorEl) {
-      errorEl.textContent = message;
-      errorEl.style.display = 'block';
+    this.setMessage('#login-info', '');
+    this.setMessage('#login-error', message);
+  },
+
+  // Neutral notice (role="status"), e.g. "verification link sent".
+  showInfo(message) {
+    this.setMessage('#login-error', '');
+    this.setMessage('#login-info', message);
+  },
+
+  // Shows the auth outcome: the "account created, verify" notice is info,
+  // everything else is an error.
+  showAuthResult(err) {
+    const message = mapAuthError(err);
+    if (message === VERIFY_SENT_MESSAGE) {
+      this.showInfo(message);
+    } else {
+      this.showError(message);
     }
   },
 
   clearError() {
-    const errorEl = this.container ? this.container.querySelector('#login-error') : null;
-    if (errorEl) {
-      errorEl.textContent = '';
-      errorEl.style.display = 'none';
-    }
+    this.setMessage('#login-error', '');
+    this.setMessage('#login-info', '');
   },
 
   setLoading(isLoading) {
@@ -170,7 +190,7 @@ export const LoginScreen = {
           window.location.hash = '#/world';
         } catch (err) {
           console.warn('Login/Register error:', err);
-          this.showError(mapAuthError(err));
+          this.showAuthResult(err);
           this.setLoading(false);
         }
       });

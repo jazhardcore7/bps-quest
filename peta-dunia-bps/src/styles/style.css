@@ -1056,7 +1056,8 @@ body.has-devbar #stage-viewport {
   line-height: 1.4;
 }
 
-.login-error-alert {
+.login-error-alert,
+.login-info-alert {
   width: 100%;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid #EF4444;
@@ -1069,6 +1070,13 @@ body.has-devbar #stage-viewport {
   margin-bottom: 16px;
   line-height: 1.4;
   box-sizing: border-box;
+}
+
+/* Neutral notice (e.g. verification link sent); errors keep the red style. */
+.login-info-alert {
+  background: rgba(94, 195, 240, 0.12);
+  border-color: var(--color-ocean-top);
+  color: var(--color-card-subtext);
 }
 
 .login-form {

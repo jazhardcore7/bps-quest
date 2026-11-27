@@ -11,6 +11,11 @@ import {
 
 let unsubscribeState = null;
 
+// Unit label shared by the ranked rows and the pinned "Kamu" row.
+function unitLabel(unit) {
+  return unit === 'biro-sdm' ? 'Biro SDM' : (unit === 'biro-umum' ? 'Biro Umum' : (unit || 'BPS'));
+}
+
 export const LeaderboardScreen = {
   container: null,
   activeTab: 'all-time',
@@ -242,7 +247,6 @@ export const LeaderboardScreen = {
 
       const periodXp = this.getPeriodXp(u);
       const level = typeof u.level === 'number' ? u.level : 1;
-      const unitLabel = u.unit === 'biro-sdm' ? 'Biro SDM' : (u.unit === 'biro-umum' ? 'Biro Umum' : (u.unit || 'BPS'));
 
       let rankBadgeHtml = '';
       if (rank === 1) {
@@ -261,7 +265,7 @@ export const LeaderboardScreen = {
           '<div class="lb-col-avatar">' + icons.avatar + '</div>' +
           '<div class="lb-col-user">' +
             '<div class="lb-user-name">' + (u.displayName || 'Pegawai BPS') + (isCurrentUser ? ' <span class="lb-you-tag">(Kamu)</span>' : '') + '</div>' +
-            '<div class="lb-user-unit">' + unitLabel + '</div>' +
+            '<div class="lb-user-unit">' + unitLabel(u.unit) + '</div>' +
           '</div>' +
           '<div class="lb-col-level">' +
             '<span class="lb-level-chip">Level ' + level + '</span>' +
@@ -281,7 +285,7 @@ export const LeaderboardScreen = {
         const player = AppState.player;
         const myPeriodXp = this.getPeriodXp(player);
         const myLevel = player.level || 1;
-        const myUnit = player.unit === 'biro-sdm' ? 'Biro SDM' : (player.unit === 'biro-umum' ? 'Biro Umum' : (player.unit || 'BPS'));
+        const myUnit = unitLabel(player.unit);
 
         // Determine if user has a rank in the broader unfiltered/all list
         let myOverallRank = '-';

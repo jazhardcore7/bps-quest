@@ -13,6 +13,7 @@ export const AppState = {
   player: {
     displayName: 'Pegawai BPS',
     email: '',
+    unit: '',
     role: 'employee',
     level: 1,
     title: 'Explorer',
@@ -43,6 +44,7 @@ export const AppState = {
       this.player = {
         displayName: userDoc.displayName || 'Pegawai BPS',
         email: userDoc.email || '',
+        unit: userDoc.unit || '',
         role: userDoc.role || 'employee',
         level,
         title: userDoc.role === 'admin' ? 'Administrator' : 'Explorer',
@@ -63,6 +65,7 @@ export const AppState = {
     this.player = {
       displayName: '',
       email: '',
+      unit: '',
       role: 'employee',
       level: 1,
       title: 'Explorer',
