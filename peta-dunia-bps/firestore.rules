@@ -12,7 +12,7 @@ service cloud.firestore {
     }
 
     function userEmail() {
-      return request.auth.token.email;
+      return request.auth.token.email.lower();
     }
 
     function userDoc(uid) {
@@ -20,9 +20,51 @@ service cloud.firestore {
     }
 
     // Email/password accounts must verify their address before they can create
-    // a profile or act as admin (Google accounts arrive already verified).
+    // a profile or act with elevated roles (Google accounts arrive already verified).
     function isEmailVerified() {
       return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isActiveData(data) {
+      return !('active' in data) || data.active == true;
+    }
+
+    function hasVerifiedActiveProfile() {
+      return isEmailVerified()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && isActiveData(userDoc(request.auth.uid));
+    }
+
+    function isSuperAdmin() {
+      return hasVerifiedActiveProfile()
+        && userDoc(request.auth.uid).role in ['super_admin', 'admin'];
+    }
+
+    function isHead() {
+      return hasVerifiedActiveProfile()
+        && userDoc(request.auth.uid).role in ['head_e2', 'head_e1', 'head_top'];
+    }
+
+    function isValidRole(role) {
+      return role in ['employee', 'head_e2', 'head_e1', 'head_top', 'super_admin', 'admin'];
+    }
+
+    function inScopeUnitData(unitId, unitData) {
+      return unitId == userDoc(request.auth.uid).unit
+        || userDoc(request.auth.uid).unit in unitData.ancestorIds;
+    }
+
+    function inScope(unitId) {
+      return unitId == userDoc(request.auth.uid).unit
+        || (exists(/databases/$(database)/documents/units/$(unitId))
+            && userDoc(request.auth.uid).unit in get(/databases/$(database)/documents/units/$(unitId)).data.ancestorIds);
+    }
+
+    function hasValidUnitPath(unitId, unitPath) {
+      return unitId is string
+        && unitId.size() > 0
+        && exists(/databases/$(database)/documents/units/$(unitId))
+        && unitPath == get(/databases/$(database)/documents/units/$(unitId)).data.ancestorIds.concat([unitId]);
     }
 
     // Two-digit zero padding for date parts.
@@ -46,12 +88,6 @@ service cloud.firestore {
         : periodKey == 'once';
     }
 
-    function isUserAdmin() {
-      return isEmailVerified()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && userDoc(request.auth.uid).role == 'admin';
-    }
-
     function allowlistDoc() {
       return get(/databases/$(database)/documents/allowedEmails/$(userEmail()));
     }
@@ -60,16 +96,140 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/allowedEmails/$(userEmail()));
     }
 
+    function isValidQuizOptions(opts) {
+      return opts is list
+        && opts.size() >= 2
+        && opts.size() <= 4
+        && opts[0] is string && opts[0].size() >= 1 && opts[0].size() <= 100
+        && opts[1] is string && opts[1].size() >= 1 && opts[1].size() <= 100
+        && (opts.size() < 3 || (opts[2] is string && opts[2].size() >= 1 && opts[2].size() <= 100))
+        && (opts.size() < 4 || (opts[3] is string && opts[3].size() >= 1 && opts[3].size() <= 100));
+    }
+
+    function isValidQuiz(quiz) {
+      return quiz is map
+        && quiz.keys().hasAll(['question', 'options', 'correctIndex'])
+        && quiz.question is string
+        && quiz.question.size() >= 3
+        && quiz.question.size() <= 200
+        && isValidQuizOptions(quiz.options)
+        && quiz.correctIndex is int
+        && quiz.correctIndex >= 0
+        && quiz.correctIndex < quiz.options.size();
+    }
+
+    function isValidQuestData(data, maxXp) {
+      return data.unitId is string
+        && data.unitId.size() > 0
+        && exists(/databases/$(database)/documents/units/$(data.unitId))
+        && data.title is string
+        && data.title.size() >= 3
+        && data.title.size() <= 80
+        && data.description is string
+        && data.description.size() <= 300
+        && data.type in ['daily', 'checkpoint']
+        && data.active is bool
+        && data.xp is int
+        && data.xp >= 1
+        && data.xp <= maxXp
+        && (data.type == 'checkpoint'
+            ? ('quiz' in data && isValidQuiz(data.quiz))
+            : !('quiz' in data));
+    }
+
+    function isValidStringList6(listVal, maxLen) {
+      return listVal is list
+        && listVal.size() <= 6
+        && (listVal.size() < 1 || (listVal[0] is string && listVal[0].size() <= maxLen))
+        && (listVal.size() < 2 || (listVal[1] is string && listVal[1].size() <= maxLen))
+        && (listVal.size() < 3 || (listVal[2] is string && listVal[2].size() <= maxLen))
+        && (listVal.size() < 4 || (listVal[3] is string && listVal[3].size() <= maxLen))
+        && (listVal.size() < 5 || (listVal[4] is string && listVal[4].size() <= maxLen))
+        && (listVal.size() < 6 || (listVal[5] is string && listVal[5].size() <= maxLen));
+    }
+
+    function isValidStringList8(listVal, maxLen) {
+      return listVal is list
+        && listVal.size() <= 8
+        && (listVal.size() < 1 || (listVal[0] is string && listVal[0].size() <= maxLen))
+        && (listVal.size() < 2 || (listVal[1] is string && listVal[1].size() <= maxLen))
+        && (listVal.size() < 3 || (listVal[2] is string && listVal[2].size() <= maxLen))
+        && (listVal.size() < 4 || (listVal[3] is string && listVal[3].size() <= maxLen))
+        && (listVal.size() < 5 || (listVal[4] is string && listVal[4].size() <= maxLen))
+        && (listVal.size() < 6 || (listVal[5] is string && listVal[5].size() <= maxLen))
+        && (listVal.size() < 7 || (listVal[6] is string && listVal[6].size() <= maxLen))
+        && (listVal.size() < 8 || (listVal[7] is string && listVal[7].size() <= maxLen));
+    }
+
+    function isValidAnnouncement(a) {
+      return a is map
+        && a.keys().hasAll(['id', 'text', 'createdAt', 'createdBy'])
+        && a.id is string && a.id.size() > 0
+        && a.text is string && a.text.size() <= 240
+        && a.createdBy is string && a.createdBy.size() > 0;
+    }
+
+    function isValidAnnouncements(listVal) {
+      return listVal is list
+        && listVal.size() <= 5
+        && (listVal.size() < 1 || isValidAnnouncement(listVal[0]))
+        && (listVal.size() < 2 || isValidAnnouncement(listVal[1]))
+        && (listVal.size() < 3 || isValidAnnouncement(listVal[2]))
+        && (listVal.size() < 4 || isValidAnnouncement(listVal[3]))
+        && (listVal.size() < 5 || isValidAnnouncement(listVal[4]));
+    }
+
+    function isValidUnitContent(data) {
+      return (!('summary' in data) || (data.summary is string && data.summary.size() <= 400))
+        && (!('tugas' in data) || isValidStringList6(data.tugas, 200))
+        && (!('services' in data) || isValidStringList8(data.services, 120))
+        && (!('announcements' in data) || isValidAnnouncements(data.announcements));
+    }
+
     // Units Collection
     match /units/{unitId} {
       allow read: if isSignedIn();
-      allow write: if isUserAdmin();
+      allow create: if isSuperAdmin()
+        && request.resource.data.id == unitId
+        && request.resource.data.name is string
+        && request.resource.data.ancestorIds is list
+        && request.resource.data.archived is bool
+        && isValidUnitContent(request.resource.data);
+      allow update: if (
+          isSuperAdmin()
+          || (
+            isHead()
+            && inScopeUnitData(unitId, resource.data)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'summary', 'tugas', 'services', 'announcements', 'updatedAt', 'updatedBy'
+            ])
+          )
+        ) && isValidUnitContent(request.resource.data);
+      allow delete: if false;
     }
 
     // Quests Collection
     match /quests/{questId} {
       allow read: if isSignedIn();
-      allow write: if isUserAdmin();
+
+      allow create: if (
+          (isSuperAdmin() && isValidQuestData(request.resource.data, 500))
+          || (isHead() && inScope(request.resource.data.unitId) && isValidQuestData(request.resource.data, 100))
+        )
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if (
+          (isSuperAdmin() && isValidQuestData(request.resource.data, 500))
+          || (isHead()
+              && inScope(resource.data.unitId)
+              && inScope(request.resource.data.unitId)
+              && isValidQuestData(request.resource.data, 100))
+        )
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isSuperAdmin();
     }
 
     // Completions Collection
@@ -88,6 +248,7 @@ service cloud.firestore {
              request.resource.data.periodKey)
         && request.resource.data.xp == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.xp
         && request.resource.data.unitId == get(/databases/$(database)/documents/quests/$(request.resource.data.questId)).data.unitId
+        && isActiveData(userDoc(request.auth.uid))
         && userDoc(request.auth.uid).unit == request.resource.data.unitId;
 
       allow update, delete: if false;
@@ -104,6 +265,8 @@ service cloud.firestore {
       allow create: if isOwner(userId)
                     && isEmailVerified()
                     && isEmailAllowed()
+                    && isActiveData(allowlistDoc().data)
+                    && request.resource.data.get('active', true) == true
                     && request.resource.data.email == request.auth.token.email
                     && request.resource.data.displayName is string
                     && request.resource.data.displayName.size() >= 1
@@ -111,48 +274,83 @@ service cloud.firestore {
                     && request.resource.data.displayName.matches('^[^<>]+$')
                     && request.resource.data.unit == allowlistDoc().data.unit
                     && request.resource.data.role == allowlistDoc().data.role
+                    && hasValidUnitPath(request.resource.data.unit, request.resource.data.unitPath)
+                    && (!('jabatan' in request.resource.data)
+                        || (request.resource.data.jabatan is string && request.resource.data.jabatan.size() <= 80))
                     && request.resource.data.xp == 0
                     && request.resource.data.xpWeek == 0
                     && request.resource.data.xpMonth == 0
                     && request.resource.data.level == 1;
 
-      // Update only permitted progression fields via atomic batch write linked to a completion
-      allow update: if isOwner(userId)
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                      'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId', 'avatarId'
-                    ])
-                    && (
-                      // 1. Profile visual tweak (avatarId only, without XP progression changes)
-                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
-                        'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId'
-                      ]))
-                      ||
-                      // 2. Tamper-resistant quest claim: verified against atomic completion creation
-                      (
-                        request.resource.data.lastCompletionId != null
-                        && existsAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId))
-                        && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.uid == userId
-                        && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.createdAt == request.time
-                        && request.resource.data.xp == resource.data.xp + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
-                        && request.resource.data.level == (request.resource.data.xp / 500) + 1
-                        && request.resource.data.weekKey.matches('^[0-9]{4}-W[0-9]{2}$')
-                        && request.resource.data.monthKey.matches('^[0-9]{4}-[0-9]{2}$')
-                        && (request.resource.data.weekKey == resource.data.weekKey
-                            ? request.resource.data.xpWeek == resource.data.xpWeek + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
-                            : request.resource.data.xpWeek == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
-                        && (request.resource.data.monthKey == resource.data.monthKey
-                            ? request.resource.data.xpMonth == resource.data.xpMonth + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
-                            : request.resource.data.xpMonth == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
-                      )
-                    );
+      // Update either:
+      // 1. Owner avatar or atomic quest progression (when user is active), or
+      // 2. Super admin editing another user's role/unit/unitPath/active/jabatan/displayName.
+      allow update: if (
+          isOwner(userId)
+          && isActiveData(resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId', 'avatarId'
+          ])
+          && (
+            // Profile visual tweak (avatarId only, without XP progression changes)
+            (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'xp', 'level', 'weekKey', 'xpWeek', 'monthKey', 'xpMonth', 'lastCompletionId'
+            ]))
+            ||
+            // Tamper-resistant quest claim: verified against atomic completion creation
+            (
+              request.resource.data.lastCompletionId != null
+              && existsAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId))
+              && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.uid == userId
+              && getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.createdAt == request.time
+              && request.resource.data.xp == resource.data.xp + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+              && request.resource.data.level == (request.resource.data.xp / 500) + 1
+              && request.resource.data.weekKey.matches('^[0-9]{4}-W[0-9]{2}$')
+              && request.resource.data.monthKey.matches('^[0-9]{4}-[0-9]{2}$')
+              && (request.resource.data.weekKey == resource.data.weekKey
+                  ? request.resource.data.xpWeek == resource.data.xpWeek + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+                  : request.resource.data.xpWeek == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
+              && (request.resource.data.monthKey == resource.data.monthKey
+                  ? request.resource.data.xpMonth == resource.data.xpMonth + getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp
+                  : request.resource.data.xpMonth == getAfter(/databases/$(database)/documents/completions/$(request.resource.data.lastCompletionId)).data.xp)
+            )
+          )
+        ) || (
+          isSuperAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'role', 'unit', 'unitPath', 'active', 'jabatan', 'displayName'
+          ])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'active'])
+              || request.auth.uid != userId)
+          && isValidRole(request.resource.data.role)
+          && (!('active' in request.resource.data) || request.resource.data.active is bool)
+          && (!('jabatan' in request.resource.data)
+              || (request.resource.data.jabatan is string && request.resource.data.jabatan.size() <= 80))
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() >= 1
+          && request.resource.data.displayName.size() <= 60
+          && request.resource.data.displayName.matches('^[^<>]+$')
+          && hasValidUnitPath(request.resource.data.unit, request.resource.data.unitPath)
+        );
 
       allow delete: if false;
     }
 
     // Allowed Emails Collection
     match /allowedEmails/{emailId} {
-      allow get: if isSignedIn() && userEmail() == emailId;
-      allow list, write: if false;
+      allow get: if (isSignedIn() && userEmail() == emailId) || isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create, update: if isSuperAdmin()
+        && emailId.matches('^[^@\\s]+@[^@\\s]+$')
+        && request.resource.data.email is string
+        && emailId == request.resource.data.email.lower()
+        && isValidRole(request.resource.data.role)
+        && request.resource.data.unit is string
+        && request.resource.data.unit.size() > 0
+        && (!('active' in request.resource.data) || request.resource.data.active is bool)
+        && (!('jabatan' in request.resource.data)
+            || (request.resource.data.jabatan is string && request.resource.data.jabatan.size() <= 80));
+      allow delete: if isSuperAdmin();
     }
 
     // Everything else denied

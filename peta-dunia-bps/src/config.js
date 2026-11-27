@@ -77,6 +77,37 @@ export function normalizeDisplayName(raw, email) {
 
 // Gamification Level Constants & Helpers
 export const XP_PER_LEVEL = 500;
+export const QUEST_XP_MAX_HEAD = 100;
+export const QUEST_XP_MAX_ADMIN = 500;
+
+export const ROLES = {
+  EMPLOYEE: 'employee',
+  HEAD_E2: 'head_e2',
+  HEAD_E1: 'head_e1',
+  HEAD_TOP: 'head_top',
+  SUPER_ADMIN: 'super_admin'
+};
+
+export const ROLE_LABELS = {
+  employee: 'Pegawai',
+  head_e2: 'Pimpinan Eselon II',
+  head_e1: 'Pimpinan Eselon I',
+  head_top: 'Pimpinan Tertinggi',
+  super_admin: 'Super Admin',
+  admin: 'Super Admin'
+};
+
+export function isHeadRole(role) {
+  return role === ROLES.HEAD_E2 || role === ROLES.HEAD_E1 || role === ROLES.HEAD_TOP;
+}
+
+export function isSuperAdminRole(role) {
+  return role === ROLES.SUPER_ADMIN || role === 'admin';
+}
+
+export function getRoleLabel(role) {
+  return ROLE_LABELS[role] || ROLE_LABELS.employee;
+}
 
 export function calculateLevel(xp) {
   return Math.floor(Math.max(0, xp || 0) / XP_PER_LEVEL) + 1;
