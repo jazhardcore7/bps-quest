@@ -36,7 +36,7 @@
 }
 
 .ambient-cloud-a { left: 225px; top: 100px; animation: island-drift-right var(--ambient-slower) ease-in-out infinite alternate; }
-.ambient-cloud-b { left: 860px; top: 150px; animation: island-drift-left var(--ambient-slow) ease-in-out infinite alternate; }
+.ambient-cloud-b { left: 876px; top: 356px; animation: island-drift-left var(--ambient-slow) ease-in-out infinite alternate; }
 .ambient-boat-a  { left: 590px; top: 186px; animation: island-sail-a 18s ease-in-out infinite alternate; }
 .ambient-boat-b  { left: 8px;   top: 372px; animation: island-sail-b var(--ambient-slow) ease-in-out infinite alternate; }
 
@@ -174,6 +174,27 @@
 
 .world-island.is-user-island .island-user-pin {
   display: inline-flex;
+}
+
+/* ---------------- Player card on the world map ----------------
+   Two rows (info, then buttons) so the card stays clear of the islands
+   below it; other screens keep the single row from island-hud.css. */
+.screen-world .hud-right-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  max-width: 340px;
+}
+
+.screen-world .hud-right-card .hud-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.screen-world .hud-player-name {
+  max-width: 260px;
 }
 
 /* ---------------- Reduced motion ---------------- */
