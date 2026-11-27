@@ -1,0 +1,282 @@
+/* ==========================================================================
+   Login (#/login): title screen on an animated sea, wordmark, menu card.
+   Ambient layer and islands reuse src/ui/island-art.js. Tokens only, except
+   the Google "G" mark colors, which live in login.js markup (brand asset).
+   ========================================================================== */
+
+.login-screen-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-4);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ocean-1) 0%, var(--ocean-3) 100%);
+  font-family: var(--font-body);
+}
+
+.title-islands {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.title-island {
+  position: absolute;
+  animation: login-bob 9s ease-in-out infinite;
+}
+
+.title-island:nth-child(2) { animation-delay: -3s; }
+
+@keyframes login-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+.title-island .island-art-svg { display: block; overflow: visible; }
+
+/* The shared sea layer draws inter-island routes for the world map; the title
+   screen has no islands to connect, so they are hidden here only. */
+.login-screen-wrap .world-routes { display: none; }
+.title-island:nth-child(3) { animation-delay: -6s; }
+
+/* ---- Wordmark ---- */
+.login-wordmark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+  padding: var(--space-2) var(--space-5) var(--space-2) var(--space-2);
+  background: var(--paper);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  box-shadow: var(--ui-shadow-hard);
+}
+
+.login-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--gold);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 50%;
+}
+
+.login-wordmark-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-6);
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* ---- Menu card ---- */
+.login-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 380px;
+  max-width: calc(100% - var(--space-8));
+  padding: var(--space-7) var(--space-6) var(--space-5);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: 0 6px 0 var(--shadow-on-ink);
+}
+
+.login-title.ribbon {
+  margin: 0;
+  font-size: var(--fs-4);
+}
+
+.login-subtitle {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  color: var(--ink-soft);
+}
+
+/* Inline error: icon + text */
+.login-error-alert {
+  position: relative;
+  padding: var(--space-2) var(--space-3) var(--space-2) 38px;
+  background: var(--white);
+  color: var(--danger-strong);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-m);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+}
+
+.login-error-alert::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background: var(--danger-strong);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Info notice (e.g. verification link sent): icon + text */
+.login-info-alert {
+  position: relative;
+  padding: var(--space-2) var(--space-3) var(--space-2) 38px;
+  background: var(--white);
+  color: var(--ink);
+  border: 2px solid var(--ocean-3);
+  border-radius: var(--radius-m);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+}
+
+.login-info-alert::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background: var(--ocean-3);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.login-label {
+  font-size: var(--fs-2);
+  font-weight: var(--fw-black);
+  color: var(--ink);
+}
+
+.login-input {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  background: var(--white);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+  font-family: var(--font-body);
+  font-size: var(--fs-3);
+}
+
+.login-input::placeholder { color: var(--ink-soft); opacity: 1; }
+
+.login-input:focus-visible,
+.login-input:focus {
+  outline: 3px solid transparent;
+  box-shadow: var(--ui-focus-ring);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--ink-soft);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-black);
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 2px dashed var(--ink-soft);
+}
+
+.google-icon { flex-shrink: 0; }
+
+.login-footer {
+  text-align: center;
+  font-size: var(--fs-2);
+  color: var(--ink-soft);
+}
+
+.login-toggle-btn {
+  min-height: 24px;
+  padding: 2px var(--space-1);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-s);
+  color: var(--ink); /* ocean-3 on paper is only ~4.4:1, so links stay ink + underline */
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--fw-black);
+  text-decoration: underline;
+  text-decoration-color: var(--ocean-3);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.login-toggle-btn:hover { text-decoration-thickness: 3px; }
+
+/* Inside the scaled stage, keep on-screen sizes: inputs >= 44px, the inline
+   text link >= 24px (WCAG 2.5.8 target size). */
+#stage .login-input { min-height: var(--tap-stage); }
+#stage .login-toggle-btn { min-height: max(24px, calc(24px / var(--stage-scale, 1))); }
+
+/* Narrow screens: login.js docks the screen on <body> at real size (outside
+   the 0.7-scaled stage), scrollable when the viewport is short. */
+.login-screen-wrap.is-docked {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  width: auto;
+  height: auto;
+  justify-content: flex-start;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.has-devbar .login-screen-wrap.is-docked { top: 36px; }
+
+.login-screen-wrap.is-docked .title-islands,
+.login-screen-wrap.is-docked .ambient-boat { display: none; }
+.login-screen-wrap.is-docked .world-ambient { position: fixed; }
+
+.login-screen-wrap.is-docked .login-wordmark {
+  margin-bottom: var(--space-7);
+}
+
+.login-screen-wrap.is-docked .login-wordmark-text { font-size: var(--fs-5); }
+
+.login-screen-wrap.is-docked .login-card {
+  width: 100%;
+  max-width: 400px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-island { animation: none; }
+}
