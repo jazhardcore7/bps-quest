@@ -1,3 +1,6 @@
+@import './island-tokens.css';
+@import './island-world.css';
+
 /* ==========================================================================
    Peta Dunia BPS - Main Stylesheet
    Pure vanilla CSS with CSS variables, responsive stage scaling & design tokens
@@ -290,111 +293,7 @@ body.has-devbar #stage-viewport {
   transition: width 0.3s ease;
 }
 
-/* ==========================================================================
-   Screen 1: World Map Islands
-   ========================================================================== */
-.world-islands {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.world-island {
-  position: absolute;
-  border-radius: 50%;
-  background-color: var(--color-island-grass);
-  border: 6px solid var(--color-island-sand);
-  box-shadow: 0 8px 0 var(--color-island-shadow);
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  transition: transform 0.15s ease, filter 0.15s ease;
-  user-select: none;
-}
-
-.world-island:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.04);
-}
-
-.world-island:active {
-  transform: translateY(2px);
-}
-
-/* Building block inside world island */
-.island-building {
-  width: 60px;
-  height: 66px;
-  border-radius: 6px;
-  border: 3px solid rgba(255, 255, 255, 0.7);
-  position: absolute;
-  left: 50%;
-  top: 16%;
-  transform: translateX(-50%);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-}
-
-.building-roof-accent {
-  width: 100%;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.25);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.building-windows {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px 8px;
-  padding: 7px 10px 0;
-  justify-items: center;
-}
-
-.window-pane {
-  display: block;
-  width: 10px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 2px;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
-}
-
-.building-door {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px 3px 0 0;
-}
-
-/* Island Label Pill */
-.island-pill {
-  position: absolute;
-  left: 50%;
-  bottom: -16px;
-  transform: translateX(-50%);
-  z-index: 5;
-  color: #FFFFFF;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 7px 12px;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.island-pill-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+/* World map styles live in island-world.css */
 
 /* ==========================================================================
    Screen 2: Island "Sekretariat Utama" (Biro Tiles)
@@ -1714,7 +1613,6 @@ body.has-devbar #stage-viewport {
    the D-pad and leaderboard controls on dark cards (gold ring), and the claim
    buttons in the white quest sheet (blue ring).
    ========================================================================== */
-.world-island:focus-visible,
 .biro-tile:focus-visible {
   outline: 3px solid var(--color-page-bg);
   outline-offset: 3px;
