@@ -952,4 +952,74 @@ describe('Firestore Security Rules', () => {
       }));
     });
   });
+
+  describe('Part 3 End-to-End Emulator Data Flows', () => {
+    function ctx(uid, email) {
+      return testEnv.authenticatedContext(uid, { email, email_verified: true }).firestore();
+    }
+
+    it('head_e2 on biro-sdm creates a quest and biro-sdm employee queries and claims it', async () => {
+      const { query: fsQuery, where: fsWhere, orderBy: fsOrderBy, limit: fsLimit } = await import('firebase/firestore');
+      const e2Db = ctx('uid_head_e2_sdm', 'karo.sdm@bps.go.id');
+      const budiDb = ctx('uid_budi', 'budi@bps.go.id');
+
+      await assertSucceeds(setDoc(doc(e2Db, 'quests', 'quest-e2e-sdm'), makeDailyQuest({
+        unitId: 'biro-sdm',
+        title: 'Quest E2E Biro SDM',
+        xp: 35,
+        createdBy: 'uid_head_e2_sdm',
+        updatedBy: 'uid_head_e2_sdm'
+      })));
+
+      const activeSnap = await assertSucceeds(getDocs(fsQuery(
+        collection(budiDb, 'quests'),
+        fsWhere('unitId', '==', 'biro-sdm'),
+        fsWhere('active', '==', true)
+      )));
+      const found = activeSnap.docs.some((d) => d.id === 'quest-e2e-sdm');
+      assert.equal(found, true);
+
+      const completionId = 'uid_budi_quest-e2e-sdm_' + TODAY;
+      const batch = writeBatch(budiDb);
+      batch.set(doc(budiDb, 'completions', completionId), {
+        uid: 'uid_budi',
+        questId: 'quest-e2e-sdm',
+        unitId: 'biro-sdm',
+        xp: 35,
+        periodKey: TODAY,
+        createdAt: serverTimestamp()
+      });
+      batch.update(doc(budiDb, 'users', 'uid_budi'), {
+        xp: 35,
+        level: 1,
+        weekKey: '2026-W46',
+        xpWeek: 35,
+        monthKey: '2026-11',
+        xpMonth: 35,
+        lastCompletionId: completionId
+      });
+      await assertSucceeds(batch.commit());
+
+      // Verify Tim Saya query scopes: head_e2 sees biro-sdm only, head_e1 sees biro-sdm + biro-umum
+      const teamE2 = await assertSucceeds(getDocs(fsQuery(
+        collection(e2Db, 'users'),
+        fsWhere('unitPath', 'array-contains', 'biro-sdm'),
+        fsOrderBy('xp', 'desc'),
+        fsLimit(200)
+      )));
+      assert.ok(teamE2.docs.some((d) => d.id === 'uid_budi'));
+      assert.equal(teamE2.docs.some((d) => d.id === 'uid_umum'), false);
+
+      const e1Db = ctx('uid_head_e1', 'sestama@bps.go.id');
+      const teamE1 = await assertSucceeds(getDocs(fsQuery(
+        collection(e1Db, 'users'),
+        fsWhere('unitPath', 'array-contains', 'sestama'),
+        fsOrderBy('xp', 'desc'),
+        fsLimit(200)
+      )));
+      assert.ok(teamE1.docs.some((d) => d.id === 'uid_budi'));
+      assert.ok(teamE1.docs.some((d) => d.id === 'uid_umum'));
+      assert.equal(teamE1.docs.some((d) => d.id === 'uid_head_e2_harga'), false);
+    });
+  });
 });
