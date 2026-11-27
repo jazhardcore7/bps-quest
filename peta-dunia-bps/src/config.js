@@ -53,6 +53,28 @@ export function toUnitId(unit) {
   return UNIT_MAPPINGS[unit] || String(unit).toLowerCase().replace(/[\s_]+/g, '-');
 }
 
+// Display names: firestore.rules requires 1 to 60 characters with no < or >.
+export const DISPLAY_NAME_MAX_LENGTH = 60;
+
+function cleanDisplayName(value) {
+  if (typeof value !== 'string') return '';
+  const cleaned = value.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
+  // Cut by code points so a surrogate pair (emoji) is never split.
+  return Array.from(cleaned).slice(0, DISPLAY_NAME_MAX_LENGTH).join('').trim();
+}
+
+/**
+ * Returns a display name that satisfies firestore.rules: trimmed, whitespace
+ * collapsed, without < or >, at most 60 characters. Falls back to the part of
+ * the email before "@", then to "Pegawai".
+ */
+export function normalizeDisplayName(raw, email) {
+  const name = cleanDisplayName(raw);
+  if (name) return name;
+  const localPart = typeof email === 'string' ? email.split('@')[0] : '';
+  return cleanDisplayName(localPart) || 'Pegawai';
+}
+
 // Gamification Level Constants & Helpers
 export const XP_PER_LEVEL = 500;
 

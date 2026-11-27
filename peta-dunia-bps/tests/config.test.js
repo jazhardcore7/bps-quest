@@ -7,7 +7,8 @@ import {
   monthKeyJakarta,
   dailyPeriodKeyJakarta,
   toUnitId,
-  UNIT_IDS
+  UNIT_IDS,
+  normalizeDisplayName
 } from '../src/config.js';
 
 describe('Level and XP calculation', () => {
@@ -44,6 +45,36 @@ describe('Unit ID Mappings', () => {
   it('handles empty or nullish unit strings', () => {
     assert.equal(toUnitId(''), '');
     assert.equal(toUnitId(null), '');
+  });
+});
+
+describe('Display name normalization (must satisfy firestore.rules: 1-60 chars, no < or >)', () => {
+  const RULE_PATTERN = /^[^<>]+$/;
+
+  it('keeps a normal name and collapses extra whitespace', () => {
+    assert.equal(normalizeDisplayName('Budi Santoso', 'budi@bps.go.id'), 'Budi Santoso');
+    assert.equal(normalizeDisplayName('  Budi \t  Santoso\n ', 'budi@bps.go.id'), 'Budi Santoso');
+  });
+
+  it('removes < and > from HTML input', () => {
+    const name = normalizeDisplayName('<img src=x onerror=alert(1)>', 'budi@bps.go.id');
+    assert.equal(name, 'img src=x onerror=alert(1)');
+    assert.match(name, RULE_PATTERN);
+  });
+
+  it('cuts names longer than 60 characters to 60', () => {
+    const name = normalizeDisplayName('A'.repeat(61), 'budi@bps.go.id');
+    assert.equal(name.length, 60);
+    assert.equal(normalizeDisplayName('B'.repeat(200), 'budi@bps.go.id').length, 60);
+  });
+
+  it('falls back to the email local part, then to "Pegawai", for empty input', () => {
+    assert.equal(normalizeDisplayName('', 'budi.santoso@bps.go.id'), 'budi.santoso');
+    assert.equal(normalizeDisplayName('   ', 'budi@bps.go.id'), 'budi');
+    assert.equal(normalizeDisplayName('<>', 'budi@bps.go.id'), 'budi');
+    assert.equal(normalizeDisplayName(null, '<b>@bps.go.id'), 'b');
+    assert.equal(normalizeDisplayName(undefined, '<>@bps.go.id'), 'Pegawai');
+    assert.equal(normalizeDisplayName('', undefined), 'Pegawai');
   });
 });
 

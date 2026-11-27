@@ -529,5 +529,43 @@ describe('Firestore Security Rules', () => {
       const db = testEnv.authenticatedContext('uid_budi', { email: 'budi@bps.go.id', email_verified: true }).firestore();
       await assertSucceeds(updateDoc(doc(db, 'users', 'uid_budi'), { avatarId: 'avatar-blue' }));
     });
+
+    // Builds a valid new profile for budi@bps.go.id with the given displayName.
+    function newProfile(displayName) {
+      return {
+        displayName,
+        email: 'budi@bps.go.id',
+        unit: 'biro-sdm',
+        role: 'employee',
+        xp: 0,
+        level: 1,
+        avatarId: 'default',
+        weekKey: '2026-W46',
+        xpWeek: 0,
+        monthKey: '2026-11',
+        xpMonth: 0,
+        createdAt: serverTimestamp()
+      };
+    }
+
+    it('denies creating a user document with an HTML displayName', async () => {
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_new_user'), newProfile('<img src=x onerror=alert(1)>')));
+    });
+
+    it('denies creating a user document with a 61-character displayName', async () => {
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_new_user'), newProfile('A'.repeat(61))));
+    });
+
+    it('denies creating a user document with an empty displayName', async () => {
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertFails(setDoc(doc(db, 'users', 'uid_new_user'), newProfile('')));
+    });
+
+    it('allows a normal displayName that differs from the allowlist value', async () => {
+      const db = testEnv.authenticatedContext('uid_new_user', { email: 'budi@bps.go.id', email_verified: true }).firestore();
+      await assertSucceeds(setDoc(doc(db, 'users', 'uid_new_user'), newProfile('Budi S. Wijaya')));
+    });
   });
 });

@@ -98,11 +98,17 @@ service cloud.firestore {
       // Signed-in users may read any user doc
       allow read: if isSignedIn();
 
-      // Create only if matching allowlist
+      // Create only if matching allowlist. displayName may come from the
+      // allowlist, Google, or the email, so its shape is checked (1-60 chars,
+      // no < or >) rather than matched against the allowlist.
       allow create: if isOwner(userId)
                     && isEmailVerified()
                     && isEmailAllowed()
                     && request.resource.data.email == request.auth.token.email
+                    && request.resource.data.displayName is string
+                    && request.resource.data.displayName.size() >= 1
+                    && request.resource.data.displayName.size() <= 60
+                    && request.resource.data.displayName.matches('^[^<>]+$')
                     && request.resource.data.unit == allowlistDoc().data.unit
                     && request.resource.data.role == allowlistDoc().data.role
                     && request.resource.data.xp == 0

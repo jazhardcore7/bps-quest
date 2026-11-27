@@ -17,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from './client.js';
 import { AppState } from '../state/index.js';
-import { weekKeyJakarta, monthKeyJakarta } from '../config.js';
+import { weekKeyJakarta, monthKeyJakarta, normalizeDisplayName } from '../config.js';
 
 export const NOT_ALLOWED_MESSAGE = 'Email kamu belum terdaftar. Hubungi admin Biro SDM.';
 export const VERIFY_SENT_MESSAGE = 'Akun dibuat. Buka tautan verifikasi yang dikirim ke email kamu, lalu masuk.';
@@ -142,7 +142,7 @@ export async function ensureUserProfile(user) {
   // 4. Provision new user profile in users/{uid}
   const now = new Date();
   const initialProfile = {
-    displayName: allowData.displayName || user.displayName || 'Pegawai BPS',
+    displayName: normalizeDisplayName(allowData.displayName || user.displayName, user.email),
     email: user.email,
     unit: allowData.unit,
     role: allowData.role || 'employee',
