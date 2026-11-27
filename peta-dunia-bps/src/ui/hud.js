@@ -1,5 +1,6 @@
 // Reusable HUD components, icons, and toast notifications
 import { logout } from '../firebase/auth.js';
+import { isHeadRole, isSuperAdminRole } from '../config.js';
 import { escapeHtml } from './escape.js';
 
 let toastTimeout = null;
@@ -19,9 +20,16 @@ export const icons = {
   trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD24A" class="icon-trophy" aria-hidden="true"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
 };
 
-// Global delegation for HUD button clicks (logout & leaderboard)
+// Global delegation for HUD button clicks (manage, leaderboard, logout)
 if (typeof document !== 'undefined') {
   document.addEventListener('click', async (e) => {
+    const manageBtn = e.target.closest('#hud-manage-btn');
+    if (manageBtn) {
+      e.preventDefault();
+      window.location.hash = '#/manage';
+      return;
+    }
+
     const trophyBtn = e.target.closest('#hud-trophy-btn');
     if (trophyBtn) {
       e.preventDefault();
@@ -45,13 +53,25 @@ if (typeof document !== 'undefined') {
 export function renderRightCard(state) {
   const player = (state && state.player) || {
     displayName: 'Pegawai BPS',
+    role: 'employee',
+    active: true,
     level: 1,
-    title: 'Explorer',
+    title: 'Pegawai',
     xp: 0,
     xpToNext: 500
   };
   const percent = Math.min(100, Math.max(0, Math.round((player.xp / player.xpToNext) * 100)));
   const name = escapeHtml(player.displayName || 'Pegawai BPS');
+  const title = escapeHtml(player.title || 'Pegawai');
+  const canManage = Boolean(
+    state &&
+    state.user &&
+    player.active !== false &&
+    (isHeadRole(player.role) || isSuperAdminRole(player.role))
+  );
+  const manageBtnHtml = canManage
+    ? '<button type="button" class="hud-manage-btn" id="hud-manage-btn" title="Pusat Pengelolaan" aria-label="Kelola">Kelola</button>'
+    : '';
 
   return '' +
     '<div class="hud-card hud-right-card" aria-label="Informasi Pemain">' +
@@ -62,12 +82,13 @@ export function renderRightCard(state) {
         '<div class="hud-player-name" title="' + name + '">' +
           name +
         '</div>' +
-        '<div class="hud-player-level">Level ' + player.level + ' · ' + player.title + '</div>' +
+        '<div class="hud-player-level">Level ' + player.level + ' · ' + title + '</div>' +
         '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +
         '<div class="hud-progress-track" role="progressbar" aria-valuenow="' + player.xp + '" aria-valuemin="0" aria-valuemax="' + player.xpToNext + '">' +
           '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
         '</div>' +
       '</div>' +
+      manageBtnHtml +
       '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
         icons.trophy +
       '</button>' +
@@ -79,8 +100,8 @@ export function renderRightCard(state) {
 
 export function renderLeftCard(options = {}) {
   const hasBack = Boolean(options.hasBack);
-  const title = options.title || 'Peta Dunia BPS';
-  const subtitle = options.subtitle || 'Jelajahi seluruh pulau unit kerja di BPS';
+  const title = escapeHtml(options.title || 'Peta Dunia BPS');
+  const subtitle = escapeHtml(options.subtitle || 'Jelajahi seluruh pulau unit kerja di BPS');
 
   const backBtnHtml = hasBack
     ? '<button type="button" class="hud-back-btn" id="hud-back-button" aria-label="Kembali">' +
