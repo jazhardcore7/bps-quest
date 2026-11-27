@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Island revamp tokens (Office visual language)
+   Source: docs/ISLAND_STYLE_REFERENCE.md and design-system/peta-dunia-bps/DECISIONS.md.
+   Existing tokens in style.css are reused: --color-ocean-top/bottom,
+   --color-island-sand/grass, --color-card-*, --color-gold, --color-page-bg.
+   ========================================================================== */
+
+:root {
+  /* Ink and outline (Office label text and wall stroke) */
+  --island-ink: #10263F;
+  --island-outline: #1E3A5F;
+  --island-outline-w: 3px;
+
+  /* Sea and land */
+  --island-shallow: #A8DFF5;
+  --island-foam: #FFFFFF;
+  --island-grass-shade: #5DB04A;
+  --island-tree: #3F8F45;
+  --island-trunk: #8A5A3B;
+
+  /* Building walls: Office room pastels; windows: Office floor */
+  --room-blue: #CFE3F7;
+  --room-gray: #D9D9E3;
+  --room-green: #D5ECD0;
+  --room-cream: #F7E6C4;
+  --room-window: #E8EEF6;
+
+  /* Info-board gold treatment ("Unit Anda", own unit) */
+  --board-gold: var(--color-gold);
+  --board-gold-stroke: #B8860B;
+  --board-gold-text: #5A4500;
+
+  /* Pill contrast fixes (white text >= 4.5:1). Other pills use the
+     pillColor from src/data/index.js, which already passes. */
+  --pill-fix-sestama: #18735D;   /* was #1F8A70, 4.26:1 -> 5.75:1 */
+  --pill-fix-produksi: #9A520A;  /* was #C06A10, 3.95:1 -> 5.86:1 */
+
+  /* Depth: hard offset shadows only */
+  --shadow-hard: 0 4px 0 rgba(16, 38, 63, 0.35);
+  --shadow-hard-hover: 0 7px 0 rgba(16, 38, 63, 0.35);
+  --shadow-pressed: 0 1px 0 rgba(16, 38, 63, 0.35);
+
+  /* Keyboard focus: gold inside, ink outside (>= 3:1 on sea, grass, navy) */
+  --focus-ring: 0 0 0 3px var(--color-gold), 0 0 0 6px var(--island-ink);
+
+  /* Shapes */
+  --radius-building: 3px;
+  --radius-gold: 10px;
+  --radius-pill: 12px;
+  --radius-card: 16px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --ambient-slow: 14s;
+  --ambient-slower: 20s;
+
+  /* HUD segmented XP bar */
+  --hud-xp-cell-empty: #2C5F93;
+  --hud-xp-cell-edge: #CFE6FA;   /* 8.55:1 on the navy card */
+}

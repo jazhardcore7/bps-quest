@@ -1,19 +1,47 @@
-// Hash router managing screen transitions, browser history, and authentication route guards
+// Hash router managing screen transitions, browser history, and route guards
 import WorldScreen from './screens/world.js';
 import IslandScreen from './screens/island.js';
 import OfficeScreen from './screens/office.js';
 import LoginScreen from './screens/login.js';
 import LeaderboardScreen from './screens/leaderboard.js';
+import ManageScreen from './screens/manage/index.js';
+import { BpsData } from './data/index.js';
 import { onAuthChanged } from './firebase/auth.js';
 import { AppState } from './state/index.js';
+import { isHeadRole, isSuperAdminRole } from './config.js';
 
-const routes = {
+const VALID_ISLAND_IDS = new Set(BpsData.islands.map((i) => i.id));
+
+const staticRoutes = {
   '#/login': LoginScreen,
   '#/world': WorldScreen,
-  '#/island': IslandScreen,
   '#/office': OfficeScreen,
-  '#/leaderboard': LeaderboardScreen
+  '#/leaderboard': LeaderboardScreen,
+  '#/manage': ManageScreen
 };
+
+function resolveRoute(hash) {
+  if (!hash) return null;
+  if (hash === '#/island') {
+    return { screen: IslandScreen, params: { islandId: 'sestama' }, canonical: '#/island/sestama' };
+  }
+  if (hash.startsWith('#/island/')) {
+    const islandId = hash.slice('#/island/'.length).trim();
+    if (VALID_ISLAND_IDS.has(islandId)) {
+      return { screen: IslandScreen, params: { islandId }, canonical: hash };
+    }
+    return null;
+  }
+  if (staticRoutes[hash]) {
+    return { screen: staticRoutes[hash], params: {}, canonical: hash };
+  }
+  return null;
+}
+
+function canAccessManage() {
+  if (!AppState.user || AppState.player.active === false) return false;
+  return isHeadRole(AppState.player.role) || isSuperAdminRole(AppState.player.role);
+}
 
 let currentScreen = null;
 let stageContainer = null;
@@ -41,21 +69,18 @@ export const Router = {
     // Subscribe to auth state changes to guard routes
     onAuthChanged((user, profile) => {
       currentUser = user && profile ? user : null;
-      const wasUninitialized = !isAuthInitialized;
       isAuthInitialized = true;
 
-      const currentHash = window.location.hash;
+      const hash = window.location.hash;
 
       if (!currentUser) {
-        // Not signed in: redirect any route to #/login
-        if (currentHash !== '#/login') {
+        if (hash !== '#/login') {
           window.location.hash = '#/login';
         } else {
           this.handleRoute();
         }
       } else {
-        // Signed in: redirect away from #/login to #/world
-        if (currentHash === '#/login' || !currentHash || !routes[currentHash]) {
+        if (hash === '#/login' || !hash || !resolveRoute(hash)) {
           window.location.hash = '#/world';
         } else {
           this.handleRoute();
@@ -69,7 +94,7 @@ export const Router = {
       return;
     }
 
-    let hash = window.location.hash || '#/world';
+    const hash = window.location.hash || '#/world';
 
     // Route guard: every route except #/login requires a signed-in user
     if (!currentUser && hash !== '#/login') {
@@ -83,8 +108,15 @@ export const Router = {
       return;
     }
 
-    if (!routes[hash]) {
+    const match = resolveRoute(hash);
+    if (!match) {
       window.location.hash = currentUser ? '#/world' : '#/login';
+      return;
+    }
+
+    // Management center guard: employees redirect to #/world
+    if (hash === '#/manage' && !canAccessManage()) {
+      window.location.hash = '#/world';
       return;
     }
 
@@ -93,17 +125,15 @@ export const Router = {
     }
     currentHash = hash;
 
-    const nextScreen = routes[hash];
-
     if (currentScreen && typeof currentScreen.unmount === 'function') {
       currentScreen.unmount();
     }
 
     if (stageContainer) {
       stageContainer.innerHTML = '';
-      currentScreen = nextScreen;
+      currentScreen = match.screen;
       if (currentScreen && typeof currentScreen.mount === 'function') {
-        currentScreen.mount(stageContainer);
+        currentScreen.mount(stageContainer, match.params);
       }
     }
   }

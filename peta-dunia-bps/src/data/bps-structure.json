@@ -1,0 +1,1007 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-11-27T09:20:00+07:00",
+  "units": [
+    {
+      "id": "bps-pusat",
+      "name": "Kepala dan Wakil Kepala BPS",
+      "shortName": "Pimpinan BPS",
+      "type": "root",
+      "parentId": null,
+      "ancestorIds": [],
+      "island": "pimpinan",
+      "headTitle": "Kepala BPS",
+      "echelon": "top",
+      "summary": "Pimpinan tertinggi BPS yang bertanggung jawab langsung kepada Presiden dalam menjalankan tugas pemerintahan di bidang kegiatan statistik nasional. Kepala BPS dibantu oleh Wakil Kepala BPS dalam memimpin perumusan kebijakan, koordinasi statistik nasional dan regional, penyelenggaraan statistik dasar, serta pembinaan sistem statistik nasional.",
+      "tugas": [
+        "Memimpin penyelenggaraan tugas pemerintahan di bidang statistik sesuai peraturan perundang-undangan.",
+        "Merumuskan dan menetapkan kebijakan serta penyelenggaraan statistik dasar dan sistem statistik nasional.",
+        "Mengoordinasikan kegiatan statistik tingkat nasional dan regional bersama instansi terkait.",
+        "Membina dan memfasilitasi instansi pemerintah dalam pelaksanaan kegiatan statistik.",
+        "Membantu Kepala BPS dalam kepemimpinan lembaga melalui peran Wakil Kepala BPS."
+      ],
+      "services": [
+        "Pelayanan Konsultasi Statistik",
+        "Pelayanan Perpustakaan",
+        "Pelayanan Produk Statistik Berbayar",
+        "Pelayanan Rekomendasi Kegiatan Statistik"
+      ],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab I-III, Pasal 1-6)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        },
+        {
+          "title": "Peraturan Presiden Nomor 1 Tahun 2025 tentang Perubahan atas Perpres 86/2007 tentang BPS",
+          "url": "https://peraturan.bpk.go.id/Details/314632/perpres-no-1-tahun-2025",
+          "accessedAt": "2026-11-27"
+        },
+        {
+          "title": "Portal PPID BPS - Layanan Pelayanan Statistik Terpadu (Peraturan BPS Nomor 65 Tahun 2024)",
+          "url": "https://ppid.bps.go.id/app/konten/Layanan-BPS.html",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "sestama",
+      "name": "Sekretariat Utama",
+      "shortName": "Sekretariat Utama",
+      "type": "sekretariat",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "sestama",
+      "headTitle": "Sekretaris Utama",
+      "echelon": 1,
+      "summary": "Unsur pembantu pimpinan yang berada di bawah Kepala BPS untuk mengoordinasikan perencanaan, pembinaan, serta pengendalian program, administrasi, dan sumber daya di seluruh lingkungan BPS, termasuk menyelaraskan layanan administrasi umum, regulasi, kehumasan, dan pelaporan lembaga.",
+      "tugas": [
+        "Mengoordinasikan, menyelaraskan, dan mengintegrasikan pelaksanaan kegiatan antarunit di lingkungan BPS.",
+        "Mengoordinasikan perencanaan strategis serta perumusan kebijakan teknis lembaga.",
+        "Membina dan melayani administrasi ketatausahaan, kepegawaian, keuangan, organisasi, kearsipan, dan kerumahtanggaan.",
+        "Membina urusan hubungan masyarakat, keprotokolan, serta koordinasi penyusunan peraturan perundang-undangan.",
+        "Mengoordinasikan penyusunan laporan kinerja dan akuntabilitas BPS."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab IV, Pasal 7-10)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "biro-perencanaan-kerja-sama",
+      "name": "Biro Perencanaan dan Kerja Sama",
+      "shortName": "Biro Renja & Kerja Sama",
+      "type": "biro",
+      "parentId": "sestama",
+      "ancestorIds": [
+        "bps-pusat",
+        "sestama"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Biro",
+      "echelon": 2,
+      "summary": "Unit eselon II di bawah Sekretariat Utama yang menangani penyusunan rencana program dan anggaran, pemantauan dan evaluasi kinerja, pengembangan kerja sama kelembagaan, penerapan pengendalian internal serta manajemen risiko, dan dukungan strategis bagi pimpinan BPS.",
+      "tugas": [
+        "Menyusun, mengoordinasikan, dan membina rencana program kerja serta anggaran BPS.",
+        "Mengoordinasikan pemantauan, evaluasi, dan pelaporan capaian kinerja di lingkungan BPS.",
+        "Menyiapkan dan membina penerapan sistem pengendalian internal serta manajemen risiko organisasi.",
+        "Mengelola dan membina kerja sama serta hubungan kelembagaan di dalam maupun luar negeri.",
+        "Menyiapkan bahan dukungan strategis bagi pimpinan BPS."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 11-16)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "biro-keuangan-bmn",
+      "name": "Biro Keuangan dan Barang Milik Negara",
+      "shortName": "Biro Keuangan & BMN",
+      "type": "biro",
+      "parentId": "sestama",
+      "ancestorIds": [
+        "bps-pusat",
+        "sestama"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Biro",
+      "echelon": 2,
+      "summary": "Unit eselon II di bawah Sekretariat Utama yang mengelola dan membina administrasi keuangan, perbendaharaan, verifikasi anggaran, akuntansi dan pelaporan keuangan, serta tata kelola barang milik negara di seluruh satuan kerja BPS.",
+      "tugas": [
+        "Mengelola administrasi keuangan serta penyelesaian tuntutan perbendaharaan dan ganti rugi.",
+        "Menyelenggarakan perbendaharaan, penatausahaan penerimaan negara bukan pajak, dan pengelolaan piutang.",
+        "Melaksanakan verifikasi, pemantauan, dan evaluasi atas pelaksanaan anggaran BPS.",
+        "Menyusun analisis akuntansi, laporan keuangan, serta pedoman teknis administrasi keuangan.",
+        "Mengoordinasikan, memfasilitasi, dan membina pengelolaan barang milik negara."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 17-22)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "biro-sdm",
+      "name": "Biro Sumber Daya Manusia",
+      "shortName": "Biro SDM",
+      "type": "biro",
+      "parentId": "sestama",
+      "ancestorIds": [
+        "bps-pusat",
+        "sestama"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Biro",
+      "echelon": 2,
+      "summary": "Unit eselon II di bawah Sekretariat Utama yang membina, mengendalikan, dan mengelola seluruh siklus sumber daya manusia aparatur di BPS, mulai dari perencanaan kebutuhan, pengadaan, penempatan, pengelolaan kinerja dan talenta, hingga pembinaan jabatan fungsional.",
+      "tugas": [
+        "Mengelola perencanaan kebutuhan, pengadaan, penempatan, dan sistem informasi kepegawaian BPS.",
+        "Mengurus mutasi pegawai, penegakan disiplin, penghargaan, kesejahteraan, serta pemberhentian pegawai.",
+        "Mengelola pengembangan pegawai, manajemen kinerja, manajemen talenta, pola karier, asesmen, dan konseling.",
+        "Mengoordinasikan dan mengendalikan pembinaan jabatan fungsional di lingkungan BPS."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 23-25)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "biro-hukum-organisasi",
+      "name": "Biro Hukum dan Organisasi",
+      "shortName": "Biro Hukum & Organisasi",
+      "type": "biro",
+      "parentId": "sestama",
+      "ancestorIds": [
+        "bps-pusat",
+        "sestama"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Biro",
+      "echelon": 2,
+      "summary": "Unit eselon II di bawah Sekretariat Utama yang menangani penyusunan peraturan perundang-undangan, pengelolaan dokumentasi dan bantuan hukum, serta penataan kelembagaan dan ketatalaksanaan di lingkungan BPS.",
+      "tugas": [
+        "Mengoordinasikan dan menyusun rancangan peraturan perundang-undangan serta produk hukum BPS lainnya.",
+        "Mengelola jaringan dokumentasi dan informasi hukum serta memberikan layanan bantuan dan penyuluhan hukum.",
+        "Mengoordinasikan dan membina penataan serta evaluasi struktur organisasi BPS.",
+        "Membina penyusunan analisis jabatan, analisis beban kerja, evaluasi jabatan, dan tata laksana kerja."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 26-28)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "biro-umum",
+      "name": "Biro Umum dan Hubungan Masyarakat",
+      "shortName": "Biro Umum & Humas",
+      "type": "biro",
+      "parentId": "sestama",
+      "ancestorIds": [
+        "bps-pusat",
+        "sestama"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Biro",
+      "echelon": 2,
+      "summary": "Unit eselon II di bawah Sekretariat Utama yang menyelenggarakan urusan kerumahtanggaan kantor, pengadaan barang dan jasa, keprotokolan dan ketatausahaan pimpinan, pengelolaan arsip, serta kehumasan dan informasi publik di BPS.",
+      "tugas": [
+        "Mengelola urusan kerumahtanggaan, pemeliharaan gedung dan fasilitas kerja, serta keamanan kantor.",
+        "Melaksanakan pengadaan barang dan jasa, layanan pengadaan elektronik, serta pembinaan kelembagaannya.",
+        "Menyelenggarakan layanan keprotokolan, persidangan, dan tata usaha bagi Kepala serta Wakil Kepala BPS.",
+        "Membina pengelolaan kearsipan di seluruh lingkungan BPS.",
+        "Mengelola komunikasi publik, hubungan masyarakat, dan layanan informasi publik."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 29-42)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "pusdiklat",
+      "name": "Pusat Pendidikan dan Pelatihan",
+      "shortName": "Pusdiklat",
+      "type": "pusat",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "sestama",
+      "headTitle": "Kepala Pusat",
+      "echelon": 2,
+      "summary": "Unsur penunjang tugas dan fungsi BPS yang berada di bawah Kepala BPS melalui Sekretaris Utama untuk merumuskan dan melaksanakan kebijakan teknis pengembangan kompetensi SDM bidang statistik melalui pelatihan, sertifikasi, dan akreditasi.",
+      "tugas": [
+        "Menyusun kebijakan teknis pelatihan dasar, kepemimpinan, teknis, dan fungsional bidang statistik.",
+        "Menyelenggarakan pendidikan dan pelatihan serta program sertifikasi dan akreditasi pelatihan.",
+        "Memantau, mengevaluasi, dan melaporkan hasil penyelenggaraan pelatihan dan sertifikasi.",
+        "Mengelola administrasi dan tata usaha di lingkungan Pusat Pendidikan dan Pelatihan."
+      ],
+      "services": [
+        "SIMDIKLAT (Sistem Informasi Manajemen Diklat)",
+        "Warkop / LMS BPS (Pembelajaran Daring Pegawai)",
+        "PULSA (Pusat Layanan Pembelajaran Statistik)",
+        "Gojags Training"
+      ],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 4 huruf j, Bab XI Pasal 142-148)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        },
+        {
+          "title": "Peraturan BPS Nomor 5 Tahun 2026 tentang Jabatan dan Kelas Jabatan di Lingkungan BPS (Lampiran I)",
+          "url": "https://peraturan.go.id/id/peraturan-bps-no-5-tahun-2026",
+          "accessedAt": "2026-11-27"
+        },
+        {
+          "title": "Portal Resmi Pusdiklat BPS",
+          "url": "https://pusdiklat.bps.go.id/",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "deputi-mis",
+      "name": "Deputi Bidang Metodologi dan Informasi Statistik",
+      "shortName": "Deputi MIS",
+      "type": "deputi",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "mis",
+      "headTitle": "Deputi",
+      "echelon": 1,
+      "summary": "Unsur pelaksana utama di bawah Kepala BPS yang bertugas merumuskan dan melaksanakan kebijakan di bidang metodologi sensus dan survei, diseminasi dan evaluasi penyelenggaraan statistik, serta pengembangan sistem informasi statistik.",
+      "tugas": [
+        "Merumuskan kebijakan teknis, bimbingan, dan pembinaan metodologi sensus/survei, diseminasi, dan sistem informasi.",
+        "Mengendalikan penerapan kebijakan teknis di bidang metodologi, diseminasi, dan teknologi informasi statistik.",
+        "Melaksanakan pengembangan metodologi sensus dan survei, diseminasi statistik, serta sistem informasi statistik."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab V, Pasal 43-46)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-metodologi-sains-data",
+      "name": "Direktorat Metodologi Statistik dan Sains Data",
+      "shortName": "Dit. Metodologi & Sains Data",
+      "type": "direktorat",
+      "parentId": "deputi-mis",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-mis"
+      ],
+      "island": "mis",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi MIS yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang desain statistik, kerangka sampel, standardisasi dan klasifikasi statistik, wilayah kerja serta geospasial statistik, sains data, dan kecerdasan buatan.",
+      "tugas": [
+        "Menyiapkan perumusan dan pelaksanaan kebijakan desain statistik serta kerangka sampel sensus dan survei.",
+        "Mengelola standardisasi statistik, klasifikasi statistik, kode referensi, dan wilayah kerja statistik.",
+        "Mengembangkan pemanfaatan geospasial statistik, sains data, dan kecerdasan buatan di BPS.",
+        "Memantau, mengevaluasi, dan melaporkan penyelenggaraan metodologi serta sains data."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 47-52)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-diseminasi-pemberdayaan-evaluasi",
+      "name": "Direktorat Diseminasi, Pemberdayaan, dan Evaluasi Penyelenggaraan Statistik",
+      "shortName": "Dit. Diseminasi, Pemberdayaan & Evaluasi",
+      "type": "direktorat",
+      "parentId": "deputi-mis",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-mis"
+      ],
+      "island": "mis",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi MIS yang mengelola diseminasi publikasi dan rujukan statistik, pemberdayaan penyelenggaraan kegiatan statistik, evaluasi serta penjaminan kualitas statistik, pengelolaan perpustakaan, dan akses data serta informasi.",
+      "tugas": [
+        "Melaksanakan diseminasi publikasi, rujukan statistik, metadata, layanan, dan promosi statistik.",
+        "Menyelenggarakan pemberdayaan kegiatan statistik serta pengelolaan perpustakaan BPS.",
+        "Melaksanakan evaluasi penyelenggaraan statistik dan penjaminan kualitas data statistik.",
+        "Mengelola akuisisi serta penyediaan akses data dan informasi statistik."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 53-61)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-sistem-informasi",
+      "name": "Direktorat Sistem Informasi Statistik",
+      "shortName": "Dit. Sistem Informasi Statistik",
+      "type": "direktorat",
+      "parentId": "deputi-mis",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-mis"
+      ],
+      "island": "mis",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi MIS yang menangani perencanaan teknologi informasi, pengelolaan infrastruktur TI dan keamanan data, pengembangan sistem informasi dan layanan TI, serta pengolahan, manajemen, dan integrasi data statistik.",
+      "tugas": [
+        "Menyusun perencanaan teknologi informasi serta mengembangkan sistem informasi dan layanan TI BPS.",
+        "Mengelola infrastruktur teknologi informasi, aset TI, dan keamanan data serta informasi.",
+        "Melaksanakan pengolahan data, manajemen data, dan integrasi data statistik.",
+        "Memantau, mengevaluasi, dan melaporkan kinerja infrastruktur TI serta integrasi data."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 62-70)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "deputi-sosial",
+      "name": "Deputi Bidang Statistik Sosial",
+      "shortName": "Deputi Statistik Sosial",
+      "type": "deputi",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "sosial",
+      "headTitle": "Deputi",
+      "echelon": 1,
+      "summary": "Unsur pelaksana utama di bawah Kepala BPS yang bertugas merumuskan dan melaksanakan kebijakan di bidang statistik sosial, mencakup kependudukan dan ketenagakerjaan, kesejahteraan rakyat, serta ketahanan sosial.",
+      "tugas": [
+        "Merumuskan kebijakan teknis pelaksanaan, bimbingan, dan pembinaan di bidang statistik sosial.",
+        "Mengendalikan kebijakan teknis statistik kependudukan, kesejahteraan rakyat, dan ketahanan sosial.",
+        "Melaksanakan pengembangan metode dan kegiatan statistik sosial."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab VI, Pasal 71-74)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-kependudukan-ketenagakerjaan",
+      "name": "Direktorat Statistik Kependudukan dan Ketenagakerjaan",
+      "shortName": "Dit. Kependudukan & Ketenagakerjaan",
+      "type": "direktorat",
+      "parentId": "deputi-sosial",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-sosial"
+      ],
+      "island": "sosial",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Sosial yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis statistik demografi, ketenagakerjaan, upah dan pendapatan pekerja, serta mobilitas penduduk dan tenaga kerja.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis di bidang statistik demografi dan kependudukan.",
+        "Menyelenggarakan pengumpulan serta pengolahan statistik ketenagakerjaan, upah, dan pendapatan tenaga kerja.",
+        "Menyelenggarakan statistik mobilitas penduduk dan mobilitas tenaga kerja.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik kependudukan dan ketenagakerjaan."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 75-77)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-kesejahteraan-rakyat",
+      "name": "Direktorat Statistik Kesejahteraan Rakyat",
+      "shortName": "Dit. Kesejahteraan Rakyat",
+      "type": "direktorat",
+      "parentId": "deputi-sosial",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-sosial"
+      ],
+      "island": "sosial",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Sosial yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang statistik rumah tangga, pendidikan, kesejahteraan sosial, kesehatan, dan perumahan.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis statistik rumah tangga serta kondisi sosial ekonomi masyarakat.",
+        "Menyelenggarakan statistik di bidang pendidikan, kesehatan, perumahan, dan kesejahteraan sosial.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik kesejahteraan rakyat."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 78-80)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-ketahanan-sosial",
+      "name": "Direktorat Statistik Ketahanan Sosial",
+      "shortName": "Dit. Ketahanan Sosial",
+      "type": "direktorat",
+      "parentId": "deputi-sosial",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-sosial"
+      ],
+      "island": "sosial",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Sosial yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang statistik ketahanan wilayah, kerawanan sosial, politik dan keamanan, serta lingkungan hidup.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis statistik ketahanan wilayah dan kerawanan sosial.",
+        "Menyelenggarakan kegiatan statistik di bidang politik, keamanan, serta lingkungan hidup.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik ketahanan sosial."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 81-83)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "deputi-produksi",
+      "name": "Deputi Bidang Statistik Produksi",
+      "shortName": "Deputi Statistik Produksi",
+      "type": "deputi",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "produksi",
+      "headTitle": "Deputi",
+      "echelon": 1,
+      "summary": "Unsur pelaksana utama di bawah Kepala BPS yang bertugas merumuskan dan melaksanakan kebijakan di bidang statistik produksi, meliputi pertanian, kelautan, perikanan, kehutanan, industri, pertambangan, penggalian, energi, dan konstruksi.",
+      "tugas": [
+        "Merumuskan kebijakan teknis, bimbingan, dan pembinaan di bidang statistik produksi.",
+        "Mengendalikan kebijakan teknis statistik sumber daya hayati, pertambangan, energi, konstruksi, dan industri.",
+        "Melaksanakan pengembangan kegiatan serta metode statistik di sektor produksi."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab VII, Pasal 84-87)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-sumber-daya-hayati",
+      "name": "Direktorat Statistik Sumber Daya Hayati",
+      "shortName": "Dit. Sumber Daya Hayati",
+      "type": "direktorat",
+      "parentId": "deputi-produksi",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-produksi"
+      ],
+      "island": "produksi",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Produksi yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis statistik tanaman pangan, hortikultura, perkebunan, peternakan, perikanan, kelautan, dan kehutanan.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis statistik tanaman pangan, hortikultura, dan perkebunan.",
+        "Menyelenggarakan statistik di bidang peternakan, perikanan, kelautan, dan kehutanan.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik sumber daya hayati."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 88-90)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-sumber-daya-mineral-konstruksi",
+      "name": "Direktorat Statistik Sumber Daya Mineral dan Konstruksi",
+      "shortName": "Dit. Mineral & Konstruksi",
+      "type": "direktorat",
+      "parentId": "deputi-produksi",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-produksi"
+      ],
+      "island": "produksi",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Produksi yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang statistik pertambangan, penggalian, energi, dan konstruksi.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis di bidang statistik pertambangan dan penggalian.",
+        "Menyelenggarakan pengumpulan dan pengolahan data statistik sektor energi dan konstruksi.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik sumber daya mineral dan konstruksi."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 91-93)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-industri",
+      "name": "Direktorat Statistik Industri",
+      "shortName": "Dit. Statistik Industri",
+      "type": "direktorat",
+      "parentId": "deputi-produksi",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-produksi"
+      ],
+      "island": "produksi",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Produksi yang merumuskan, melaksanakan, serta memantau dan mengevaluasi kebijakan teknis di bidang statistik industri manufaktur skala besar, sedang, mikro, kecil, dan menengah.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis di bidang statistik industri besar dan sedang.",
+        "Menyelenggarakan pengumpulan serta pengolahan statistik industri mikro, kecil, dan menengah.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik sektor industri."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 94-96)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "deputi-distribusi-jasa",
+      "name": "Deputi Bidang Statistik Distribusi dan Jasa",
+      "shortName": "Deputi Distribusi & Jasa",
+      "type": "deputi",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "distribusi-jasa",
+      "headTitle": "Deputi",
+      "echelon": 1,
+      "summary": "Unsur pelaksana utama di bawah Kepala BPS yang bertugas merumuskan dan melaksanakan kebijakan di bidang statistik perdagangan, logistik, transportasi, harga, keuangan, pariwisata, dan sektor jasa lainnya.",
+      "tugas": [
+        "Merumuskan kebijakan teknis, bimbingan, dan pembinaan di bidang statistik distribusi, harga, keuangan, dan jasa.",
+        "Mengendalikan penerapan kebijakan teknis pada kegiatan statistik perdagangan, harga, keuangan, dan jasa.",
+        "Melaksanakan pengembangan metodologi dan kegiatan statistik sektor distribusi serta jasa."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab VIII, Pasal 97-100)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-distribusi",
+      "name": "Direktorat Statistik Distribusi",
+      "shortName": "Dit. Statistik Distribusi",
+      "type": "direktorat",
+      "parentId": "deputi-distribusi-jasa",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-distribusi-jasa"
+      ],
+      "island": "distribusi-jasa",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Distribusi dan Jasa yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang statistik ekspor, impor, perdagangan dalam negeri, logistik, dan transportasi.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis statistik ekspor dan impor barang.",
+        "Menyelenggarakan kegiatan statistik perdagangan dalam negeri, logistik, dan transportasi.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik distribusi."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 101-103)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-harga",
+      "name": "Direktorat Statistik Harga",
+      "shortName": "Dit. Statistik Harga",
+      "type": "direktorat",
+      "parentId": "deputi-distribusi-jasa",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-distribusi-jasa"
+      ],
+      "island": "distribusi-jasa",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Distribusi dan Jasa yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis statistik harga produsen, harga perdagangan besar, harga konsumen, serta harga pedesaan.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis di bidang statistik harga produsen dan perdagangan besar.",
+        "Menyelenggarakan pengumpulan dan penghitungan statistik harga konsumen serta harga pedesaan.",
+        "Memantau, mengevaluasi, dan melaporkan penyelenggaraan kegiatan statistik harga."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 104-106)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-jasa",
+      "name": "Direktorat Statistik Jasa",
+      "shortName": "Dit. Statistik Jasa",
+      "type": "direktorat",
+      "parentId": "deputi-distribusi-jasa",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-distribusi-jasa"
+      ],
+      "island": "distribusi-jasa",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Statistik Distribusi dan Jasa yang merumuskan, melaksanakan, serta memantau dan mengevaluasi kebijakan teknis statistik sektor keuangan, komunikasi dan teknologi informasi, pariwisata, serta jasa lainnya.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis statistik sektor keuangan, komunikasi, dan teknologi informasi.",
+        "Menyelenggarakan kegiatan statistik di bidang pariwisata dan sektor jasa lainnya.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan kegiatan statistik jasa."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 107-109)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "deputi-neraca",
+      "name": "Deputi Bidang Neraca dan Analisis Statistik",
+      "shortName": "Deputi Neraca & Analisis",
+      "type": "deputi",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "neraca",
+      "headTitle": "Deputi",
+      "echelon": 1,
+      "summary": "Unsur pelaksana utama di bawah Kepala BPS yang bertugas merumuskan dan melaksanakan kebijakan di bidang penyusunan neraca produksi, neraca pengeluaran, neraca satelit, serta analisis statistik dan tata kelola data pembangunan.",
+      "tugas": [
+        "Merumuskan kebijakan teknis, bimbingan, dan pembinaan di bidang neraca produksi, pengeluaran, dan analisis statistik.",
+        "Mengendalikan kebijakan teknis penyusunan neraca ekonomi dan pengembangan analisis statistik.",
+        "Melaksanakan pengembangan neraca produksi, neraca pengeluaran, serta analisis statistik nasional."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab IX, Pasal 110-113)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-neraca-produksi",
+      "name": "Direktorat Neraca Produksi",
+      "shortName": "Dit. Neraca Produksi",
+      "type": "direktorat",
+      "parentId": "deputi-neraca",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-neraca"
+      ],
+      "island": "neraca",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Neraca dan Analisis Statistik yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis penyusunan tabel penyediaan dan penggunaan, tabel input-output, serta PDB dan PDRB menurut lapangan usaha.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis penyusunan tabel penyediaan dan penggunaan serta input-output nasional.",
+        "Menyusun produk domestik bruto dan produk domestik regional bruto berdasarkan lapangan usaha.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan penyusunan neraca produksi."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 114-116)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-neraca-pengeluaran",
+      "name": "Direktorat Neraca Pengeluaran",
+      "shortName": "Dit. Neraca Pengeluaran",
+      "type": "direktorat",
+      "parentId": "deputi-neraca",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-neraca"
+      ],
+      "island": "neraca",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Neraca dan Analisis Statistik yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis penyusunan neraca institusi, sistem neraca sosial ekonomi, serta PDB dan PDRB menurut pengeluaran.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis penyusunan neraca institusi serta sistem neraca sosial ekonomi.",
+        "Menyusun produk domestik bruto dan produk domestik regional bruto menurut komponen pengeluaran.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan penyusunan neraca pengeluaran."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 117-119)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "dir-analisis-neraca-satelit",
+      "name": "Direktorat Analisis Statistik dan Neraca Satelit",
+      "shortName": "Dit. Analisis & Neraca Satelit",
+      "type": "direktorat",
+      "parentId": "deputi-neraca",
+      "ancestorIds": [
+        "bps-pusat",
+        "deputi-neraca"
+      ],
+      "island": "neraca",
+      "headTitle": "Direktur",
+      "echelon": 2,
+      "summary": "Direktorat di bawah Deputi Bidang Neraca dan Analisis Statistik yang merumuskan, melaksanakan, dan mengevaluasi kebijakan teknis di bidang analisis statistik lintas sektor, tata kelola data statistik pembangunan, serta penyusunan neraca satelit.",
+      "tugas": [
+        "Menyiapkan dan melaksanakan kebijakan teknis di bidang analisis statistik dan penyusunan neraca satelit.",
+        "Mengelola tata kelola data statistik pembangunan bersama unit dan instansi terkait.",
+        "Memantau, mengevaluasi, dan melaporkan pelaksanaan analisis statistik serta neraca satelit."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 120-125)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "itama",
+      "name": "Inspektorat Utama",
+      "shortName": "Inspektorat Utama",
+      "type": "inspektorat-utama",
+      "parentId": "bps-pusat",
+      "ancestorIds": [
+        "bps-pusat"
+      ],
+      "island": "itama",
+      "headTitle": "Inspektur Utama",
+      "echelon": 1,
+      "summary": "Unsur pengawasan intern yang berada di bawah dan bertanggung jawab kepada Kepala BPS untuk menyelenggarakan pengawasan fungsional atas pelaksanaan tugas, kinerja, serta pengelolaan keuangan di seluruh lingkungan BPS.",
+      "tugas": [
+        "Merumuskan kebijakan pengawasan fungsional intern di lingkungan BPS.",
+        "Melaksanakan pengawasan kinerja, keuangan, dan pengawasan untuk tujuan tertentu atas arahan Kepala BPS.",
+        "Menyusun laporan hasil pengawasan sebagai bahan akuntabilitas dan perbaikan tata kelola.",
+        "Menyelenggarakan urusan administrasi Inspektorat Utama."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Bab X, Pasal 126-129)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "inspektorat-1",
+      "name": "Inspektorat I",
+      "shortName": "Inspektorat I",
+      "type": "inspektorat",
+      "parentId": "itama",
+      "ancestorIds": [
+        "bps-pusat",
+        "itama"
+      ],
+      "island": "itama",
+      "headTitle": "Inspektur",
+      "echelon": 2,
+      "summary": "Unit pengawasan eselon II di bawah Inspektorat Utama yang bertugas melaksanakan pengawasan intern terhadap kinerja pelaksanaan tugas dan fungsi kelembagaan di lingkungan BPS.",
+      "tugas": [
+        "Menyusun kebijakan teknis pengawasan intern atas kinerja pelaksanaan tugas dan fungsi kelembagaan BPS.",
+        "Melaksanakan pengawasan intern terhadap capaian kinerja tugas dan fungsi kelembagaan.",
+        "Menyusun laporan hasil pengawasan kinerja kelembagaan serta mengelola administrasi Inspektorat I."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 130-132)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "inspektorat-2",
+      "name": "Inspektorat II",
+      "shortName": "Inspektorat II",
+      "type": "inspektorat",
+      "parentId": "itama",
+      "ancestorIds": [
+        "bps-pusat",
+        "itama"
+      ],
+      "island": "itama",
+      "headTitle": "Inspektur",
+      "echelon": 2,
+      "summary": "Unit pengawasan eselon II di bawah Inspektorat Utama yang bertugas melaksanakan pengawasan intern atas pelaksanaan administrasi umum dan pengelolaan keuangan di lingkungan BPS.",
+      "tugas": [
+        "Menyusun kebijakan teknis pengawasan intern terhadap pelaksanaan administrasi umum dan keuangan BPS.",
+        "Melaksanakan pengawasan intern atas tata kelola administrasi umum serta keuangan satuan kerja.",
+        "Menyusun laporan hasil pengawasan administrasi umum dan keuangan serta administrasi Inspektorat II."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 133-135)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "inspektorat-3",
+      "name": "Inspektorat III",
+      "shortName": "Inspektorat III",
+      "type": "inspektorat",
+      "parentId": "itama",
+      "ancestorIds": [
+        "bps-pusat",
+        "itama"
+      ],
+      "island": "itama",
+      "headTitle": "Inspektur",
+      "echelon": 2,
+      "summary": "Unit pengawasan eselon II di bawah Inspektorat Utama yang menangani pengawasan intern bersifat investigatif terhadap indikasi pelanggaran, penanganan pengaduan masyarakat, pengawasan tujuan tertentu, serta evaluasi zona integritas.",
+      "tugas": [
+        "Melaksanakan audit investigatif atas indikasi pelanggaran yang berpotensi merugikan negara maupun pelanggaran administratif dan pidana.",
+        "Menangani serta memantau tindak lanjut atas pengaduan masyarakat di lingkungan BPS.",
+        "Melaksanakan pengawasan untuk tujuan tertentu sesuai penugasan Kepala BPS.",
+        "Mengoordinasikan pelaksanaan evaluasi pembangunan zona integritas serta administrasi Inspektorat III."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 136-138)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "itama-bagian-umum",
+      "name": "Bagian Umum",
+      "shortName": "Bagian Umum Itama",
+      "type": "bagian",
+      "parentId": "itama",
+      "ancestorIds": [
+        "bps-pusat",
+        "itama"
+      ],
+      "island": "itama",
+      "headTitle": "Kepala Bagian",
+      "echelon": null,
+      "summary": "Unit dukungan administratif dan tata usaha di lingkungan Inspektorat Utama yang menyiapkan rencana dan anggaran, mengelola SDM, keuangan, TI, BMN, persuratan, kearsipan, serta mengoordinasikan kepatuhan internal Inspektorat Utama.",
+      "tugas": [
+        "Menyiapkan bahan penyusunan rencana, program kerja, dan anggaran Inspektorat Utama.",
+        "Mengelola tata laksana, SDM, keuangan, teknologi informasi, rumah tangga, serta barang milik negara di Itama.",
+        "Menyelenggarakan persuratan, kearsipan, serta pemantauan dan pelaporan kinerja Inspektorat Utama.",
+        "Mengoordinasikan kepatuhan internal dan manajemen risiko internal di lingkungan Inspektorat Utama."
+      ],
+      "services": [],
+      "verified": true,
+      "sources": [
+        {
+          "title": "Peraturan BPS Nomor 2 Tahun 2025 tentang Organisasi dan Tata Kerja BPS (Pasal 139-141)",
+          "url": "https://peraturan.bpk.go.id/Details/333268/peraturan-bps-no-2-tahun-2025",
+          "accessedAt": "2026-11-27"
+        },
+        {
+          "title": "Peraturan BPS Nomor 5 Tahun 2026 tentang Jabatan dan Kelas Jabatan di Lingkungan BPS (Lampiran I No. 53)",
+          "url": "https://peraturan.go.id/id/peraturan-bps-no-5-tahun-2026",
+          "accessedAt": "2026-11-27"
+        }
+      ]
+    }
+  ]
+}

@@ -12,8 +12,8 @@ export function mountDevBar() {
   header.innerHTML = `
     <span class="devbar-label">Simulasi pegawai dari:</span>
     <select id="dev-unit-select" class="devbar-select" aria-label="Pilih unit kerja simulasi">
-      <option value="Biro SDM">Biro SDM</option>
-      <option value="Biro Umum">Biro Umum</option>
+      <option value="biro-sdm">Biro SDM</option>
+      <option value="biro-umum">Biro Umum</option>
     </select>
   `;
 

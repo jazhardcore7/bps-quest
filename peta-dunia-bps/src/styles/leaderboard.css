@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Leaderboard (#/leaderboard): segmented tabs, unit chips, podium for 1-3,
+   list for the rest, pinned current-user row. Tokens only.
+   ========================================================================== */
+
+.screen-leaderboard {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ocean-1) 0%, var(--ocean-3) 100%);
+}
+
+.leaderboard-card-container {
+  position: absolute;
+  left: 16px;
+  top: 96px;
+  width: 928px;
+  height: 448px;
+  display: flex;
+  flex-direction: column;
+}
+
+.leaderboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: var(--ui-shadow-hard);
+  font-family: var(--font-body);
+}
+
+.leaderboard-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.leaderboard-filters-row { flex: 1; min-width: 0; }
+
+.leaderboard-chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lb-filter-label {
+  font-weight: var(--fw-black);
+  font-size: var(--fs-2);
+  color: var(--ink-soft);
+}
+
+.lb-refresh-btn { margin-left: auto; }
+.lb-refresh-btn.is-busy .icon { animation: bps-spin 800ms linear infinite; }
+
+/* ---- Body: podium (left) + list (right) ---- */
+.leaderboard-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.leaderboard-body.has-podium {
+  grid-template-columns: 360px 1fr;
+}
+
+.leaderboard-podium-wrap:empty { display: none; }
+
+.leaderboard-list-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  min-width: 0;
+}
+
+.leaderboard-list-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+}
+
+/* ---- Podium ---- */
+.lb-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 100%;
+  margin: 0;
+  padding: var(--space-2) 0 0;
+  list-style: none;
+  background: var(--sand);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+}
+
+.lb-podium-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  width: 108px;
+  min-width: 0;
+}
+
+.lb-podium-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.lb-podium-name {
+  width: 100%;
+  font-weight: var(--fw-black);
+  font-size: var(--fs-2);
+  line-height: var(--lh-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-podium-step {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  padding-top: var(--space-2);
+  border: var(--border-w) solid var(--ink);
+  border-bottom: 0;
+  border-radius: var(--radius-s) var(--radius-s) 0 0;
+}
+
+.lb-podium-slot.rank-1 .lb-podium-step { height: 120px; background: var(--medal-gold); }
+.lb-podium-slot.rank-2 .lb-podium-step { height: 88px;  background: var(--medal-silver); }
+.lb-podium-slot.rank-3 .lb-podium-step { height: 64px;  background: var(--medal-bronze); }
+.lb-podium-slot.is-empty .lb-podium-step { background: var(--paper-shade); border-style: dashed; }
+
+.lb-podium-num {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-6);
+  line-height: 1;
+  color: var(--ink);
+}
+
+.lb-podium-slot.is-current-user .lb-avatar { box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--ink); }
+
+/* ---- Avatars and rank medallions ---- */
+.lb-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--unit-sestama);
+  color: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-2);
+  line-height: 1;
+}
+
+.lb-avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: var(--fs-4);
+  border-width: var(--border-w);
+}
+
+/* Medallion: number always shown; color is a second cue for 1-3 */
+.rank-medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 var(--space-1);
+  background: var(--white);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-2);
+  line-height: 1;
+}
+
+.lb-avatar .rank-medal {
+  position: absolute;
+  right: -8px;
+  bottom: -6px;
+  min-width: 24px;
+  height: 24px;
+  font-size: var(--fs-1);
+}
+
+.rank-medal.rank-1 { background: var(--medal-gold); }
+.rank-medal.rank-2 { background: var(--medal-silver); }
+.rank-medal.rank-3 { background: var(--medal-bronze); }
+
+/* ---- List rows ---- */
+.leaderboard-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leaderboard-row,
+.leaderboard-pinned-row {
+  display: grid;
+  grid-template-columns: 40px 40px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-3);
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-m);
+}
+
+.leaderboard-row.is-current-user,
+.leaderboard-pinned-row {
+  background: var(--gold);
+  box-shadow: var(--ui-shadow-hard);
+}
+
+.leaderboard-pinned-row { border-width: var(--border-w); }
+
+.lb-col-user { min-width: 0; }
+
+.lb-user-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-weight: var(--fw-black);
+  font-size: var(--fs-3);
+  line-height: var(--lh-tight);
+}
+
+.lb-user-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-user-unit {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--ink-soft);
+}
+
+.leaderboard-row.is-current-user .lb-user-unit,
+.leaderboard-pinned-row .lb-user-unit { color: var(--ink); }
+
+/* "Kamu" tag: text cue for the current user (not color alone) */
+.lb-you-tag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 1px var(--space-2);
+  background: var(--ink);
+  color: var(--white);
+  border-radius: var(--radius-s);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-black);
+  line-height: 1.4;
+}
+
+/* ---- Loading, empty, notes ---- */
+.leaderboard-loading,
+.leaderboard-list-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--ink-soft);
+  font-weight: var(--fw-bold);
+}
+
+.leaderboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.leaderboard-empty-state .empty-text {
+  max-width: 420px;
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+}
+
+.leaderboard-empty-state.is-error { color: var(--danger-strong); }
+.leaderboard-empty-state.is-error .empty-text { color: var(--danger-strong); }
+
+.empty-illustration { display: block; }

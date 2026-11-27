@@ -2,12 +2,20 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   XP_PER_LEVEL,
+  QUEST_XP_MAX_HEAD,
+  QUEST_XP_MAX_ADMIN,
+  ROLES,
+  ROLE_LABELS,
+  isHeadRole,
+  isSuperAdminRole,
+  getRoleLabel,
   calculateLevel,
   weekKeyJakarta,
   monthKeyJakarta,
   dailyPeriodKeyJakarta,
   toUnitId,
-  UNIT_IDS
+  UNIT_IDS,
+  normalizeDisplayName
 } from '../src/config.js';
 
 describe('Level and XP calculation', () => {
@@ -44,6 +52,36 @@ describe('Unit ID Mappings', () => {
   it('handles empty or nullish unit strings', () => {
     assert.equal(toUnitId(''), '');
     assert.equal(toUnitId(null), '');
+  });
+});
+
+describe('Display name normalization (must satisfy firestore.rules: 1-60 chars, no < or >)', () => {
+  const RULE_PATTERN = /^[^<>]+$/;
+
+  it('keeps a normal name and collapses extra whitespace', () => {
+    assert.equal(normalizeDisplayName('Budi Santoso', 'budi@bps.go.id'), 'Budi Santoso');
+    assert.equal(normalizeDisplayName('  Budi \t  Santoso\n ', 'budi@bps.go.id'), 'Budi Santoso');
+  });
+
+  it('removes < and > from HTML input', () => {
+    const name = normalizeDisplayName('<img src=x onerror=alert(1)>', 'budi@bps.go.id');
+    assert.equal(name, 'img src=x onerror=alert(1)');
+    assert.match(name, RULE_PATTERN);
+  });
+
+  it('cuts names longer than 60 characters to 60', () => {
+    const name = normalizeDisplayName('A'.repeat(61), 'budi@bps.go.id');
+    assert.equal(name.length, 60);
+    assert.equal(normalizeDisplayName('B'.repeat(200), 'budi@bps.go.id').length, 60);
+  });
+
+  it('falls back to the email local part, then to "Pegawai", for empty input', () => {
+    assert.equal(normalizeDisplayName('', 'budi.santoso@bps.go.id'), 'budi.santoso');
+    assert.equal(normalizeDisplayName('   ', 'budi@bps.go.id'), 'budi');
+    assert.equal(normalizeDisplayName('<>', 'budi@bps.go.id'), 'budi');
+    assert.equal(normalizeDisplayName(null, '<b>@bps.go.id'), 'b');
+    assert.equal(normalizeDisplayName(undefined, '<>@bps.go.id'), 'Pegawai');
+    assert.equal(normalizeDisplayName('', undefined), 'Pegawai');
   });
 });
 
@@ -107,5 +145,51 @@ describe('Jakarta Daily Period Key (format YYYY-MM-DD in Asia/Jakarta UTC+7)', (
   it('matches YYYY-MM-DD format regex', () => {
     const todayKey = dailyPeriodKeyJakarta(new Date());
     assert.match(todayKey, /^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe('Role constants, labels, and helpers', () => {
+  it('defines role constants and Indonesian UI labels', () => {
+    assert.equal(ROLES.EMPLOYEE, 'employee');
+    assert.equal(ROLES.HEAD_E2, 'head_e2');
+    assert.equal(ROLES.HEAD_E1, 'head_e1');
+    assert.equal(ROLES.HEAD_TOP, 'head_top');
+    assert.equal(ROLES.SUPER_ADMIN, 'super_admin');
+
+    assert.equal(ROLE_LABELS.employee, 'Pegawai');
+    assert.equal(ROLE_LABELS.head_e2, 'Pimpinan Eselon II');
+    assert.equal(ROLE_LABELS.head_e1, 'Pimpinan Eselon I');
+    assert.equal(ROLE_LABELS.head_top, 'Pimpinan Tertinggi');
+    assert.equal(ROLE_LABELS.super_admin, 'Super Admin');
+    assert.equal(ROLE_LABELS.admin, 'Super Admin');
+  });
+
+  it('defines XP caps for heads and super admins', () => {
+    assert.equal(QUEST_XP_MAX_HEAD, 100);
+    assert.equal(QUEST_XP_MAX_ADMIN, 500);
+  });
+
+  it('identifies head roles accurately', () => {
+    assert.equal(isHeadRole('head_e2'), true);
+    assert.equal(isHeadRole('head_e1'), true);
+    assert.equal(isHeadRole('head_top'), true);
+    assert.equal(isHeadRole('employee'), false);
+    assert.equal(isHeadRole('super_admin'), false);
+    assert.equal(isHeadRole('admin'), false);
+    assert.equal(isHeadRole(undefined), false);
+  });
+
+  it('identifies super_admin and legacy admin alias accurately', () => {
+    assert.equal(isSuperAdminRole('super_admin'), true);
+    assert.equal(isSuperAdminRole('admin'), true);
+    assert.equal(isSuperAdminRole('head_top'), false);
+    assert.equal(isSuperAdminRole('employee'), false);
+    assert.equal(isSuperAdminRole(null), false);
+  });
+
+  it('resolves role labels with safe fallback', () => {
+    assert.equal(getRoleLabel('head_e1'), 'Pimpinan Eselon I');
+    assert.equal(getRoleLabel('admin'), 'Super Admin');
+    assert.equal(getRoleLabel('unknown'), 'Pegawai');
   });
 });

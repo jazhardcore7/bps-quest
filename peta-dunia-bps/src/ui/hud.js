@@ -1,5 +1,8 @@
 // Reusable HUD components, icons, and toast notifications
 import { logout } from '../firebase/auth.js';
+import { isHeadRole, isSuperAdminRole } from '../config.js';
+import { escapeHtml } from './escape.js';
+import { buildToastEl, TOAST_DEFAULT_MS } from './toast.js';
 
 let toastTimeout = null;
 
@@ -18,9 +21,16 @@ export const icons = {
   trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD24A" class="icon-trophy" aria-hidden="true"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
 };
 
-// Global delegation for HUD button clicks (logout & leaderboard)
+// Global delegation for HUD button clicks (manage, leaderboard, logout)
 if (typeof document !== 'undefined') {
   document.addEventListener('click', async (e) => {
+    const manageBtn = e.target.closest('#hud-manage-btn');
+    if (manageBtn) {
+      e.preventDefault();
+      window.location.hash = '#/manage';
+      return;
+    }
+
     const trophyBtn = e.target.closest('#hud-trophy-btn');
     if (trophyBtn) {
       e.preventDefault();
@@ -44,41 +54,68 @@ if (typeof document !== 'undefined') {
 export function renderRightCard(state) {
   const player = (state && state.player) || {
     displayName: 'Pegawai BPS',
+    role: 'employee',
+    active: true,
     level: 1,
-    title: 'Explorer',
+    title: 'Pegawai',
     xp: 0,
     xpToNext: 500
   };
   const percent = Math.min(100, Math.max(0, Math.round((player.xp / player.xpToNext) * 100)));
+  const name = escapeHtml(player.displayName || 'Pegawai BPS');
+  const title = escapeHtml(player.title || 'Pegawai');
+  const canManage = Boolean(
+    state &&
+    state.user &&
+    player.active !== false &&
+    (isHeadRole(player.role) || isSuperAdminRole(player.role))
+  );
+  const manageBtnHtml = canManage
+    ? '<button type="button" class="hud-manage-btn" id="hud-manage-btn" title="Pusat Pengelolaan" aria-label="Kelola">Kelola</button>'
+    : '';
+
+  const level = escapeHtml(String(player.level));
+  const xp = escapeHtml(String(player.xp));
+  const xpToNext = escapeHtml(String(player.xpToNext));
 
   return '' +
-    '<div class="hud-card hud-right-card" aria-label="Informasi Pemain">' +
+    '<div class="hud-card hud-right-card hud-v2" aria-label="Informasi Pemain">' +
       '<div class="hud-avatar-wrap">' +
         icons.avatar +
       '</div>' +
       '<div class="hud-player-info">' +
-        '<div class="hud-player-name" title="' + (player.displayName || 'Pegawai BPS') + '">' +
-          (player.displayName || 'Pegawai BPS') +
+        '<div class="hud-player-name" title="' + name + '">' +
+          name +
         '</div>' +
-        '<div class="hud-player-level">Level ' + player.level + ' · ' + player.title + '</div>' +
-        '<div class="hud-xp-text">' + player.xp + ' / ' + player.xpToNext + ' XP</div>' +
-        '<div class="hud-progress-track" role="progressbar" aria-valuenow="' + player.xp + '" aria-valuemin="0" aria-valuemax="' + player.xpToNext + '">' +
-          '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
+        '<div class="hud-player-level">' +
+          '<span class="hud-level-text">Level ' + level + '</span>' +
+          '<span class="hud-role-chip" title="' + title + '">' + title + '</span>' +
+        '</div>' +
+        '<div class="hud-xp-row">' +
+          '<div class="hud-progress-track" role="progressbar" aria-label="XP menuju level berikutnya" ' +
+            'aria-valuenow="' + xp + '" aria-valuemin="0" aria-valuemax="' + xpToNext + '" ' +
+            'aria-valuetext="' + xp + ' dari ' + xpToNext + ' XP">' +
+            '<div class="hud-progress-fill" style="width: ' + percent + '%;"></div>' +
+          '</div>' +
+          '<div class="hud-xp-text">' + xp + ' / ' + xpToNext + ' XP</div>' +
         '</div>' +
       '</div>' +
-      '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
-        icons.trophy +
-      '</button>' +
-      '<button type="button" class="hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
-        icons.logout +
-      '</button>' +
+      '<div class="hud-actions">' +
+        manageBtnHtml +
+        '<button type="button" class="hud-action-btn hud-trophy-btn" id="hud-trophy-btn" title="Papan Peringkat" aria-label="Papan Peringkat">' +
+          icons.trophy +
+        '</button>' +
+        '<button type="button" class="hud-action-btn hud-logout-btn" id="hud-logout-btn" title="Keluar dari akun" aria-label="Keluar dari akun">' +
+          icons.logout +
+        '</button>' +
+      '</div>' +
     '</div>';
 }
 
 export function renderLeftCard(options = {}) {
   const hasBack = Boolean(options.hasBack);
-  const title = options.title || 'Peta Dunia BPS';
-  const subtitle = options.subtitle || 'Jelajahi seluruh pulau unit kerja di BPS';
+  const title = escapeHtml(options.title || 'Peta Dunia BPS');
+  const subtitle = escapeHtml(options.subtitle || 'Jelajahi seluruh pulau unit kerja di BPS');
 
   const backBtnHtml = hasBack
     ? '<button type="button" class="hud-back-btn" id="hud-back-button" aria-label="Kembali">' +
@@ -87,7 +124,7 @@ export function renderLeftCard(options = {}) {
     : '';
 
   return '' +
-    '<div class="hud-card hud-left-card' + (hasBack ? ' has-back' : '') + '">' +
+    '<div class="hud-card hud-left-card hud-v2' + (hasBack ? ' has-back' : '') + '">' +
       backBtnHtml +
       '<div class="hud-title-wrap">' +
         '<h1 class="hud-title">' + title + '</h1>' +
@@ -110,7 +147,36 @@ export function bindLeftCardEvents(container, onBack) {
   }
 }
 
-export function showToast(message, duration = 2000) {
+// Persistent screen-reader live region outside #stage, so it survives screen
+// re-renders and announces reliably (a freshly inserted region often does not).
+export function announce(message) {
+  let live = document.getElementById('bps-live-status');
+  if (!live) {
+    live = document.createElement('div');
+    live.id = 'bps-live-status';
+    live.className = 'visually-hidden';
+    live.setAttribute('role', 'status');
+    live.setAttribute('aria-live', 'polite');
+    live.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(live);
+  }
+  live.textContent = '';
+  // Next frame so repeated identical messages are still announced.
+  requestAnimationFrame(() => { live.textContent = String(message); });
+}
+
+// First letter of the first and last word that contain a letter (leaderboard avatars).
+export function initialsOf(name) {
+  const letters = String(name || '')
+    .split(/\s+/)
+    .map((w) => (w.match(/\p{L}/u) || [''])[0])
+    .filter(Boolean);
+  if (letters.length === 0) return 'P';
+  const last = letters.length > 1 ? letters[letters.length - 1] : '';
+  return (letters[0] + last).toUpperCase();
+}
+
+export function showToast(message, duration = TOAST_DEFAULT_MS) {
   const stage = document.getElementById('stage');
   if (!stage) return;
 
@@ -123,11 +189,13 @@ export function showToast(message, duration = 2000) {
     toastTimeout = null;
   }
 
-  const toast = document.createElement('div');
-  toast.className = 'bps-toast';
-  toast.setAttribute('role', 'alert');
-  toast.textContent = message;
+  const toast = buildToastEl(message);
+  // The visible toast is presentation; the live region does the announcing.
+  toast.removeAttribute('role');
+  toast.removeAttribute('aria-live');
+  toast.setAttribute('aria-hidden', 'true');
   stage.appendChild(toast);
+  announce(message);
 
   void toast.offsetWidth;
   toast.classList.add('visible');

@@ -1,0 +1,238 @@
+/* ==========================================================================
+   HUD cards (shared by every game screen) - Office visual language
+   Navy card like the Office "Tekan E" bubble, ink outline, hard shadow.
+   Player card: full name on line 1 (ellipsis only past a generous width,
+   full value in title), "Level N" + role chip on line 2, segmented XP bar.
+   ========================================================================== */
+
+.hud-left-wrapper,
+.hud-right-wrapper {
+  position: absolute;
+  top: 16px;
+  z-index: 20;
+}
+.hud-left-wrapper  { left: 18px; }
+.hud-right-wrapper { right: 18px; }
+
+.hud-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: var(--color-card-bg);
+  color: var(--color-card-text);
+  border: var(--island-outline-w) solid var(--island-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-hard);
+  user-select: none;
+}
+
+/* ---------------- Left: title card ---------------- */
+.hud-left-card {
+  max-width: 380px;
+  min-height: 62px;
+}
+
+.hud-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hud-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hud-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-card-subtext);
+}
+
+/* ---------------- Right: player card ---------------- */
+.hud-right-card {
+  max-width: 560px;
+}
+
+.hud-avatar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid var(--hud-xp-cell-edge);
+  border-radius: 50%;
+}
+
+.hud-avatar-svg { display: block; }
+
+.hud-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hud-player-name {
+  max-width: 280px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-player-level {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Role chip: light plate with ink text (Office label treatment) */
+.hud-role-chip {
+  display: inline-block;
+  max-width: 200px;
+  padding: 1px 8px;
+  overflow: hidden;
+  background: var(--room-window);
+  color: var(--island-ink);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Segmented XP bar: gold fill under 10 cell dividers; light cell edge */
+.hud-progress-track {
+  position: relative;
+  width: 140px;
+  height: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-color: var(--hud-xp-cell-empty);
+  border: 2px solid var(--hud-xp-cell-edge);
+  border-radius: 4px;
+}
+
+.hud-progress-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(10% - 2px),
+    var(--color-card-bg) calc(10% - 2px),
+    var(--color-card-bg) 10%
+  );
+  pointer-events: none;
+}
+
+.hud-progress-fill {
+  height: 100%;
+  background-color: var(--color-gold);
+  transition: width var(--dur-base) ease-out;
+}
+
+.hud-xp-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-card-subtext);
+  white-space: nowrap;
+}
+
+/* ---------------- Buttons (real <button>s, >= 44px) ---------------- */
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hud-back-btn,
+.hud-action-btn,
+.hud-manage-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  background-color: var(--color-page-bg);
+  color: var(--color-card-text);
+  border: 2px solid var(--hud-xp-cell-edge);
+  border-radius: 10px;
+  box-shadow: var(--shadow-hard);
+  font-family: inherit;
+  cursor: pointer;
+  outline: 3px solid transparent; /* forced-colors fallback */
+  transform: translateY(0);
+  transition: transform var(--dur-fast) ease-out, box-shadow var(--dur-fast) ease-out;
+}
+
+.hud-back-btn { border-radius: 50%; }
+
+.hud-manage-btn {
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hud-back-btn:hover,
+.hud-action-btn:hover,
+.hud-manage-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hard-hover);
+}
+
+.hud-back-btn:active,
+.hud-action-btn:active,
+.hud-manage-btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-pressed);
+}
+
+.hud-back-btn:focus-visible,
+.hud-action-btn:focus-visible,
+.hud-manage-btn:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.hud-action-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-back-btn,
+  .hud-action-btn,
+  .hud-manage-btn,
+  .hud-progress-fill {
+    transition: none;
+  }
+  .hud-back-btn:hover, .hud-action-btn:hover, .hud-manage-btn:hover,
+  .hud-back-btn:active, .hud-action-btn:active, .hud-manage-btn:active {
+    transform: none;
+  }
+}

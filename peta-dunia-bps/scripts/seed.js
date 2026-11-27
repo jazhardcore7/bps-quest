@@ -1,6 +1,11 @@
 // Seed script targeting Firestore emulator only
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { initializeApp, getApps, getApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Guard: Target EMULATOR ONLY
 if (!process.env.FIRESTORE_EMULATOR_HOST) {
@@ -8,6 +13,15 @@ if (!process.env.FIRESTORE_EMULATOR_HOST) {
   console.error('This seed script targets the local emulator suite ONLY and refuses to run against remote production.');
   console.error('Please run with: $env:FIRESTORE_EMULATOR_HOST="127.0.0.1:8080"; npm run seed\n');
   process.exit(1);
+}
+
+const structurePath = path.resolve(__dirname, '../src/data/bps-structure.json');
+const bpsStructure = JSON.parse(fs.readFileSync(structurePath, 'utf8'));
+const UNITS_BY_ID = new Map(bpsStructure.units.map((u) => [u.id, u]));
+
+function unitPathFor(unitId) {
+  const unit = UNITS_BY_ID.get(unitId);
+  return unit ? [...unit.ancestorIds, unitId] : [unitId];
 }
 
 const targetProjects = Array.from(new Set([
@@ -44,40 +58,105 @@ const currentWeek = weekKeyJakarta(now);
 const currentMonth = monthKeyJakarta(now);
 
 const ALLOWED_EMAILS = [
+  // Existing demo accounts (kept working)
   {
     email: 'pegawai1@bps.go.id',
     data: {
+      email: 'pegawai1@bps.go.id',
       displayName: 'Budi Santoso',
       unit: 'biro-sdm',
-      role: 'employee'
+      role: 'employee',
+      jabatan: 'Analis SDM Aparatur Ahli Pertama',
+      active: true
     }
   },
   {
     email: 'pegawai2@bps.go.id',
     data: {
+      email: 'pegawai2@bps.go.id',
       displayName: 'Siti Rahma',
       unit: 'biro-umum',
-      role: 'employee'
+      role: 'employee',
+      jabatan: 'Pranata Humas Ahli Pertama',
+      active: true
     }
   },
   {
     email: 'admin@bps.go.id',
     data: {
+      email: 'admin@bps.go.id',
       displayName: 'Admin Utama',
       unit: 'biro-sdm',
-      role: 'admin'
+      role: 'admin',
+      jabatan: 'Administrator Sistem',
+      active: true
     }
-  }
-];
-
-const UNITS = [
+  },
+  // Role matrix demo accounts
   {
-    id: 'biro-sdm',
+    email: 'superadmin@bps.go.id',
     data: {
-      name: 'Biro Sumber Daya Manusia',
-      parentUnit: 'Sekretariat Utama',
-      description: 'Biro yang mengelola perencanaan, mutasi, pengembangan, dan kesejahteraan pegawai BPS',
-      level: 2
+      email: 'superadmin@bps.go.id',
+      displayName: 'Super Admin BPS',
+      unit: 'bps-pusat',
+      role: 'super_admin',
+      jabatan: 'Pengelola Sistem Utama',
+      active: true
+    }
+  },
+  {
+    email: 'kepala@bps.go.id',
+    data: {
+      email: 'kepala@bps.go.id',
+      displayName: 'Pimpinan Tertinggi Demo',
+      unit: 'bps-pusat',
+      role: 'head_top',
+      jabatan: 'Kepala BPS',
+      active: true
+    }
+  },
+  {
+    email: 'sestama@bps.go.id',
+    data: {
+      email: 'sestama@bps.go.id',
+      displayName: 'Sekretaris Utama Demo',
+      unit: 'sestama',
+      role: 'head_e1',
+      jabatan: 'Sekretaris Utama',
+      active: true
+    }
+  },
+  {
+    email: 'karo.sdm@bps.go.id',
+    data: {
+      email: 'karo.sdm@bps.go.id',
+      displayName: 'Kepala Biro SDM Demo',
+      unit: 'biro-sdm',
+      role: 'head_e2',
+      jabatan: 'Kepala Biro Sumber Daya Manusia',
+      active: true
+    }
+  },
+  {
+    email: 'dir.harga@bps.go.id',
+    data: {
+      email: 'dir.harga@bps.go.id',
+      displayName: 'Direktur Statistik Harga Demo',
+      unit: 'dir-harga',
+      role: 'head_e2',
+      jabatan: 'Direktur Statistik Harga',
+      active: true
+    }
+  },
+  {
+    email: 'nonaktif@bps.go.id',
+    data: {
+      email: 'nonaktif@bps.go.id',
+      displayName: 'Pegawai Nonaktif',
+      unit: 'biro-sdm',
+      role: 'employee',
+      jabatan: 'Pranata Komputer Pelaksana',
+      active: false
     }
   }
 ];
@@ -87,22 +166,30 @@ const QUESTS = [
     id: 'quest-daily-1',
     data: {
       unitId: 'biro-sdm',
-      title: '[Judul quest 1] Presensi & Rencana Harian',
-      description: '[Deskripsi quest harian pengisian presensi dan log aktivitas harian pegawai]',
+      title: 'Presensi dan Rencana Harian',
+      description: 'Catat presensi serta rencana aktivitas kerja harian pegawai Biro SDM.',
       type: 'daily',
       xp: 20,
-      active: true
+      active: true,
+      createdBy: 'seed',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedBy: 'seed',
+      updatedAt: FieldValue.serverTimestamp()
     }
   },
   {
     id: 'quest-checkpoint-1',
     data: {
       unitId: 'biro-sdm',
-      title: '[Judul quest 2] Pemahaman Pola Karir Pegawai',
-      description: '[Pelajari panduan pola karir ASN BPS dan selesaikan kuis pemahaman]',
+      title: 'Pemahaman Pola Karir Pegawai',
+      description: 'Pelajari panduan pola karir ASN BPS dan selesaikan kuis pemahaman.',
       type: 'checkpoint',
       xp: 50,
       active: true,
+      createdBy: 'seed',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedBy: 'seed',
+      updatedAt: FieldValue.serverTimestamp(),
       quiz: {
         question: 'Apa prinsip utama dalam implementasi sistem merit manajemen ASN di BPS?',
         options: [
@@ -119,11 +206,15 @@ const QUESTS = [
     id: 'quest-checkpoint-2',
     data: {
       unitId: 'biro-sdm',
-      title: '[Judul quest 3] Kode Etik BerAKHLAK',
-      description: '[Pahami nilai-nilai dasar BerAKHLAK dalam pelaksanaan tugas sehari-hari]',
+      title: 'Kode Etik BerAKHLAK',
+      description: 'Pahami nilai-nilai dasar BerAKHLAK dalam pelaksanaan tugas sehari-hari.',
       type: 'checkpoint',
       xp: 30,
       active: true,
+      createdBy: 'seed',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedBy: 'seed',
+      updatedAt: FieldValue.serverTimestamp(),
       quiz: {
         question: 'Dalam core values BerAKHLAK, perilaku saling peduli dan menghargai perbedaan mencerminkan nilai...',
         options: [
@@ -138,6 +229,169 @@ const QUESTS = [
   }
 ];
 
+const ROLE_PROFILES = [
+  {
+    id: 'uid_super_admin',
+    data: {
+      displayName: 'Super Admin BPS',
+      email: 'superadmin@bps.go.id',
+      unit: 'bps-pusat',
+      unitPath: unitPathFor('bps-pusat'),
+      role: 'super_admin',
+      jabatan: 'Pengelola Sistem Utama',
+      active: true,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_head_top',
+    data: {
+      displayName: 'Pimpinan Tertinggi Demo',
+      email: 'kepala@bps.go.id',
+      unit: 'bps-pusat',
+      unitPath: unitPathFor('bps-pusat'),
+      role: 'head_top',
+      jabatan: 'Kepala BPS',
+      active: true,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_head_e1_sestama',
+    data: {
+      displayName: 'Sekretaris Utama Demo',
+      email: 'sestama@bps.go.id',
+      unit: 'sestama',
+      unitPath: unitPathFor('sestama'),
+      role: 'head_e1',
+      jabatan: 'Sekretaris Utama',
+      active: true,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_head_e2_sdm',
+    data: {
+      displayName: 'Kepala Biro SDM Demo',
+      email: 'karo.sdm@bps.go.id',
+      unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
+      role: 'head_e2',
+      jabatan: 'Kepala Biro Sumber Daya Manusia',
+      active: true,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_head_e2_harga',
+    data: {
+      displayName: 'Direktur Statistik Harga Demo',
+      email: 'dir.harga@bps.go.id',
+      unit: 'dir-harga',
+      unitPath: unitPathFor('dir-harga'),
+      role: 'head_e2',
+      jabatan: 'Direktur Statistik Harga',
+      active: true,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_pegawai_sdm',
+    data: {
+      displayName: 'Budi Santoso',
+      email: 'pegawai1@bps.go.id',
+      unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
+      role: 'employee',
+      jabatan: 'Analis SDM Aparatur Ahli Pertama',
+      active: true,
+      xp: 50,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 50,
+      monthKey: currentMonth,
+      xpMonth: 50,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_pegawai_umum',
+    data: {
+      displayName: 'Siti Rahma',
+      email: 'pegawai2@bps.go.id',
+      unit: 'biro-umum',
+      unitPath: unitPathFor('biro-umum'),
+      role: 'employee',
+      jabatan: 'Pranata Humas Ahli Pertama',
+      active: true,
+      xp: 75,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 75,
+      monthKey: currentMonth,
+      xpMonth: 75,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  },
+  {
+    id: 'uid_pegawai_inactive',
+    data: {
+      displayName: 'Pegawai Nonaktif',
+      email: 'nonaktif@bps.go.id',
+      unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
+      role: 'employee',
+      jabatan: 'Pranata Komputer Pelaksana',
+      active: false,
+      xp: 0,
+      level: 1,
+      avatarId: 'default',
+      weekKey: currentWeek,
+      xpWeek: 0,
+      monthKey: currentMonth,
+      xpMonth: 0,
+      createdAt: FieldValue.serverTimestamp()
+    }
+  }
+];
+
 const MOCK_USERS = [
   {
     id: 'mock_user_1',
@@ -145,7 +399,9 @@ const MOCK_USERS = [
       displayName: 'Andi Pratama',
       email: 'andi@bps.go.id',
       unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
       role: 'employee',
+      active: true,
       xp: 450,
       level: 1,
       avatarId: 'default',
@@ -162,7 +418,9 @@ const MOCK_USERS = [
       displayName: 'Dewi Lestari',
       email: 'dewi@bps.go.id',
       unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
       role: 'employee',
+      active: true,
       xp: 350,
       level: 1,
       avatarId: 'default',
@@ -179,7 +437,9 @@ const MOCK_USERS = [
       displayName: 'Rian Hidayat',
       email: 'rian@bps.go.id',
       unit: 'biro-umum',
+      unitPath: unitPathFor('biro-umum'),
       role: 'employee',
+      active: true,
       xp: 200,
       level: 1,
       avatarId: 'default',
@@ -196,7 +456,9 @@ const MOCK_USERS = [
       displayName: 'Hendra Veteran',
       email: 'hendra@bps.go.id',
       unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
       role: 'employee',
+      active: true,
       xp: 600,
       level: 2,
       avatarId: 'default',
@@ -213,7 +475,9 @@ const MOCK_USERS = [
       displayName: 'Citra Ayu',
       email: 'citra@bps.go.id',
       unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
       role: 'employee',
+      active: true,
       xp: 100,
       level: 1,
       avatarId: 'default',
@@ -230,7 +494,9 @@ const MOCK_USERS = [
       displayName: 'Doni Kurniawan',
       email: 'doni@bps.go.id',
       unit: 'biro-sdm',
+      unitPath: unitPathFor('biro-sdm'),
       role: 'employee',
+      active: true,
       xp: 100,
       level: 1,
       avatarId: 'default',
@@ -259,15 +525,21 @@ async function seedProject(projectId) {
   for (const entry of ALLOWED_EMAILS) {
     const docRef = db.collection('allowedEmails').doc(entry.email.toLowerCase());
     await docRef.set(entry.data, { merge: true });
-    console.log(`  ✓ [${projectId}] allowedEmails/${entry.email.toLowerCase()} ->`, entry.data.displayName);
+    console.log(`  ✓ [${projectId}] allowedEmails/${entry.email.toLowerCase()} ->`, entry.data.displayName, `(${entry.data.role})`);
   }
 
-  // Seed units
-  for (const u of UNITS) {
+  // Seed all units from src/data/bps-structure.json
+  for (const u of bpsStructure.units) {
     const docRef = db.collection('units').doc(u.id);
-    await docRef.set(u.data, { merge: true });
-    console.log(`  ✓ [${projectId}] units/${u.id} ->`, u.data.name);
+    await docRef.set({
+      ...u,
+      archived: false,
+      announcements: [],
+      updatedAt: FieldValue.serverTimestamp(),
+      updatedBy: 'seed'
+    }, { merge: true });
   }
+  console.log(`  ✓ [${projectId}] units (${bpsStructure.units.length} units from bps-structure.json)`);
 
   // Seed quests
   for (const q of QUESTS) {
@@ -276,11 +548,11 @@ async function seedProject(projectId) {
     console.log(`  ✓ [${projectId}] quests/${q.id} ->`, q.data.title, `(+${q.data.xp} XP)`);
   }
 
-  // Seed mock users for leaderboard
-  for (const m of MOCK_USERS) {
+  // Seed role profiles + mock leaderboard users
+  for (const m of [...ROLE_PROFILES, ...MOCK_USERS]) {
     const docRef = db.collection('users').doc(m.id);
     await docRef.set(m.data, { merge: true });
-    console.log(`  ✓ [${projectId}] users/${m.id} ->`, m.data.displayName, `(xp: ${m.data.xp}, xpWeek: ${m.data.xpWeek})`);
+    console.log(`  ✓ [${projectId}] users/${m.id} ->`, m.data.displayName, `(${m.data.role})`);
   }
 }
 
@@ -289,7 +561,7 @@ async function seedAll() {
   for (const proj of targetProjects) {
     await seedProject(proj);
   }
-  console.log(`[Seed] Successfully seeded all data (allowlist, units, quests, leaderboard users)!\n`);
+  console.log(`[Seed] Successfully seeded all data (allowlist, ${bpsStructure.units.length} units, quests, role profiles, leaderboard users)!\n`);
 }
 
 seedAll().catch((err) => {

@@ -1,0 +1,507 @@
+/* ==========================================================================
+   Peta Dunia BPS - Base components ("Cozy Archipelago")
+   Buttons, panels, ribbons, pills, chips/segmented, toasts, icons, focus,
+   reduced motion. Tokens only; no raw colors here.
+   ========================================================================== */
+
+/* ---------- Utilities ---------- */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Icons ---------- */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.icon--s { width: var(--icon-s); height: var(--icon-s); }
+.icon--m { width: var(--icon-m); height: var(--icon-m); }
+.icon--l { width: var(--icon-l); height: var(--icon-l); }
+
+/* ---------- Focus (two-tone: gold inner, ink outer; >= 3:1 on every surface) ----------
+   The transparent outline keeps a visible ring in Windows forced-colors mode. */
+:where(button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--ui-focus-ring);
+}
+
+/* ==========================================================================
+   Button
+   .btn + .btn--primary | --navy | --secondary | --ghost | --danger | --locked
+   Size modifiers: --lg, --icon. Native :disabled is the disabled state.
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: 0 var(--space-5);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--ui-shadow-hard);
+  transform: translateY(0);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: var(--ui-shadow-pressed);
+}
+
+.btn:focus-visible {
+  box-shadow: var(--ui-focus-ring), var(--ui-shadow-hard);
+}
+
+/* Variants */
+.btn--primary   { background: var(--gold); color: var(--ink); }
+.btn--navy      { background: var(--ink); color: var(--white); }
+.btn--secondary { background: var(--paper); color: var(--ink); }
+.btn--danger    { background: var(--danger-strong); color: var(--white); }
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.btn--ghost:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--ui-shadow-hard);
+}
+.btn--ghost:active { box-shadow: var(--ui-shadow-pressed); }
+
+/* Sizes */
+.btn--lg {
+  min-height: 52px;
+  padding: 0 var(--space-7);
+  font-size: var(--fs-4);
+  border-radius: var(--radius-l);
+}
+
+.btn--icon {
+  width: var(--tap-min);
+  padding: 0;
+}
+
+.btn--block { display: flex; width: 100%; }
+
+/* Disabled: dashed outline, no shadow, no motion */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: var(--paper);
+  color: var(--ink-soft);
+  border-style: dashed;
+  border-color: var(--ink-soft);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Locked: looks like disabled but stays operable (e.g. shows a "coming soon" toast) */
+.btn--locked {
+  background: var(--locked);
+  color: var(--ink);
+  border-style: dashed;
+  box-shadow: none;
+}
+.btn--locked:hover,
+.btn--locked:active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Busy: spinner icon inside a button */
+.btn[aria-busy="true"] .icon-spinner,
+.spin {
+  animation: bps-spin 800ms linear infinite;
+}
+
+@keyframes bps-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Panel / card + title ribbon
+   ========================================================================== */
+.panel {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-l);
+  box-shadow: var(--ui-shadow-hard);
+  padding: var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  line-height: var(--lh-body);
+}
+
+.panel--sand { background: var(--sand); }
+
+.panel--has-ribbon { padding-top: var(--space-7); }
+
+.ribbon {
+  position: absolute;
+  top: calc(-1 * var(--space-5));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100% - var(--space-8));
+  padding: var(--space-1) var(--space-6);
+  background: var(--gold);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-s);
+  box-shadow: var(--ui-shadow-hard);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-4);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ticket notches on the ribbon ends (decorative) */
+.ribbon::before,
+.ribbon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: var(--space-3);
+  height: var(--space-3);
+  background: var(--paper);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.ribbon::before { left: calc(-1 * var(--space-2) - var(--border-w)); }
+.ribbon::after  { right: calc(-1 * var(--space-2) - var(--border-w)); }
+
+.panel__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-5);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+}
+
+.panel__text {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ==========================================================================
+   Pill label (unit color, white text)
+   Set data-unit="<id>" or the --pill-bg custom property.
+   ========================================================================== */
+.pill {
+  --pill-bg: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  max-width: 100%;
+  padding: 0 var(--space-3);
+  background: var(--pill-bg);
+  color: var(--white);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  box-shadow: var(--ui-shadow-hard);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-2);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Flex containers ignore text-overflow, so the label span carries the ellipsis. */
+.pill > span:not(.icon) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill[data-unit="kepala"]     { --pill-bg: var(--unit-kepala); }
+.pill[data-unit="sestama"]    { --pill-bg: var(--unit-sestama); }
+.pill[data-unit="metodologi"] { --pill-bg: var(--unit-metodologi); }
+.pill[data-unit="sosial"]     { --pill-bg: var(--unit-sosial); }
+.pill[data-unit="produksi"]   { --pill-bg: var(--unit-produksi); }
+.pill[data-unit="distribusi"] { --pill-bg: var(--unit-distribusi); }
+.pill[data-unit="neraca"]     { --pill-bg: var(--unit-neraca); }
+.pill[data-unit="itama"]      { --pill-bg: var(--unit-itama); }
+.pill[data-unit="biro"]       { --pill-bg: var(--unit-biro); }
+
+.pill--locked {
+  --pill-bg: var(--locked);
+  color: var(--ink);
+  border-style: dashed;
+}
+
+.pill--gold {
+  --pill-bg: var(--gold);
+  color: var(--ink);
+}
+
+/* Small info chip on paper (level, XP, unit name) */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+  font-family: var(--font-body);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-1);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+}
+
+/* Coin-style XP badge */
+.xp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-3) 2px 2px;
+  background: var(--paper);
+  color: var(--gold-deep);
+  border: 2px solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-2);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Chips (toggle filters) and segmented control (tabs)
+   Selected state = gold fill + weight + check icon / underline bar (never color alone).
+   ========================================================================== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  box-shadow: var(--ui-shadow-pressed);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.chip:hover { transform: translateY(-1px); }
+.chip:active { transform: translateY(1px); }
+.chip .icon-check { display: none; }
+.chip[aria-pressed="true"] {
+  background: var(--gold);
+  font-weight: var(--fw-black);
+  box-shadow: var(--ui-shadow-hard);
+}
+.chip[aria-pressed="true"] .icon-check { display: inline-block; }
+.chip:focus-visible { box-shadow: var(--ui-focus-ring); }
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--paper);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius-m);
+  box-shadow: var(--ui-shadow-hard);
+}
+
+.segmented__btn {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  background: transparent;
+  color: var(--ink-soft);
+  border: 0;
+  border-radius: var(--radius-s);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.segmented__btn:hover { background: var(--paper-shade); color: var(--ink); }
+.segmented__btn[aria-selected="true"],
+.segmented__btn[aria-pressed="true"] {
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: var(--fw-black);
+  box-shadow: inset 0 -4px 0 var(--ink); /* underline bar: non-color cue */
+}
+
+/* ==========================================================================
+   Toast (built by src/ui/toast.js, shown by showToast in hud.js)
+   ========================================================================== */
+.bps-toast {
+  position: absolute;
+  top: var(--space-5);
+  left: 50%;
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100% - var(--space-8));
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-6);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--ui-radius-pill);
+  box-shadow: var(--ui-shadow-hard);
+  font-family: var(--font-body);
+  font-size: var(--fs-3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-12px);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-slow) var(--ease-bounce);
+}
+
+.bps-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bps-toast--xp {
+  background: var(--ink);
+  color: var(--gold);
+  padding-left: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: var(--fs-4);
+}
+
+.bps-toast__coin {
+  display: inline-flex;
+}
+
+.bps-toast--xp.visible .bps-toast__coin {
+  animation: bps-coin-pop var(--dur-slow) var(--ease-bounce) 80ms both;
+}
+
+@keyframes bps-coin-pop {
+  0%   { transform: scale(0.4) rotate(-30deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   Scale-aware touch targets. src/stage.js sets --stage-scale on #stage.
+   Controls inside the stage are sized so that their on-screen size stays
+   >= --tap-min at any scale: max(44px, 44px / scale). At scale >= 1 this is
+   simply 44px; at 0.8 it is 55 stage px; at 0.7 it is ~63 stage px.
+   ========================================================================== */
+#stage {
+  --tap-stage: max(var(--tap-min), calc(var(--tap-min) / var(--stage-scale, 1)));
+}
+
+#stage .btn,
+#stage .chip,
+#stage .segmented__btn,
+#stage .info-row-btn,
+#stage .quiz-option-item {
+  min-height: var(--tap-stage);
+}
+
+#stage .btn--lg {
+  min-height: max(52px, var(--tap-stage));
+}
+
+#stage .btn--icon {
+  width: var(--tap-stage);
+  min-width: var(--tap-stage);
+}
+
+/* Controls may get taller: panel content scrolls inside the dialog card */
+.info-main-view,
+.info-sub-view,
+.quest-sheet-container {
+  overflow-y: auto;
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+}
+
+/* ==========================================================================
+   Reduced motion: no ambient loops, bobbing, bursts or travel.
+   State changes become instant; final states stay correct.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .btn:hover,
+  .btn:active,
+  .chip:hover,
+  .chip:active {
+    transform: none;
+  }
+
+  .bps-toast,
+  .bps-toast.visible {
+    transform: translateX(-50%);
+  }
+}

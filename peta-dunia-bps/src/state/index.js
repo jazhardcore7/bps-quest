@@ -1,9 +1,20 @@
 // Application state management with pub/sub observer pattern
-import { calculateLevel, XP_PER_LEVEL } from '../config.js';
+import {
+  calculateLevel,
+  XP_PER_LEVEL,
+  getRoleLabel,
+  isHeadRole,
+  isSuperAdminRole,
+  toUnitId
+} from '../config.js';
+import bpsStructure from '../data/bps-structure.json' with { type: 'json' };
+
+const STATIC_UNITS_BY_ID = new Map(bpsStructure.units.map((u) => [u.id, u]));
 
 function normalizeUnit(unit) {
-  if (!unit) return '';
-  return String(unit).toLowerCase().replace(/[\s\-_]+/g, '');
+  const resolved = toUnitId(unit);
+  if (!resolved) return '';
+  return String(resolved).toLowerCase().replace(/[\s\-_]+/g, '');
 }
 
 const subscribers = [];
@@ -13,9 +24,13 @@ export const AppState = {
   player: {
     displayName: 'Pegawai BPS',
     email: '',
+    unit: '',
+    unitPath: [],
     role: 'employee',
+    active: true,
+    jabatan: '',
     level: 1,
-    title: 'Explorer',
+    title: 'Pegawai',
     xp: 0,
     xpToNext: XP_PER_LEVEL,
     avatarId: 'default'
@@ -40,12 +55,17 @@ export const AppState = {
       this.currentUnit = userDoc.unit || '';
       const xp = typeof userDoc.xp === 'number' ? userDoc.xp : 0;
       const level = calculateLevel(xp);
+      const role = userDoc.role || 'employee';
       this.player = {
         displayName: userDoc.displayName || 'Pegawai BPS',
         email: userDoc.email || '',
-        role: userDoc.role || 'employee',
+        unit: userDoc.unit || '',
+        unitPath: Array.isArray(userDoc.unitPath) ? userDoc.unitPath : [],
+        role,
+        active: userDoc.active !== false,
+        jabatan: userDoc.jabatan || '',
         level,
-        title: userDoc.role === 'admin' ? 'Administrator' : 'Explorer',
+        title: getRoleLabel(role),
         xp,
         xpToNext: level * XP_PER_LEVEL,
         avatarId: userDoc.avatarId || 'default'
@@ -63,9 +83,13 @@ export const AppState = {
     this.player = {
       displayName: '',
       email: '',
+      unit: '',
+      unitPath: [],
       role: 'employee',
+      active: true,
+      jabatan: '',
       level: 1,
-      title: 'Explorer',
+      title: 'Pegawai',
       xp: 0,
       xpToNext: XP_PER_LEVEL,
       avatarId: 'default'
@@ -84,6 +108,22 @@ export const AppState = {
   canStartQuest(buildingUnit) {
     if (!this.currentUnit || !buildingUnit) return false;
     return normalizeUnit(this.currentUnit) === normalizeUnit(buildingUnit);
+  },
+
+  canManageUnit(unitId, unitsList = null) {
+    if (!this.user || !unitId || this.player.active === false) return false;
+    const role = this.player.role;
+    if (isSuperAdminRole(role)) return true;
+    if (!isHeadRole(role)) return false;
+
+    const myUnit = this.player.unit;
+    if (!myUnit) return false;
+    if (unitId === myUnit) return true;
+
+    const target = Array.isArray(unitsList)
+      ? (unitsList.find((u) => u && u.id === unitId) || STATIC_UNITS_BY_ID.get(unitId))
+      : STATIC_UNITS_BY_ID.get(unitId);
+    return Boolean(target && Array.isArray(target.ancestorIds) && target.ancestorIds.includes(myUnit));
   },
 
   notify() {

@@ -53,8 +53,61 @@ export function toUnitId(unit) {
   return UNIT_MAPPINGS[unit] || String(unit).toLowerCase().replace(/[\s_]+/g, '-');
 }
 
+// Display names: firestore.rules requires 1 to 60 characters with no < or >.
+export const DISPLAY_NAME_MAX_LENGTH = 60;
+
+function cleanDisplayName(value) {
+  if (typeof value !== 'string') return '';
+  const cleaned = value.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
+  // Cut by code points so a surrogate pair (emoji) is never split.
+  return Array.from(cleaned).slice(0, DISPLAY_NAME_MAX_LENGTH).join('').trim();
+}
+
+/**
+ * Returns a display name that satisfies firestore.rules: trimmed, whitespace
+ * collapsed, without < or >, at most 60 characters. Falls back to the part of
+ * the email before "@", then to "Pegawai".
+ */
+export function normalizeDisplayName(raw, email) {
+  const name = cleanDisplayName(raw);
+  if (name) return name;
+  const localPart = typeof email === 'string' ? email.split('@')[0] : '';
+  return cleanDisplayName(localPart) || 'Pegawai';
+}
+
 // Gamification Level Constants & Helpers
 export const XP_PER_LEVEL = 500;
+export const QUEST_XP_MAX_HEAD = 100;
+export const QUEST_XP_MAX_ADMIN = 500;
+
+export const ROLES = {
+  EMPLOYEE: 'employee',
+  HEAD_E2: 'head_e2',
+  HEAD_E1: 'head_e1',
+  HEAD_TOP: 'head_top',
+  SUPER_ADMIN: 'super_admin'
+};
+
+export const ROLE_LABELS = {
+  employee: 'Pegawai',
+  head_e2: 'Pimpinan Eselon II',
+  head_e1: 'Pimpinan Eselon I',
+  head_top: 'Pimpinan Tertinggi',
+  super_admin: 'Super Admin',
+  admin: 'Super Admin'
+};
+
+export function isHeadRole(role) {
+  return role === ROLES.HEAD_E2 || role === ROLES.HEAD_E1 || role === ROLES.HEAD_TOP;
+}
+
+export function isSuperAdminRole(role) {
+  return role === ROLES.SUPER_ADMIN || role === 'admin';
+}
+
+export function getRoleLabel(role) {
+  return ROLE_LABELS[role] || ROLE_LABELS.employee;
+}
 
 export function calculateLevel(xp) {
   return Math.floor(Math.max(0, xp || 0) / XP_PER_LEVEL) + 1;
